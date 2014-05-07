@@ -1,0 +1,41 @@
+(dp0
+S'ALG_DESC'
+p1
+VFor each pixel in a historical flood database this algorithm sums up the times that a pixel was classified as flooded. It returns the number of positive flood classifications and the number relative to the number of valid acquisitions.
+p2
+sS'AOI '
+p3
+VA polygon shapefile with the delineation of the Area of Interest.
+p4
+sS'ALG_CREATOR'
+p5
+V
+p6
+sS'Flood_count '
+p7
+VNumber of times a pixel was classified as flooded.
+p8
+sS'Input_file_mask '
+p9
+VThe input files to be selected. Wildcards such as * can be used to match multiple letters.
+p10
+sS'HAND_image '
+p11
+VA raster file with the Height above nearest drainage index that will be used for masking areas that are not prone to flooding.
+p12
+sS'Flood_count_as_percent_of_acquisitions '
+p13
+VNumber of times a pixel was classified as flooded expressed in percent of valid acquisitions.
+p14
+sS'HAND_threshold '
+p15
+VPixels with a Height above nearest drainage below this value will be classified as flood-prone. A value in metres has to be specified here.
+p16
+sS'Input_folder '
+p17
+VThe Input folder which holds the classified images. Please note that path separators have to be written / instead of \u005c .
+p18
+sS'ALG_HELP_CREATOR'
+p19
+g6
+s.

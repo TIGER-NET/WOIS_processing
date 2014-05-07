@@ -1,0 +1,14 @@
+(dp0
+S'input'
+p1
+S'Image to normalise'
+p2
+sS'ALG_DESC'
+p3
+S'The algorithm calculates mean and standard deviation from all the valid pixels in the image and then normalises the image with the operation:\n\noutput_DN = (input_DN-mean)/stddev\n\nThe statistics are calculated using GRASS r.univar and the band math using OTB band math.'
+p4
+sS'output'
+p5
+S'Normalised image'
+p6
+s.

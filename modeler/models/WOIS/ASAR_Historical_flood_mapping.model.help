@@ -1,0 +1,42 @@
+(dp0
+VRASTERLAYER_INPUTFILE
+p1
+VThe geocoded and calibrated input file to be classified.
+p2
+sVNUMBER_SPLITTILESIZE
+p3
+VThe tile size specifies the size of the tiles for which the Otsu threshold will be computed.
+p4
+sS'ALG_DESC'
+p5
+VIn this module, all scenes that were geocoded in the preprocessing module will be classified in flooded and non-flooded areas. For each input file, a manual and an automatic thresholding are done which means that for each input file two output maps will be produced. Additionally, a KML layer is produced for each output file.
+p6
+sS'Output_raster _ALG4'
+p7
+VThe result of the automatic Otsu split-based thresholding. Flooded pixels are coded as 1, non-flooded as 0, masked pixels are coded as 255.
+p8
+sVNUMBER_MMU
+p9
+VMinimum mapping unit. Continuous clusters of flood pixels which have less than this amount of pixels will be reclassified into the non-flooded class. This is to clean up the results and to remove pixels mistakenly classified as flooded due to noise.
+p10
+sVNUMBER_HANDTHRESHOLD
+p11
+VPixels with a Height above nearest drainage below this value will be classified as flood-prone. A value in metres has to be specified here.
+p12
+sS'Output_raster _ALG5'
+p13
+VThe result of the manual thresholding. Flooded pixels are coded as 1, non-flooded as 0, masked pixels are coded as 255.
+p14
+sVNUMBER_MANUALTHRESHOLD
+p15
+VThe threshold value in dB under which pixels will be classified as flooded.
+p16
+sVNUMBER_NODATAVALUE
+p17
+VThe value which is used in the input files that is used to mark missing values. For NEST output this is typically 0.
+p18
+sVRASTERLAYER_HANDIMAGE
+p19
+VThe image with the Height Above Nearest Drainage (HAND) index that will be used to mask out non-flood-prone areas.
+p20
+s.

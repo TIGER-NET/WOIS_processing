@@ -1,0 +1,38 @@
+(dp0
+S'ALG_DESC'
+p1
+S''
+p2
+sS'flow_direction '
+p3
+S'Flow direction raster; directions have to be coded as 1 to 128 as in ArcGIS specification'
+p4
+sS'DEM '
+p5
+S'Digital Elevation Model'
+p6
+sS'ALG_CREATOR'
+p7
+S'Stefan Schlaffer'
+p8
+sS'HAND_raster '
+p9
+S'Filename for the output HAND map'
+p10
+sS'drainage '
+p11
+S'Drainage raster; Binary raster (0 and 1) defining drainage network'
+p12
+sS'ALG_HELP_CREATOR'
+p13
+S'Stefan Schlaffer'
+p14
+sS'Drainage_network '
+p15
+S'Binary raster (0 and 1) defining drainage cells.'
+p16
+sS'Flow_direction '
+p17
+S'Raster specifying the flow direction for each cell. The coding is from 1 to 128, according to the flow direction specification used by ESRI ArcGIS.'
+p18
+s.

@@ -1,0 +1,34 @@
+(dp0
+S'ALG_DESC'
+p1
+S''
+p2
+sS'ALG_CREATOR'
+p3
+S'Stefan Schlaffer'
+p4
+sS'Layer '
+p5
+S'Input raster layer containing backscatter in dB.'
+p6
+sS'Nodata_value '
+p7
+S'No data value used in Layer. For NEST output this is typically 0.'
+p8
+sS'ALG_HELP_CREATOR'
+p9
+S'Stefan Schlaffer'
+p10
+sS'Tile_size '
+p11
+S'Tile size in pixels for subsetting during the automatic split-based threshold determination. Default is 200 pixels.'
+p12
+sS'Classified_raster '
+p13
+S'Filename for the classified flood map.'
+p14
+sS'Lower_than '
+p15
+S'If this is Yes, all cells with values < threshold will be set to 1. If No, all cells > threshold will be set to 1.'
+p16
+s.

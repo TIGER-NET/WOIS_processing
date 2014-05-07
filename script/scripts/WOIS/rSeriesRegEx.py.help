@@ -1,0 +1,10 @@
+(dp0
+S'filenameFormat'
+p1
+S'Other examples:\nNDVI_201203.tif -> NDVI_YYYYMM.tif'
+p2
+sS'ALG_DESC'
+p3
+S'Runs GRASS r.series on selected directory, picking up and grouping files based on date string in their filenames.'
+p4
+s.
