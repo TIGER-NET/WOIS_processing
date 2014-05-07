@@ -1,0 +1,16 @@
+[general]
+name = Processing
+description = Spatial data processing framework for QGIS
+category = Analysis
+version = 2.2.0-2
+qgisMinimumVersion = 2.0
+author = Victor Olaya
+email = volayaf@gmail.com
+website = www.qgis.org
+icon = images/alg.png
+class_name = ProcessingPlugin
+experimental = True
+homepage = https://hub.qgis.org/projects/sextante/
+tracker = https://hub.qgis.org/projects/sextante/issues
+repository = https://github.com/qgis/QGIS
+
