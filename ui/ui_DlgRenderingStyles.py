@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/alex/devel/cpp/qgis/python/plugins/processing/ui/DlgRenderingStyles.ui'
+# Form implementation generated from reading ui file 'python/plugins/processing/ui/DlgRenderingStyles.ui'
 #
-# Created: Mon May  5 16:59:51 2014
+# Created: Wed Oct  2 17:04:59 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,8 +19,8 @@ class Ui_DlgRenderingStyles(object):
         DlgRenderingStyles.setObjectName(_fromUtf8("DlgRenderingStyles"))
         DlgRenderingStyles.resize(550, 400)
         self.verticalLayout = QtGui.QVBoxLayout(DlgRenderingStyles)
-        self.verticalLayout.setSpacing(6)
-        self.verticalLayout.setMargin(9)
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.tblStyles = QtGui.QTableWidget(DlgRenderingStyles)
         self.tblStyles.setObjectName(_fromUtf8("tblStyles"))

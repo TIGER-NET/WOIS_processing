@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/alex/devel/cpp/qgis/python/plugins/processing/ui/DlgNumberInput.ui'
+# Form implementation generated from reading ui file 'python/plugins/processing/ui/DlgNumberInput.ui'
 #
-# Created: Mon May  5 16:59:51 2014
+# Created: Tue Oct 15 17:27:23 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,8 +19,8 @@ class Ui_DlgNumberInput(object):
         DlgNumberInput.setObjectName(_fromUtf8("DlgNumberInput"))
         DlgNumberInput.resize(445, 300)
         self.verticalLayout = QtGui.QVBoxLayout(DlgNumberInput)
-        self.verticalLayout.setSpacing(6)
-        self.verticalLayout.setMargin(9)
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setContentsMargins(0, 5, 0, 0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.label = QtGui.QLabel(DlgNumberInput)
         self.label.setWordWrap(True)

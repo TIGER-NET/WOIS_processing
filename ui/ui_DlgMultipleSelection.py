@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/alex/devel/cpp/qgis/python/plugins/processing/ui/DlgMultipleSelection.ui'
+# Form implementation generated from reading ui file 'python/plugins/processing/ui/DlgMultipleSelection.ui'
 #
-# Created: Mon May  5 16:59:51 2014
+# Created: Thu Oct  3 20:32:49 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,8 +19,8 @@ class Ui_DlgMultipleSelection(object):
         DlgMultipleSelection.setObjectName(_fromUtf8("DlgMultipleSelection"))
         DlgMultipleSelection.resize(380, 320)
         self.horizontalLayout = QtGui.QHBoxLayout(DlgMultipleSelection)
-        self.horizontalLayout.setSpacing(6)
-        self.horizontalLayout.setMargin(9)
+        self.horizontalLayout.setSpacing(2)
+        self.horizontalLayout.setContentsMargins(0, 5, 0, 0)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.lstLayers = QtGui.QListWidget(DlgMultipleSelection)
         self.lstLayers.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)

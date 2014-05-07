@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/alex/devel/cpp/qgis/python/plugins/processing/ui/DlgHelpEdition.ui'
+# Form implementation generated from reading ui file 'DlgHelpEdition.ui'
 #
-# Created: Mon May  5 16:59:51 2014
+# Created: Fri Sep 13 14:15:23 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,8 +19,8 @@ class Ui_DlgHelpEdition(object):
         DlgHelpEdition.setObjectName(_fromUtf8("DlgHelpEdition"))
         DlgHelpEdition.resize(600, 460)
         self.verticalLayout_3 = QtGui.QVBoxLayout(DlgHelpEdition)
-        self.verticalLayout_3.setSpacing(6)
-        self.verticalLayout_3.setMargin(9)
+        self.verticalLayout_3.setSpacing(2)
+        self.verticalLayout_3.setMargin(0)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.splitter_2 = QtGui.QSplitter(DlgHelpEdition)
         self.splitter_2.setOrientation(QtCore.Qt.Vertical)
@@ -31,32 +31,32 @@ class Ui_DlgHelpEdition(object):
         self.splitter = QtGui.QSplitter(self.splitter_2)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName(_fromUtf8("splitter"))
-        self.layoutWidget = QtGui.QWidget(self.splitter)
-        self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
-        self.verticalLayout = QtGui.QVBoxLayout(self.layoutWidget)
+        self.widget = QtGui.QWidget(self.splitter)
+        self.widget.setObjectName(_fromUtf8("widget"))
+        self.verticalLayout = QtGui.QVBoxLayout(self.widget)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.label = QtGui.QLabel(self.layoutWidget)
+        self.label = QtGui.QLabel(self.widget)
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout.addWidget(self.label)
-        self.tree = QtGui.QTreeWidget(self.layoutWidget)
+        self.tree = QtGui.QTreeWidget(self.widget)
         self.tree.setMinimumSize(QtCore.QSize(0, 200))
         self.tree.setAlternatingRowColors(True)
         self.tree.setObjectName(_fromUtf8("tree"))
         self.tree.headerItem().setText(0, _fromUtf8("1"))
         self.tree.header().setVisible(False)
         self.verticalLayout.addWidget(self.tree)
-        self.layoutWidget1 = QtGui.QWidget(self.splitter)
-        self.layoutWidget1.setObjectName(_fromUtf8("layoutWidget1"))
-        self.verticalLayout_2 = QtGui.QVBoxLayout(self.layoutWidget1)
+        self.widget1 = QtGui.QWidget(self.splitter)
+        self.widget1.setObjectName(_fromUtf8("widget1"))
+        self.verticalLayout_2 = QtGui.QVBoxLayout(self.widget1)
         self.verticalLayout_2.setSpacing(2)
         self.verticalLayout_2.setMargin(0)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.lblDescription = QtGui.QLabel(self.layoutWidget1)
+        self.lblDescription = QtGui.QLabel(self.widget1)
         self.lblDescription.setObjectName(_fromUtf8("lblDescription"))
         self.verticalLayout_2.addWidget(self.lblDescription)
-        self.text = QtGui.QTextEdit(self.layoutWidget1)
+        self.text = QtGui.QTextEdit(self.widget1)
         self.text.setMinimumSize(QtCore.QSize(0, 200))
         self.text.setObjectName(_fromUtf8("text"))
         self.verticalLayout_2.addWidget(self.text)

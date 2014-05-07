@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/alex/devel/cpp/qgis/python/plugins/processing/ui/DlgResults.ui'
+# Form implementation generated from reading ui file 'DlgResults.ui'
 #
-# Created: Mon May  5 16:59:51 2014
+# Created: Fri Sep 13 14:16:05 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,8 +19,8 @@ class Ui_DlgResults(object):
         DlgResults.setObjectName(_fromUtf8("DlgResults"))
         DlgResults.resize(623, 515)
         self.verticalLayout = QtGui.QVBoxLayout(DlgResults)
-        self.verticalLayout.setSpacing(6)
-        self.verticalLayout.setMargin(9)
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.splitter = QtGui.QSplitter(DlgResults)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)

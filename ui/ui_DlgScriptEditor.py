@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/alex/devel/cpp/qgis/python/plugins/processing/ui/DlgScriptEditor.ui'
+# Form implementation generated from reading ui file 'DlgScriptEditor.ui'
 #
-# Created: Mon May  5 16:59:51 2014
+# Created: Sat Sep 14 12:47:57 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,11 +19,11 @@ class Ui_DlgScriptEditor(object):
         DlgScriptEditor.setObjectName(_fromUtf8("DlgScriptEditor"))
         DlgScriptEditor.resize(720, 480)
         self.verticalLayout = QtGui.QVBoxLayout(DlgScriptEditor)
-        self.verticalLayout.setSpacing(6)
-        self.verticalLayout.setMargin(9)
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setSpacing(6)
+        self.horizontalLayout.setSpacing(-1)
         self.horizontalLayout.setContentsMargins(3, 3, 3, -1)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.btnSave = QtGui.QToolButton(DlgScriptEditor)

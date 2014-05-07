@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/alex/devel/cpp/qgis/python/plugins/processing/ui/DlgModeler.ui'
+# Form implementation generated from reading ui file 'python/plugins/processing/ui/DlgModeler.ui'
 #
-# Created: Mon May  5 16:59:51 2014
+# Created: Sun Sep 22 14:25:36 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,11 +19,11 @@ class Ui_DlgModeler(object):
         DlgModeler.setObjectName(_fromUtf8("DlgModeler"))
         DlgModeler.resize(1000, 600)
         self.verticalLayout = QtGui.QVBoxLayout(DlgModeler)
-        self.verticalLayout.setSpacing(6)
-        self.verticalLayout.setMargin(9)
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setSpacing(6)
+        self.horizontalLayout.setSpacing(-1)
         self.horizontalLayout.setMargin(3)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.btnOpen = QtGui.QToolButton(DlgModeler)

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/alex/devel/cpp/qgis/python/plugins/processing/ui/widgetNumberInput.ui'
+# Form implementation generated from reading ui file 'python/plugins/processing/ui/widgetNumberInput.ui'
 #
-# Created: Mon May  5 16:59:51 2014
+# Created: Wed Oct  9 19:20:54 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,9 +17,9 @@ except AttributeError:
 class Ui_widgetNumberInput(object):
     def setupUi(self, widgetNumberInput):
         widgetNumberInput.setObjectName(_fromUtf8("widgetNumberInput"))
-        widgetNumberInput.resize(205, 49)
+        widgetNumberInput.resize(189, 28)
         self.horizontalLayout_2 = QtGui.QHBoxLayout(widgetNumberInput)
-        self.horizontalLayout_2.setMargin(9)
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 2)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setSpacing(2)

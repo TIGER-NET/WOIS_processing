@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/alex/devel/cpp/qgis/python/plugins/processing/ui/DlgAutofill.ui'
+# Form implementation generated from reading ui file 'python/plugins/processing/ui/DlgAutofill.ui'
 #
-# Created: Mon May  5 16:59:51 2014
+# Created: Wed Oct  2 20:49:45 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
