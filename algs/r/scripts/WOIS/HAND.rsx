@@ -1,7 +1,7 @@
 ##[DEM analysis]=group
-##DEM = raster|R.raster
-##Flow_direction = raster|R.raster
-##Drainage_network = raster|R.raster
+##DEM = raster
+##Flow_direction = raster
+##Drainage_network = raster
 ##HAND_raster = output raster
 DEM <- raster(DEM,1)
 Flow_direction <- raster(Flow_direction,1)

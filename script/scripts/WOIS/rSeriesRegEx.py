@@ -22,9 +22,9 @@ import os
 import glob
 import re
 from PyQt4.QtGui import *
-from sextante.core.SextanteLog import SextanteLog
-from sextante.grass.GrassUtils import GrassUtils
-from sextante.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
+from processing.core.ProcessingLog import ProcessingLog
+from processing.algs.grass.GrassUtils import GrassUtils
+from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
 
 def getFiles(dataDir, filenameFormat, outputFileFormat, groupFiles, outputFiles, groupBy):
 
@@ -120,7 +120,7 @@ else:
         loglines.append("Processing date string: "+date)
         params={'input':groupFiles[date], '-n':propagateNulls, 'method':operation, 'quantile':quantile, 'threshold':threshold, \
                 'range':range, 'GRASS_REGION_CELLSIZE_PARAMETER':cellSize, 'GRASS_REGION_PARAMETER':extent, 'output':outputDir+os.sep+outputFiles[date]}
-        if sextante.runalg("grass:r.series",params):
+        if processing.runalg("grass:r.series",params):
             iteration +=1
         else:
             GrassUtils.endGrassSession()
@@ -129,4 +129,4 @@ else:
     loglines.append("Finished!")
     GrassUtils.endGrassSession()
     
-SextanteLog.addToLog(SextanteLog.LOG_INFO, loglines)
+ProcessingLog.addToLog(ProcessingLog.LOG_INFO, loglines)

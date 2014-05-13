@@ -16,7 +16,7 @@
 
 import os
 import glob
-from sextante.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
+from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
 
 oldDir = os.getcwd()
 
@@ -37,7 +37,7 @@ for image in matchingFiles:
     progress.setText("Processing image: "+os.path.basename(image))
     params={'input':os.path.dirname(inputFileDir)+os.sep+image, 'method':method, 'tension':tension, 'smooth':smooth, 'GRASS_REGION_CELLSIZE_PARAMETER':cellSize, \
             'GRASS_REGION_PARAMETER':extent, 'output':outputDir+os.sep+os.path.basename(image)}
-    if sextante.runalg("grass:r.fillnulls", params):
+    if processing.runalg("grass:r.fillnulls", params):
         iteration +=1
     else:
         raise GeoAlgorithmExecutionException("Unable to execute script \"r.fillnulls for directory\". Check SEXTANTE log for details.")

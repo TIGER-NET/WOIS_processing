@@ -19,8 +19,8 @@
 
 import os
 import re
-from sextante.core.SextanteLog import SextanteLog
-from sextante.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
+from processing.core.ProcessingLog import ProcessingLog
+from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
 
 class mapCalcRegExUtil():
 
@@ -134,7 +134,7 @@ class mapCalcRegExUtil():
         # regex to match it
         match = re.search(regex, filenameFormat)
         if not match:
-            SextanteLog.addToLog(SextanteLog.LOG_INFO, "No match for date string in filename format!")
+            ProcessingLog.addToLog(ProcessingLog.LOG_INFO, "No match for date string in filename format!")
             return None
         matchLength = match.end()-match.start()
         matchingFormat = re.sub(regex, "\d{"+str(matchLength)+"}", filenameFormat)
@@ -175,7 +175,7 @@ for date in groupFiles:
     progress.setPercentage(int(iteration/float(len(groupFiles))*100))
     progress.setText("Processing date string: "+date)
     params = {'-il':groupFiles[date], '-ram':ram, '-exp':expression,'-out':outputDir+os.sep+outputFiles[date]}
-    if sextante.runalg("otb:bandmath", params):
+    if processing.runalg("otb:bandmath", params):
         iteration +=1
     else:
         raise GeoAlgorithmExecutionException("Unable to execute script \"OTB Band Math for temporal data\". Check SEXTANTE log for details.")

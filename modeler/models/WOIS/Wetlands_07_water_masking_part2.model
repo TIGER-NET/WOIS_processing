@@ -76,4 +76,5 @@ ALGORITHM:gdalogr:sieve
 3|outfile
 -1|HARDCODEDPARAMVALUE_connectedness_4
 -1|HARDCODEDPARAMVALUE_threshold_4
+None
 Output: water mask image

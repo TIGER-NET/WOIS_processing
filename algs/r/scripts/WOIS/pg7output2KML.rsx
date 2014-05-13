@@ -1,6 +1,6 @@
 ##[Conversion]=group
 ##Input_layer = vector
-##Input_raster = raster|R.raster
+##Input_raster = raster
 tryCatch(find.package("maptools"), error=function(e) install.packages("maptools", lib=file.path(Sys.getenv("USERPROFILE"),".qgis/sextante/rlibs")))
 tryCatch(find.package("rgeos"), error=function(e) install.packages("rgeos", lib=file.path(Sys.getenv("USERPROFILE"),".qgis/sextante/rlibs")))
 library(maptools)

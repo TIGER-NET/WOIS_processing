@@ -1,6 +1,6 @@
 ##[for_modeler]=group
-##Classified_Layer = raster|R.raster
-##Clumped_Layer = raster|R.raster
+##Classified_Layer = raster
+##Clumped_Layer = raster
 ##MMU = number 3
 ##Output_raster = output raster
 Classified_Layer=raster(Classified_Layer,1)

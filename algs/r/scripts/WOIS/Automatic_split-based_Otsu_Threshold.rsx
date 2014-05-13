@@ -1,5 +1,5 @@
 ##[Classification]=group 
-##Layer = raster|R.raster
+##Layer = raster
 ##Nodata_value = number 0
 ##Lower_than = boolean True
 ##Tile_size = number 200

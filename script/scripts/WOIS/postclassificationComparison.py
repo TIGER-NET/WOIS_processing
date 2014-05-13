@@ -12,8 +12,8 @@
 #==================================
 
 import os
-from sextante.core.SextanteUtils import SextanteUtils
-from sextante.core.SextanteLog import SextanteLog
+from processing.tools.system import tempFolder
+from processing.core.ProcessingLog import ProcessingLog
 
 loglines = []
 loglines.append('Post-classification comparison script console output')
@@ -22,11 +22,11 @@ loglines.append('')
 # set up the actual and temporary outputs
 outputFile = open(output, 'w')
 outputFile.close()
-tempOutput = SextanteUtils.tempFolder() + os.sep + "postclassificationComparisionScript.txt"
+tempOutput = tempFolder() + os.sep + "postclassificationComparisionScript.txt"
 if os.path.exists(tempOutput):
     os.remove(tempOutput)
 
-if sextante.runalg("grass:r.kappa",classification,reference,'"CHANGE DETECTION MATRIX"',True,w,extent,tempOutput):
+if processing.runalg("grass:r.kappa",classification,reference,'"CHANGE DETECTION MATRIX"',True,w,extent,tempOutput):
     with open(tempOutput) as inputFile, open(output, "a") as outputFile:
         lines = inputFile.readlines()
         writeLines = False
@@ -40,8 +40,8 @@ if sextante.runalg("grass:r.kappa",classification,reference,'"CHANGE DETECTION M
                 outputFile.write('Change detection matrix\n')
     progress.setText('Saved change detection matrix to file %s' % output)
     loglines.append('Saved change detection matrix to file %s' % output)
-    SextanteLog.addToLog(SextanteLog.LOG_INFO, loglines)
+    ProcessingLog.addToLog(ProcessingLog.LOG_INFO, loglines)
 else:
     progress.setText('ERROR running r.kappa. Check log for details.')
     loglines.append('ERROR running r.kappa. Check log for details.')
-    SextanteLog.addToLog(SextanteLog.LOG_INFO, loglines)
+    ProcessingLog.addToLog(ProcessingLog.LOG_INFO, loglines)

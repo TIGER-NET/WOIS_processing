@@ -1,5 +1,5 @@
 ##[Classification]=group
-##Layer = raster|R.raster
+##Layer = raster
 ##Nodata_value = number 255
 ##MMU = number 3
 ##Output_raster = output raster

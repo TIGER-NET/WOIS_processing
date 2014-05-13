@@ -11,7 +11,9 @@ ALGORITHM:grass:r.to.vect
 -1|HARDCODEDPARAMVALUE_-s_0
 None
 None
+None
 ALGORITHM:r:pg7output2kml
 340.0,260.0
 0|output
 -1|RASTERLAYER_INPUTLAYER
+

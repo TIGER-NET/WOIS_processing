@@ -19,7 +19,7 @@ import re
 import socket
 from osgeo import gdal
 from gdalconst import *
-from sextante.core.SextanteLog import SextanteLog
+from processing.core.ProcessingLog import ProcessingLog
 
 regex='\d{14}'
 SUBSET = 1
@@ -158,7 +158,7 @@ def subsetToExtent(filename):
     progress.setText('Subsetting')
     subsetExtent = str(xmin)+","+str(xmax)+","+str(ymin)+","+str(ymax)
     param = {'INPUT':tmpFilename, 'OUTSIZE':100, 'OUTSIZE_PERC':True, 'NO_DATA':"none", 'EXPAND':0, 'SRS':'', 'PROJWIN':subsetExtent, 'EXTRA':'-co "COMPRESS=LZW"', 'SDS':False, 'OUTPUT':localFilename}
-    if not sextante.runalg("gdalogr:translate(convertformat)",param):
+    if not processing.runalg("gdalogr:translate(convertformat)",param):
         progress.setText('Problems with subsetting "%s"' % filename)
         loglines.append('Problems with subsetting "%s"' % filename)      
     for filename in tmpFileList:
@@ -276,4 +276,4 @@ if not os.path.isdir(localDir):
 if os.path.isdir(localDir):
     ftpDownload(loglines)
     
-SextanteLog.addToLog(SextanteLog.LOG_INFO, loglines)
+ProcessingLog.addToLog(ProcessingLog.LOG_INFO, loglines)

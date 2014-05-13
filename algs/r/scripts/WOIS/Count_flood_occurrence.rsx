@@ -2,7 +2,7 @@
 ##Input_folder = folder
 ##Input_file_mask = string *_gr_geo_fld_manual.tif
 ##AOI = vector
-##HAND_image = raster|R.raster
+##HAND_image = raster
 ##HAND_threshold = number 11
 ##Flood_count = output raster
 ##Flood_count_as_percent_of_acquisitions = output raster

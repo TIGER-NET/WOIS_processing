@@ -1,6 +1,6 @@
 ##[Classification]=group
-##Input_HAND_raster = raster|R.raster
-##Input_thresholded_raster = raster|R.raster
+##Input_HAND_raster = raster
+##Input_thresholded_raster = raster
 ##HAND_threshold = number 10
 ##Output_flood_map = output raster
 Input_HAND_raster <- raster(Input_HAND_raster,1)

@@ -13,10 +13,10 @@
 
 import os
 from qgis.core import *
-from sextante.core.QGisLayers import QGisLayers
-from sextante.grass.GrassUtils import GrassUtils
-from sextante.core.SextanteUtils import SextanteUtils
-from sextante.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
+from processing.tools import dataobjects
+from processing.algs.grass.GrassUtils import GrassUtils
+from processing.tools import system
+from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
 
 
 def setMinExtent(layer, zones):
@@ -34,16 +34,16 @@ if not (layers == None or len(layers) == 0):
     # set up the actual and temporary outputs
     outputFile = open(output, 'w')
     outputFile.close()
-    tempOutput = SextanteUtils.tempFolder() + os.sep + "rUnivarScriptOut.txt"
+    tempOutput = system.tempFolder() + os.sep + "rUnivarScriptOut.txt"
     if os.path.exists(tempOutput):
         os.remove(tempOutput)
     
     # get the zones cover raster layer
-    zonesLayer = QGisLayers.getObjectFromUri(zones)
+    zonesLayer = dataobjects.getObjectFromUri(zones)
     
     # run r.univar individually for each input raster        
     for layername in layers:
-        layer = QGisLayers.getObjectFromUri(layername)
+        layer = dataobjects.getObjectFromUri(layername)
         if isinstance(layer, QgsRasterLayer):
             if zonesLayer:
                 extent = setMinExtent(layer, zonesLayer)
@@ -52,7 +52,7 @@ if not (layers == None or len(layers) == 0):
             progress.setPercentage(int(iteration / float(len(layers)) * 100))
             progress.setText("Processing image: " + layername)
             params = {'map': layername, 'zones': zones, '-e': e, '-g': False, '-t': True, 'percentile': percentile, 'GRASS_REGION_PARAMETER': extent, 'output': tempOutput}
-            if sextante.runalg("grass:r.univar", params) and os.path.exists(tempOutput):
+            if processing.runalg("grass:r.univar", params) and os.path.exists(tempOutput):
                 # copy the output from the temporary to actual output file
                 with open(tempOutput) as inputFile, open(output, "a") as outputFile:
                     outputFile.write(layername + "\n")
