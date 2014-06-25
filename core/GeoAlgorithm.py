@@ -346,17 +346,10 @@ class GeoAlgorithm:
                             if layer.source() == inputlayer:
                                 self.crs = layer.crs()
                                 return
-                        if isinstance(param, ParameterRaster) \
-                                or isinstance(param, ParameterMultipleInput) \
-                                and param.datatype \
-                                == ParameterMultipleInput.TYPE_RASTER:
-                            p = QgsProviderRegistry.instance().provider('gdal',
-                                    inputlayer)
-                        else:
-                            p = QgsProviderRegistry.instance().provider('ogr',
-                                    inputlayer)
+                        p = dataobjects.getObjectFromUri(inputlayer)
                         if p is not None:
                             self.crs = p.crs()
+                            p = None
                             return
         qgis = dataobjects.interface.iface
         if qgis is None:
