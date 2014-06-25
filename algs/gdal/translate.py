@@ -121,7 +121,7 @@ class translate(GeoAlgorithm):
         arguments.append(regionCoords[3])
         arguments.append(regionCoords[1])
         arguments.append(regionCoords[2])
-        if crsId is not None:
+        if crsId:
             arguments.append('-a_srs')
             arguments.append(str(crsId))
         if sds:
