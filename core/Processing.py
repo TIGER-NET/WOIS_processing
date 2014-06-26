@@ -337,7 +337,6 @@ class Processing:
             if len(args) != alg.getVisibleParametersCount() \
                     + alg.getVisibleOutputsCount():
                 print 'Error: Wrong number of parameters'
-                print (len(args))
                 processing.alghelp(algOrName)
                 return
             i = 0
