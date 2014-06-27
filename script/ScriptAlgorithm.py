@@ -49,6 +49,7 @@ from processing.outputs.OutputNumber import OutputNumber
 from processing.outputs.OutputString import OutputString
 from processing.outputs.OutputHTML import OutputHTML
 from processing.outputs.OutputFile import OutputFile
+from processing.outputs.OutputDirectory import OutputDirectory
 from processing.outputs.OutputFactory import OutputFactory
 from processing.script.WrongScriptException import WrongScriptException
 
@@ -127,6 +128,9 @@ class ScriptAlgorithm(GeoAlgorithm):
         if '|' in line:
             self.processDescriptionParameterLine(line)
             return
+        if line == "nomodeler":
+            self.showInModeler = False
+            return
         tokens = line.split('=', 1)
         desc = self.createDescriptiveName(tokens[0])
         if tokens[1].lower().strip() == 'group':
@@ -182,7 +186,7 @@ class ScriptAlgorithm(GeoAlgorithm):
                     found = True
                     break
             if found:
-                param = ParameterTableField(tokens[0], tokens[0], field)
+                param = ParameterTableField(tokens[0], desc, field)
         elif tokens[1].lower().strip().startswith('string'):
             default = tokens[1].strip()[len('string') + 1:]
             param = ParameterString(tokens[0], desc, default)
@@ -204,6 +208,11 @@ class ScriptAlgorithm(GeoAlgorithm):
             out = OutputHTML()
         elif tokens[1].lower().strip().startswith('output file'):
             out = OutputFile()
+            subtokens = tokens[1].split(' ')
+            if len(subtokens > 2):
+                out.ext = subtokens[2]
+        elif tokens[1].lower().strip().startswith('output directory'):
+            out = OutputDirectory()
         elif tokens[1].lower().strip().startswith('output number'):
             out = OutputNumber()
         elif tokens[1].lower().strip().startswith('output string'):
@@ -213,7 +222,7 @@ class ScriptAlgorithm(GeoAlgorithm):
             self.addParameter(param)
         elif out is not None:
             out.name = tokens[0]
-            out.description = tokens[0]
+            out.description = desc
             self.addOutput(out)
         else:
             raise WrongScriptException('Could not load script:'
@@ -244,7 +253,9 @@ class ScriptAlgorithm(GeoAlgorithm):
         ns = {}
         ns['progress'] = progress
 
+        print self.parameters
         for param in self.parameters:
+            print param.name
             ns[param.name] = param.value
 
         for out in self.outputs:

@@ -29,14 +29,18 @@ from os import path
 from qgis.core import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from processing import interface
+from qgis.utils import iface
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.algs.gdal.GdalUtils import GdalUtils
 from processing.tools.system import *
 
 ALL_TYPES = [-1]
-interface.iface = None
 
+_loadedLayers = {}
+
+def resetLoadedLayers():
+    global _loadedLayers
+    _loadedLayers = {}
 
 def getSupportedOutputVectorLayerExtensions():
     formats = QgsVectorFileWriter.supportedFiltersAndFormats()
@@ -172,7 +176,7 @@ def load(fileName, name=None, crs=None, style=None):
                         ProcessingConfig.RASTER_STYLE)
             qgslayer.loadNamedStyle(style)
             QgsMapLayerRegistry.instance().addMapLayers([qgslayer])
-            interface.iface.legendInterface().refreshLayerSymbology(qgslayer)
+            iface.legendInterface().refreshLayerSymbology(qgslayer)
         else:
             if prjSetting:
                 settings.setValue('/Projections/defaultBehaviour', prjSetting)
@@ -208,6 +212,9 @@ def getObjectFromUri(uri, forceLoad=True):
 
     if uri is None:
         return None
+    print _loadedLayers
+    if uri in _loadedLayers:
+        return _loadedLayers[uri]
     layers = getRasterLayers()
     for layer in layers:
         if layer.source() == uri:
@@ -230,11 +237,13 @@ def getObjectFromUri(uri, forceLoad=True):
         if layer.isValid():
             if prjSetting:
                 settings.setValue('/Projections/defaultBehaviour', prjSetting)
+            _loadedLayers[layer.source()] = layer
             return layer
         layer = QgsRasterLayer(uri, uri)
         if layer.isValid():
             if prjSetting:
                 settings.setValue('/Projections/defaultBehaviour', prjSetting)
+            _loadedLayers[layer.source()] = layer
             return layer
         if prjSetting:
             settings.setValue('/Projections/defaultBehaviour', prjSetting)

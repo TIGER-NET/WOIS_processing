@@ -16,6 +16,7 @@
 *                                                                         *
 ***************************************************************************
 """
+import json
 
 __author__ = 'Victor Olaya'
 __date__ = 'August 2012'
@@ -26,16 +27,15 @@ __copyright__ = '(C) 2012, Victor Olaya'
 __revision__ = '$Format:%H$'
 
 import codecs
-import pickle
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.gui.HelpEditionDialog import HelpEditionDialog
 from processing.gui.ParametersDialog import ParametersDialog
 from processing.gui.AlgorithmClassification import AlgorithmDecorator
-from processing.modeler.ModelerParameterDefinitionDialog import \
-        ModelerParameterDefinitionDialog
+from processing.modeler.ModelerParameterDefinitionDialog import ModelerParameterDefinitionDialog
 from processing.modeler.ModelerAlgorithm import ModelerAlgorithm
 from processing.modeler.ModelerParametersDialog import ModelerParametersDialog
 from processing.modeler.ModelerUtils import ModelerUtils
@@ -54,7 +54,6 @@ class ModelerDialog(QDialog, Ui_DlgModeler):
     def __init__(self, alg=None):
         QDialog.__init__(self)
 
-        self.hasChanged = False
         self.setupUi(self)
 
         self.setWindowFlags(Qt.WindowMinimizeButtonHint |
@@ -77,7 +76,6 @@ class ModelerDialog(QDialog, Ui_DlgModeler):
         def _dropEvent(event):
             if event.mimeData().hasText():
                 text = event.mimeData().text()
-                print text
                 if text in ModelerParameterDefinitionDialog.paramTypes:
                     self.addInputOfType(text)
                 else:
@@ -163,6 +161,7 @@ class ModelerDialog(QDialog, Ui_DlgModeler):
             self.textGroup.setText(alg.group)
             self.textName.setText(alg.name)
             self.repaintModel()
+
         else:
             self.alg = ModelerAlgorithm()
 
@@ -172,6 +171,8 @@ class ModelerDialog(QDialog, Ui_DlgModeler):
         # Indicates whether to update or not the toolbox after
         # closing this dialog
         self.update = False
+
+        self.hasChanged = False
 
     def changeModel(self):
         self.hasChanged = True
@@ -204,8 +205,8 @@ class ModelerDialog(QDialog, Ui_DlgModeler):
         # TODO: enable alg cloning without saving to file
         if len(self.alg.algs) == 0:
             QMessageBox.warning(self, self.tr('Empty model'),
-                    self.tr("Model doesn't contains any algorithms and/or \
-                             parameters and can't be executed"))
+                    self.tr("Model doesn't contains any algorithms and/or "
+                            "parameters and can't be executed"))
             return
 
         if self.alg.descriptionFile is None:
@@ -295,10 +296,10 @@ class ModelerDialog(QDialog, Ui_DlgModeler):
                             % unicode(sys.exc_info()[1]))
                 else:
                     QMessageBox.warning(self, self.tr("Can't save model"),
-                            self.tr("This model can't be saved in its \
-                                     original location (probably you do not \
-                                     have permission to do it). Please, use \
-                                     the 'Save as...' option."))
+                            self.tr("This model can't be saved in its "
+                                    "original location (probably you do not "
+                                    "have permission to do it). Please, use "
+                                    "the 'Save as...' option."))
                 return
             fout.write(text)
             fout.close()
@@ -307,9 +308,8 @@ class ModelerDialog(QDialog, Ui_DlgModeler):
             # If help strings were defined before saving the model
             # for the first time, we do it here.
             if self.help:
-                f = open(self.alg.descriptionFile + '.help', 'wb')
-                pickle.dump(self.help, f)
-                f.close()
+                with open(self.descriptionFile + '.help', 'w') as f:
+                    json.dump(self.help, f)
                 self.help = None
             QMessageBox.information(self, self.tr('Model saved'),
                                     self.tr('Model was correctly saved.'))
@@ -335,8 +335,8 @@ class ModelerDialog(QDialog, Ui_DlgModeler):
                 self.hasChanged = False
             except WrongModelException, e:
                 QMessageBox.critical(self, self.tr('Could not open model'),
-                        self.tr('The selected model could not be loaded.\n\
-                                 Wrong line: %s') % e.msg)
+                        self.tr('The selected model could not be loaded.\n'
+                                'Wrong line: %s') % e.msg)
 
     def repaintModel(self):
         self.scene = ModelerScene()
@@ -508,7 +508,7 @@ class ModelerDialog(QDialog, Ui_DlgModeler):
 
     def fillAlgorithmTreeUsingProviders(self):
         self.algorithmTree.clear()
-        text = str(self.searchBox.text())
+        text = unicode(self.searchBox.text())
         allAlgs = ModelerUtils.getAlgorithms()
         for providerName in allAlgs.keys():
             groups = {}

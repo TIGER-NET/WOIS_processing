@@ -55,7 +55,7 @@ class ConcaveHull(GeoAlgorithm):
         self.addParameter(ParameterBoolean(self.HOLES, 'Allow holes', True))
         self.addParameter(ParameterBoolean(self.NO_MULTIGEOMETRY,
                             'Split multipart geometry into singleparts geometries', False))
-        self.addOutput(OutputVector(ConcaveHull.OUTPUT, 'Convex hull'))
+        self.addOutput(OutputVector(ConcaveHull.OUTPUT, 'Concave hull'))
 
     def processAlgorithm(self, progress):
         #get parameters
@@ -64,7 +64,7 @@ class ConcaveHull(GeoAlgorithm):
         holes = self.getParameterValue(self.HOLES)
         no_multigeom = self.getParameterValue(self.NO_MULTIGEOMETRY)
         #Delaunay triangulation from input point layer
-        progress.setText('Creating Delaunay triangles ...') 
+        progress.setText('Creating Delaunay triangles ...')
         delone_triangles = processing.runalg("qgis:delaunaytriangulation", layer, None)['OUTPUT']
         delaunay_layer = processing.getObject(delone_triangles)
         #get max edge length from Delaunay triangles

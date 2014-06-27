@@ -25,17 +25,17 @@ __copyright__ = '(C) 2012, Alexander Bruy'
 
 __revision__ = '$Format:%H$'
 
-import pickle
 import codecs
 import sys
+import json
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.Qsci import *
 
 from qgis.core import *
+from qgis.utils import iface
 
-from processing import interface
 from processing.gui.ParametersDialog import ParametersDialog
 from processing.gui.HelpEditionDialog import HelpEditionDialog
 from processing.modeler.Providers import Providers
@@ -166,9 +166,8 @@ class ScriptEditorDialog(QDialog, Ui_DlgScriptEditor):
             # If help strings were defined before saving the script for
             # the first time, we do it here
             if self.help:
-                f = open(self.filename + '.help', 'wb')
-                pickle.dump(self.help, f)
-                f.close()
+                with open(self.filename + '.help', 'w') as f:
+                    json.dump(self.help, f)
                 self.help = None
             self.setHasChanged(False)
         else:
@@ -190,7 +189,7 @@ class ScriptEditorDialog(QDialog, Ui_DlgScriptEditor):
         if not dlg:
             dlg = ParametersDialog(alg)
 
-        canvas = interface.iface.mapCanvas()
+        canvas = iface.mapCanvas()
         prevMapTool = canvas.mapTool()
 
         dlg.show()

@@ -45,7 +45,7 @@ class BatchInputSelectionPanel(QtGui.QWidget):
         self.row = row
         self.col = col
         self.horizontalLayout = QtGui.QHBoxLayout(self)
-        self.horizontalLayout.setSpacing(2)
+        self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setMargin(0)
         self.text = QtGui.QLineEdit()
         self.text.setText('')
@@ -90,7 +90,7 @@ class BatchInputSelectionPanel(QtGui.QWidget):
         if dlg.selectedoptions is not None:
             selected = dlg.selectedoptions
             if len(selected) == 1:
-                self.text.setText(layers[selected[0]])
+                self.text.setText(layers[selected[0]].name())
             else:
                 if isinstance(self.param, ParameterMultipleInput):
                     self.text.setText(';'.join(layers[idx].name() for idx in selected))

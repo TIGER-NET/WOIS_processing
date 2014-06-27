@@ -17,6 +17,7 @@
 ***************************************************************************
 """
 
+
 __author__ = 'Victor Olaya'
 __date__ = 'December 2012'
 __copyright__ = '(C) 2012, Victor Olaya'
@@ -90,7 +91,16 @@ from PointsDisplacement import PointsDisplacement
 from ZonalStatistics import ZonalStatistics
 from PointsFromPolygons import PointsFromPolygons
 from PointsFromLines import PointsFromLines
-
+from RandomPointsExtent import RandomPointsExtent
+from RandomPointsLayer import RandomPointsLayer
+from RandomPointsPolygonsFixed import RandomPointsPolygonsFixed
+from RandomPointsPolygonsVariable import RandomPointsPolygonsVariable
+from RandomPointsAlongLines import RandomPointsAlongLines
+from PointsToPaths import PointsToPaths
+from PostGISExecuteSQL import PostGISExecuteSQL
+from ImportIntoPostGIS import ImportIntoPostGIS
+from SetVectorStyle import SetVectorStyle
+from SetRasterStyle import SetRasterStyle
 # from VectorLayerHistogram import VectorLayerHistogram
 # from VectorLayerScatterplot import VectorLayerScatterplot
 # from MeanAndStdDevPlot import MeanAndStdDevPlot
@@ -119,8 +129,9 @@ class QGISAlgorithmProvider(AlgorithmProvider):
                         VariableDistanceBuffer(), Dissolve(), Difference(),
                         Intersection(), Union(), Clip(), ExtentFromLayer(),
                         RandomSelection(), RandomSelectionWithinSubsets(),
-                        SelectByLocation(), RandomExtract(), RandomExtractWithinSubsets(),
-                        ExtractByLocation(), SpatialJoin(),
+                        SelectByLocation(), RandomExtract(),
+                        RandomExtractWithinSubsets(), ExtractByLocation(),
+                        SpatialJoin(),
                         # ------ mmqgisx ------
                         mmqgisx_delete_columns_algorithm(),
                         mmqgisx_delete_duplicate_geometries_algorithm(),
@@ -141,7 +152,12 @@ class QGISAlgorithmProvider(AlgorithmProvider):
                         StatisticsByCategories(), ConcaveHull(), Polygonize(),
                         RasterLayerStatistics(), PointsDisplacement(),
                         ZonalStatistics(), PointsFromPolygons(),
-                        PointsFromLines(),
+                        PointsFromLines(), RandomPointsExtent(),
+                        RandomPointsLayer(), RandomPointsPolygonsFixed(),
+                        RandomPointsPolygonsVariable(),
+                        RandomPointsAlongLines(), PointsToPaths(),
+                        PostGISExecuteSQL(), ImportIntoPostGIS(),
+                        SetVectorStyle(), SetRasterStyle(),
                         # ------ raster ------
                         # CreateConstantRaster(),
                         # ------ graphics ------

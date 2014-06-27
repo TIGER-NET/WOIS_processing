@@ -33,6 +33,7 @@ from processing.core.ProcessingConfig import ProcessingConfig, Setting
 from processing.core.ProcessingLog import ProcessingLog
 from SagaAlgorithm import SagaAlgorithm
 from SplitRGBBands import SplitRGBBands
+from RasterCalculator import RasterCalculator
 from SagaUtils import SagaUtils
 from processing.tools.system import *
 
@@ -45,64 +46,39 @@ class SagaAlgorithmProvider(AlgorithmProvider):
 
     def initializeSettings(self):
         AlgorithmProvider.initializeSettings(self)
-        if isWindows():
+        if SagaUtils.findSagaFolder() is None:
             ProcessingConfig.addSetting(Setting(self.getDescription(),
-                    SagaUtils.SAGA_FOLDER, 'SAGA folder',
-                    SagaUtils.sagaPath()))
-        ProcessingConfig.addSetting(Setting(self.getDescription(),
-                                    SagaUtils.SAGA_208,
-                                    'Enable SAGA 2.0.8 compatibility', True))
+                                        SagaUtils.SAGA_208,
+                                        'Use SAGA 2.0.8 syntax', not isMac()))
+            if isWindows() or isMac():
+                ProcessingConfig.addSetting(Setting(self.getDescription(),
+                                            SagaUtils.SAGA_FOLDER, 'SAGA folder', ''))
         ProcessingConfig.addSetting(Setting(self.getDescription(),
                                     SagaUtils.SAGA_IMPORT_EXPORT_OPTIMIZATION,
                                     'Enable SAGA Import/Export optimizations',
                                     False))
-        ProcessingConfig.addSetting(Setting(self.getDescription(),
-                SagaUtils.SAGA_AUTO_RESAMPLING,
-                'Use min covering grid system for resampling', True))
         ProcessingConfig.addSetting(Setting(self.getDescription(),
                                     SagaUtils.SAGA_LOG_COMMANDS,
                                     'Log execution commands', True))
         ProcessingConfig.addSetting(Setting(self.getDescription(),
                                     SagaUtils.SAGA_LOG_CONSOLE,
                                     'Log console output', True))
-        ProcessingConfig.addSetting(Setting(self.getDescription(),
-                                    SagaUtils.SAGA_RESAMPLING_REGION_XMIN,
-                                    'Resampling region min x', 0))
-        ProcessingConfig.addSetting(Setting(self.getDescription(),
-                                    SagaUtils.SAGA_RESAMPLING_REGION_YMIN,
-                                    'Resampling region min y', 0))
-        ProcessingConfig.addSetting(Setting(self.getDescription(),
-                                    SagaUtils.SAGA_RESAMPLING_REGION_XMAX,
-                                    'Resampling region max x', 1000))
-        ProcessingConfig.addSetting(Setting(self.getDescription(),
-                                    SagaUtils.SAGA_RESAMPLING_REGION_YMAX,
-                                    'Resampling region max y', 1000))
-        ProcessingConfig.addSetting(Setting(self.getDescription(),
-                                    SagaUtils.SAGA_RESAMPLING_REGION_CELLSIZE,
-                                    'Resampling region cellsize', 1))
 
     def unload(self):
         AlgorithmProvider.unload(self)
         if isWindows():
             ProcessingConfig.removeSetting(SagaUtils.SAGA_FOLDER)
 
-        ProcessingConfig.removeSetting(SagaUtils.SAGA_AUTO_RESAMPLING)
-        ProcessingConfig.removeSetting(SagaUtils.SAGA_RESAMPLING_REGION_XMIN)
-        ProcessingConfig.removeSetting(SagaUtils.SAGA_RESAMPLING_REGION_YMIN)
-        ProcessingConfig.removeSetting(SagaUtils.SAGA_RESAMPLING_REGION_XMAX)
-        ProcessingConfig.removeSetting(SagaUtils.SAGA_RESAMPLING_REGION_YMAX)
-        ProcessingConfig.removeSetting(
-                SagaUtils.SAGA_RESAMPLING_REGION_CELLSIZE)
         ProcessingConfig.removeSetting(SagaUtils.SAGA_LOG_CONSOLE)
         ProcessingConfig.removeSetting(SagaUtils.SAGA_LOG_COMMANDS)
 
+
     def _loadAlgorithms(self):
         self.algs = []
-        saga208 = ProcessingConfig.getSetting(SagaUtils.SAGA_208)
         folder = SagaUtils.sagaDescriptionPath()
         for descriptionFile in os.listdir(folder):
             if descriptionFile.endswith('txt'):
-                if not saga208:
+                if not SagaUtils.isSaga208():
                     if descriptionFile.startswith('2.0.8'):
                         continue
                 else:
@@ -121,6 +97,7 @@ class SagaAlgorithmProvider(AlgorithmProvider):
                             'Could not open SAGA algorithm: '
                             + descriptionFile + '\n' + str(e))
         self.algs.append(SplitRGBBands())
+        self.algs.append(RasterCalculator())
 
     def getDescription(self):
         return 'SAGA'

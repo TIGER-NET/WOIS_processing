@@ -424,7 +424,6 @@ class mmqgisx_grid_algorithm(GeoAlgorithm):
 
         crsId = self.getParameterValue(self.CRS)
         self.crs = QgsCoordinateReferenceSystem(crsId)
-        print self.crs.authid()
 
         if hspacing <= 0 or vspacing <= 0:
             raise GeoAlgorithmExecutionException('Invalid grid spacing: '
@@ -1060,7 +1059,6 @@ class mmqgisx_select_algorithm(GeoAlgorithm):
     RESULT = 'RESULT'
 
     def defineCharacteristics(self):
-        self.allowOnlyOpenedLayers = True
         self.name = 'Select by attribute'
         self.group = 'Vector selection tools'
 
@@ -1089,7 +1087,6 @@ class mmqgisx_select_algorithm(GeoAlgorithm):
 
         filename = self.getParameterValue(self.LAYERNAME)
         layer = dataobjects.getObjectFromUri(filename)
-
         attribute = self.getParameterValue(self.ATTRIBUTE)
         comparison = self.comparisons[self.getParameterValue(self.COMPARISON)]
         comparisonvalue = self.getParameterValue(self.COMPARISONVALUE)

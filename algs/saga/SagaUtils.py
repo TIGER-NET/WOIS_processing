@@ -42,12 +42,6 @@ class SagaUtils:
     SAGA_208 = 'SAGA_208'
     SAGA_LOG_COMMANDS = 'SAGA_LOG_COMMANDS'
     SAGA_LOG_CONSOLE = 'SAGA_LOG_CONSOLE'
-    SAGA_AUTO_RESAMPLING = 'SAGA_AUTO_RESAMPLING'
-    SAGA_RESAMPLING_REGION_XMIN = 'SAGA_RESAMPLING_REGION_XMIN'
-    SAGA_RESAMPLING_REGION_YMIN = 'SAGA_RESAMPLING_REGION_YMIN'
-    SAGA_RESAMPLING_REGION_XMAX = 'SAGA_RESAMPLING_REGION_XMAX'
-    SAGA_RESAMPLING_REGION_YMAX = 'SAGA_RESAMPLING_REGION_YMAX'
-    SAGA_RESAMPLING_REGION_CELLSIZE = 'SAGA_RESAMPLING_REGION_CELLSIZE'
     SAGA_FOLDER = 'SAGA_FOLDER'
     SAGA_IMPORT_EXPORT_OPTIMIZATION = 'SAGA_IMPORT_EXPORT_OPTIMIZATION'
 
@@ -65,26 +59,35 @@ class SagaUtils:
         return batchfile
 
     @staticmethod
-    def sagaPath():
-        folder = ProcessingConfig.getSetting(SagaUtils.SAGA_FOLDER)
-        if folder is None:
-            folder = ''
-            # Try to auto-configure the folder
-            if isMac():
-                testfolder = os.path.join(str(QgsApplication.prefixPath()),
-                        'bin')
+    def findSagaFolder():
+        folder = None
+        if isMac():
+            testfolder = os.path.join(QgsApplication.prefixPath(), 'bin')
+            if os.path.exists(os.path.join(testfolder, 'saga_cmd')):
+                folder = testfolder
+            else:
+                testfolder = '/usr/local/bin'
                 if os.path.exists(os.path.join(testfolder, 'saga_cmd')):
                     folder = testfolder
-                else:
-                    testfolder = '/usr/local/bin'
-                    if os.path.exists(os.path.join(testfolder, 'saga_cmd')):
-                        folder = testfolder
-            elif isWindows():
-                testfolder = os.path.dirname(str(QgsApplication.prefixPath()))
-                testfolder = os.path.join(testfolder, 'saga')
-                if os.path.exists(os.path.join(testfolder, 'saga_cmd.exe')):
-                    folder = testfolder
+        elif isWindows():
+            testfolder = os.path.join(os.path.dirname(QgsApplication.prefixPath()), 'saga')
+            if os.path.exists(os.path.join(testfolder, 'saga_cmd.exe')):
+                folder = testfolder
         return folder
+
+    @staticmethod
+    def sagaPath():
+        folder = SagaUtils.findSagaFolder()
+        if folder is None:
+            folder = ProcessingConfig.getSetting(SagaUtils.SAGA_FOLDER)
+        return folder or ''
+
+    @staticmethod
+    def isSaga208():
+        if SagaUtils.findSagaFolder() is not None:
+            return not isMac();
+        else:
+            return ProcessingConfig.getSetting(SagaUtils.SAGA_208)
 
     @staticmethod
     def sagaDescriptionPath():

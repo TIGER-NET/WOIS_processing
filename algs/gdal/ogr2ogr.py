@@ -25,7 +25,6 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
-import tempfile
 
 try:
     from osgeo import gdal, ogr, osr
@@ -51,42 +50,50 @@ GeomOperation = Enum(['NONE', 'SEGMENTIZE', 'SIMPLIFY_PRESERVE_TOPOLOGY'])
 FORMATS = [
     'ESRI Shapefile',
     'GeoJSON',
-    ' GeoRSS',
+    'GeoRSS',
     'SQLite',
-    'Generic Mapping Tools',
-    'Mapinfo TAB',
-    'ESRI Shapefile',
+    'GMT',
+    'MapInfo File',
     'INTERLIS 1',
-    'Geography Markup Language',
-    'Geoconcept',
-    'AutoCAD DXF',
     'INTERLIS 2',
-    '',
-    'Microstation DGN',
-    'Comma Separated Value',
-    'Atlas BNAGPS eXchange Format',
-    'S-57 Base file',
-    'Keyhole Markup Language',
+    'GML',
+    'Geoconcept',
+    'DXF',
+    'DGN',
+    'CSV',
+    'BNA',
+    'S57',
+    'KML',
+    'GPX',
+    'PGDump',
+    'GPSTrackMaker',
+    'ODS',
+    'XLSX',
+    'PDF',
     ]
 EXTS = [
-    'shp',
-    'geojson',
+    '.shp',
+    '.geojson',
     '.xml',
     '.sqlite',
     '.gmt',
     '.tab',
-    '.shp',
+    '.ili',
     '.ili',
     '.gml',
     '.txt',
     '.dxf',
-    '.ili',
     '.dgn',
     '.csv',
     '.bna',
-    '.gpx',
     '.000',
     '.kml',
+    '.gpx',
+    '.pgdump',
+    '.gtm',
+    '.ods',
+    '.xlsx',
+    '.pdf',
     ]
 
 
