@@ -40,5 +40,5 @@ for image in matchingFiles:
     if processing.runalg("grass:r.fillnulls", params):
         iteration +=1
     else:
-        raise GeoAlgorithmExecutionException("Unable to execute script \"r.fillnulls for directory\". Check SEXTANTE log for details.")
+        raise GeoAlgorithmExecutionException("Unable to execute script \"r.fillnulls for directory\". Check Processing log for details.")
 progress.setText("Finished!")
