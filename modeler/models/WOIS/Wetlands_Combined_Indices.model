@@ -18,7 +18,7 @@ ALGORITHM:modeler:wetlands_ndvi
 None
 -1|RASTERLAYER_CLOUDMASKEDMERISIMAGE
 -1|RASTERLAYER_CLOUDMASK
-None
+Output: NDVI|125.0,237.5
 ALGORITHM:modeler:wetlands_ndwi
 358.0,170.0
 None
@@ -62,4 +62,4 @@ ALGORITHM:gdalogr:translate
 None
 -1|HARDCODEDPARAMVALUE_SDS_5
 -1|HARDCODEDPARAMVALUE_EXTRA_5
-Output: Combined Indices|515.0,483.0
+Output: Combined Indices|540.0,468.5
