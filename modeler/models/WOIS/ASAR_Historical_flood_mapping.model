@@ -1,4 +1,68 @@
 NAME:Historical flood mapping
 GROUP:Flood mapping
-PARAMETER:ParameterRaster|RASTERLAYER_DUMMY|dummy|False
+PARAMETER:ParameterNumber|NUMBER_SPLITTILESIZE|SplitTileSize|1.0|None|200.0
 120.0,60.0
+PARAMETER:ParameterNumber|NUMBER_NODATAVALUE|Nodatavalue|None|None|0.0
+386.0,183.0
+PARAMETER:ParameterNumber|NUMBER_MANUALTHRESHOLD|Manual_Threshold|None|0.0|-14.0
+689.0,63.0
+PARAMETER:ParameterRaster|RASTERLAYER_INPUTFILE|Input_file|False
+391.0,64.0
+PARAMETER:ParameterRaster|RASTERLAYER_HANDIMAGE|HAND_image|False
+391.0,285.0
+PARAMETER:ParameterNumber|NUMBER_HANDTHRESHOLD|HAND_threshold|0.0|None|11.0
+388.0,391.0
+PARAMETER:ParameterNumber|NUMBER_MMU|MMU|1.0|None|3.0
+392.0,491.0
+VALUE:HARDCODEDPARAMVALUE_Lower_than _0===True
+VALUE:HARDCODEDPARAMVALUE_Lower_than _1===True
+ALGORITHM:r:automaticsplitbasedotsuthreshold
+124.0,183.0
+None
+-1|RASTERLAYER_INPUTFILE
+-1|NUMBER_NODATAVALUE
+-1|HARDCODEDPARAMVALUE_Lower_than _0
+-1|NUMBER_SPLITTILESIZE
+None
+ALGORITHM:r:manualthreshold
+685.0,185.0
+None
+-1|RASTERLAYER_INPUTFILE
+-1|NUMBER_NODATAVALUE
+-1|HARDCODEDPARAMVALUE_Lower_than _1
+-1|NUMBER_MANUALTHRESHOLD
+None
+ALGORITHM:r:masknonfloodproneareas
+138.0,335.0
+None
+0|Classified_raster 
+-1|RASTERLAYER_HANDIMAGE
+-1|NUMBER_HANDTHRESHOLD
+None
+ALGORITHM:r:masknonfloodproneareas
+686.0,342.0
+None
+1|Classified_raster 
+-1|RASTERLAYER_HANDIMAGE
+-1|NUMBER_HANDTHRESHOLD
+None
+ALGORITHM:modeler:pg7_applymmu
+121.0,497.0
+None
+2|Output_flood_map 
+-1|NUMBER_MMU
+Automatic Flood Map|234.0,562.5
+ALGORITHM:modeler:pg7_applymmu
+692.0,487.0
+None
+3|Output_flood_map 
+-1|NUMBER_MMU
+Manual Flood Map|487.0,557.5
+ALGORITHM:modeler:kml_output
+124.0,651.0
+None
+4|Output_raster _ALG1
+ALGORITHM:modeler:kml_output
+688.0,635.0
+None
+5|Output_raster _ALG1
