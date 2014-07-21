@@ -5,9 +5,9 @@
 ##Output_flood_map = output raster
 Input_HAND_raster <- raster(Input_HAND_raster,1)
 Input_thresholded_raster <- raster(Input_thresholded_raster,1)
-dll.path <- file.path(Sys.getenv("USERPROFILE"),".qgis/sextante/rlibs/resample",.Platform$r_arch,paste("sartools",.Platform$dynlib.ext,sep=""))
+dll.path <- file.path("C:/Program Files/R/R-3.1.0/library/resample",.Platform$r_arch,paste("sartools",.Platform$dynlib.ext,sep=""))
 dyn.load(dll.path)
-source(file.path(Sys.getenv("USERPROFILE"),".qgis/sextante/rlibs/resample/resamplef.R"))
+source(file.path("C:/Program Files/R/R-3.1.0/library/resample/resamplef.R"))
 fpmask <- resamplef(Input_HAND_raster, Input_thresholded_raster, "bilinear", datatype="INT2S")
 fpmask <- fpmask <= HAND_threshold
 fpmask[fpmask == 0] <- NA

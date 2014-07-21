@@ -1,8 +1,8 @@
 ##[Conversion]=group
 ##Input_layer = vector
 ##Input_raster = raster
-tryCatch(find.package("maptools"), error=function(e) install.packages("maptools", lib=file.path(Sys.getenv("USERPROFILE"),".qgis/sextante/rlibs")))
-tryCatch(find.package("rgeos"), error=function(e) install.packages("rgeos", lib=file.path(Sys.getenv("USERPROFILE"),".qgis/sextante/rlibs")))
+tryCatch(find.package("maptools"), error=function(e) install.packages("maptools", lib=file.path("C:/Program Files/R/R-3.1.0/library")))
+tryCatch(find.package("rgeos"), error=function(e) install.packages("rgeos", lib=file.path("C:/Program Files/R/R-3.1.0/library")))
 library(maptools)
 library(rgeos)
 outputfile <- filename(Input_raster)
