@@ -1,4 +1,4 @@
-##[Classification]=group
+.Library ##[Classification]=group
 ##Input_folder = folder
 ##Input_file_mask = string *_gr_geo_fld_manual.tif
 ##AOI = vector
@@ -9,9 +9,9 @@
 #library(sartools)
 library(rgdal)
 Input_folder = normalizePath(Input_folder)
-dll.path <- file.path("C:/Program Files/R/R-3.1.0/library/resample",.Platform$r_arch,paste("sartools",.Platform$dynlib.ext,sep=""))
+dll.path <- file.path(.Library[1],"resample",.Platform$r_arch,paste("sartools",.Platform$dynlib.ext,sep=""))
 dyn.load(dll.path)
-source(file.path("C:/Program Files/R/R-3.1.0/library/resample/resamplef.R"))
+source(file.path(.Library[1],"resample/resamplef.R"))
 classified.imgs <- Sys.glob(file.path(Input_folder, Input_file_mask))
 if (length(classified.imgs) == 0) stop("No images could be found")
 #AOI <- readOGR("r:/Projects_work/TIGERNET/data/Demonstration cases/2012-09-14 Elisabeth NBI flood mapping for DC21",

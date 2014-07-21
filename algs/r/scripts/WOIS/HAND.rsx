@@ -6,9 +6,9 @@
 DEM <- raster(DEM,1)
 Flow_direction <- raster(Flow_direction,1)
 Drainage_network <- raster(Drainage_network,1)
-dll.path <- file.path("C:/Program Files/R/R-3.1.0/library/resample",.Platform$r_arch,paste("sartools",.Platform$dynlib.ext,sep=""))
+dll.path <- file.path(.Library[1],"resample",.Platform$r_arch,paste("sartools",.Platform$dynlib.ext,sep=""))
 dyn.load(dll.path)
-source(file.path("C:/Program Files/R/R-3.1.0/library/resample/HAND.R"))
+source(file.path(.Library[1],"resample/HAND.R"))
 e <- extent(max(xmin(DEM),xmin(Flow_direction),xmin(Drainage_network)),
 min(xmax(DEM),xmax(Flow_direction),xmax(Drainage_network)),
 max(ymin(DEM),ymin(Flow_direction),ymin(Drainage_network)),
