@@ -1,13 +1,13 @@
 NAME:Historical flood mapping
 GROUP:Flood mapping
+PARAMETER:ParameterRaster|RASTERLAYER_INPUTFILE|Input_file|False
+391.0,64.0
 PARAMETER:ParameterNumber|NUMBER_SPLITTILESIZE|SplitTileSize|1.0|None|200.0
 120.0,60.0
 PARAMETER:ParameterNumber|NUMBER_NODATAVALUE|Nodatavalue|None|None|0.0
 386.0,183.0
 PARAMETER:ParameterNumber|NUMBER_MANUALTHRESHOLD|Manual_Threshold|None|0.0|-14.0
 689.0,63.0
-PARAMETER:ParameterRaster|RASTERLAYER_INPUTFILE|Input_file|False
-391.0,64.0
 PARAMETER:ParameterRaster|RASTERLAYER_HANDIMAGE|HAND_image|False
 391.0,285.0
 PARAMETER:ParameterNumber|NUMBER_HANDTHRESHOLD|HAND_threshold|0.0|None|11.0
