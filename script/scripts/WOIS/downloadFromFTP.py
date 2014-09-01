@@ -158,7 +158,7 @@ def subsetToExtent(filename):
     progress.setText('Subsetting')
     subsetExtent = str(xmin)+","+str(xmax)+","+str(ymin)+","+str(ymax)
     param = {'INPUT':tmpFilename, 'OUTSIZE':100, 'OUTSIZE_PERC':True, 'NO_DATA':"none", 'EXPAND':0, 'SRS':'', 'PROJWIN':subsetExtent, 'EXTRA':'-co "COMPRESS=LZW"', 'SDS':False, 'OUTPUT':localFilename}
-    if not processing.runalg("gdalogr:translate(convertformat)",param):
+    if not processing.runalg("gdalogr:translate",param):
         progress.setText('Problems with subsetting "%s"' % filename)
         loglines.append('Problems with subsetting "%s"' % filename)      
     for filename in tmpFileList:
