@@ -8,7 +8,7 @@
 ##ParameterString|outputFileFormat|Output images filename, with YMD where the date string is supposed to be (eg. NDVI_YMD_alaska.tif)|
 ##ParameterSelection|groupBy|Aggregation condition|year-month;year-month-day;year;month;day;decadal;format
 ##ParameterBoolean|propagateNulls|Propagate NULLs|True
-##ParameterSelection|operation|Aggregate operation|average;count;median;mode;minimum;min_raster;maximum;max_raster;stddev;range;sum;threshold;variance;diversity;slope;offset;detcoeff;quart1;quart3;perc90;quantile;skewness;kurtosis
+##ParameterSelection|operation|Aggregate operation|average;count;median;mode;minimum;min_raster;maximum;max_raster;stddev;range;sum;variance;diversity;slope;offset;detcoeff;quart1;quart3;perc90;skewness;kurtosis                                                   
 ##*ParameterString|range|Ignore values outside this range (lo,hi)|-10000000000,10000000000
 ##ParameterExtent|extent|Region extent|
 ##ParameterNumber|cellSize|Region cellsize (leave 0 for default)|0.0|None|0.0
