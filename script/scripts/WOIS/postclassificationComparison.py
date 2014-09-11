@@ -2,8 +2,8 @@
 #==================================
 ##Post-classification comparison=name
 ##Timeseries=group
-##ParameterRaster|classification|Select classification of “initial state” |False
-##ParameterRaster|reference|Select classification of “final state”|False
+##ParameterRaster|classification|Select classification of "initial state" |False
+##ParameterRaster|reference|Select classification of "final state"|False
 ##ParameterBoolean|w|Wide report (132 columns)|False
 ##ParameterExtent|extent|Region extent|
 ##OutputFile|output|Name for output file containing the change detection matrix
@@ -26,7 +26,7 @@ tempOutput = tempFolder() + os.sep + "postclassificationComparisionScript.txt"
 if os.path.exists(tempOutput):
     os.remove(tempOutput)
 
-if processing.runalg("grass:r.kappa",classification,reference,'"CHANGE DETECTION MATRIX"',True,w,extent,tempOutput):
+if processing.runalg("grass:r.kappa",classification,reference,'CHANGE DETECTION MATRIX',True,w,extent,tempOutput):
     with open(tempOutput) as inputFile, open(output, "a") as outputFile:
         lines = inputFile.readlines()
         writeLines = False
