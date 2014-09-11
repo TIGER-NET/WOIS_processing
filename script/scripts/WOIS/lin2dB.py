@@ -38,7 +38,7 @@ if not geotransform is None:
     out_ds.SetGeoTransform(geotransform)
 if not projection is None:
     out_ds.SetProjection(projection)
-out_ds.GetRasterBand(1).WriteArray(raster_data, 0, 0)
+out_ds.GetRasterBand(1).WriteArray(np.ma.filled(raster_data), 0, 0)
 out_ds=None
 
 progress.setText("Finished!")
