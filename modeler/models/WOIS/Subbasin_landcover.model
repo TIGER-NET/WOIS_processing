@@ -1,4 +1,0 @@
-NAME:Subbasin land cover
-GROUP:Tools
-PARAMETER:ParameterRaster|RASTERLAYER_DUMMY|dummy|False
-120.0,60.0
