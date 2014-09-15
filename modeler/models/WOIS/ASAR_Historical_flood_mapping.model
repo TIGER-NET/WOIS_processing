@@ -16,6 +16,8 @@ PARAMETER:ParameterNumber|NUMBER_MMU|MMU|1.0|None|3.0
 392.0,491.0
 VALUE:HARDCODEDPARAMVALUE_Lower_than _0===True
 VALUE:HARDCODEDPARAMVALUE_Lower_than _1===True
+VALUE:HARDCODEDPARAMVALUE_Nodata_value_8===0.0
+VALUE:HARDCODEDPARAMVALUE_Lower_than_8===True
 ALGORITHM:r:automaticsplitbasedotsuthreshold
 124.0,183.0
 None
@@ -23,14 +25,6 @@ None
 -1|NUMBER_NODATAVALUE
 -1|HARDCODEDPARAMVALUE_Lower_than _0
 -1|NUMBER_SPLITTILESIZE
-None
-ALGORITHM:r:manualthreshold
-685.0,185.0
-None
--1|RASTERLAYER_INPUTFILE
--1|NUMBER_NODATAVALUE
--1|HARDCODEDPARAMVALUE_Lower_than _1
--1|NUMBER_MANUALTHRESHOLD
 None
 ALGORITHM:r:masknonfloodproneareas
 138.0,335.0
@@ -42,27 +36,35 @@ None
 ALGORITHM:r:masknonfloodproneareas
 686.0,342.0
 None
-1|Classified_raster 
+7|classified_raster
 -1|RASTERLAYER_HANDIMAGE
 -1|NUMBER_HANDTHRESHOLD
 None
 ALGORITHM:modeler:pg7_applymmu
 121.0,497.0
 None
-2|Output_flood_map 
+1|Output_flood_map 
 -1|NUMBER_MMU
 Automatic Flood Map|234.0,562.5
 ALGORITHM:modeler:pg7_applymmu
 692.0,487.0
 None
-3|Output_flood_map 
+2|Output_flood_map 
 -1|NUMBER_MMU
 Manual Flood Map|487.0,557.5
 ALGORITHM:modeler:kml_output
 124.0,651.0
 None
-4|Output_raster _ALG1
+3|Output_raster _ALG1
 ALGORITHM:modeler:kml_output
 688.0,635.0
 None
-5|Output_raster _ALG1
+4|Output_raster _ALG1
+ALGORITHM:script:manualthreshold
+694.0,169.0
+None
+-1|RASTERLAYER_INPUTFILE
+-1|NUMBER_NODATAVALUE
+-1|HARDCODEDPARAMVALUE_Lower_than_8
+-1|NUMBER_MANUALTHRESHOLD
+None
