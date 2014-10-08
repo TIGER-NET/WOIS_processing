@@ -2,7 +2,7 @@
 #==================================
 ##Timeseries=group
 ##Build Virtual Raster - directory=name
-##ParameterRaster|inFile|An image located in the directory |False
+##ParameterRaster|inFile|Image located in input directory |False
 ##ParameterSelection|resolution|Resolution|average;highest;lowest
 ##ParameterBoolean|separate|Layer stack|True
 ##ParameterBoolean|proj_difference|Allow projection difference|False
