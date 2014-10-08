@@ -21,9 +21,7 @@ dataDir = os.path.dirname(inFile)
 fileList = list()
 for path, subdirs, files in os.walk(dataDir):
     for name in files:
-        progress.setText(name)
         if name.endswith(rasterExt):
-            progress.setText("File found")
             fileList.append(os.path.join(path,name)) 
 fileList.sort()
 
