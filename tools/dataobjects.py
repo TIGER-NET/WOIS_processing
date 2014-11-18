@@ -68,19 +68,22 @@ def getSupportedOutputTableExtensions():
     return exts
 
 
-def getRasterLayers():
-    layers = QgsMapLayerRegistry.instance().mapLayers().values()
+def getRasterLayers(sorting=True):
+    layers = iface.legendInterface().layers()
     raster = []
 
     for layer in layers:
         if layer.type() == layer.RasterLayer:
             if layer.providerType() == 'gdal':  # only gdal file-based layers
                 raster.append(layer)
-    return raster
+    if sorting:
+        return sorted(raster,  key=lambda layer: layer.name().lower())
+    else:
+        return raster
 
 
-def getVectorLayers(shapetype=[-1]):
-    layers = QgsMapLayerRegistry.instance().mapLayers().values()
+def getVectorLayers(shapetype=[-1], sorting=True):
+    layers = iface.legendInterface().layers()
     vector = []
     for layer in layers:
         if layer.type() == layer.VectorLayer:
@@ -89,7 +92,10 @@ def getVectorLayers(shapetype=[-1]):
                 if not uri.lower().endswith('csv') \
                         and not uri.lower().endswith('dbf'):
                     vector.append(layer)
-    return vector
+    if sorting:
+        return sorted(vector,  key=lambda layer: layer.name().lower())
+    else:
+        return vector
 
 
 def getAllLayers():
@@ -99,13 +105,16 @@ def getAllLayers():
     return layers
 
 
-def getTables():
-    layers = QgsMapLayerRegistry.instance().mapLayers().values()
+def getTables(sorting=True):
+    layers = iface.legendInterface().layers()
     tables = list()
     for layer in layers:
         if layer.type() == layer.VectorLayer:
             tables.append(layer)
-    return tables
+    if sorting:
+        return sorted(tables,  key=lambda table: table.name().lower())
+    else:
+        return tables
 
 
 def extent(layers):
