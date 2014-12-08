@@ -19,10 +19,37 @@
 import os
 import glob
 import re
+import datetime
 from PyQt4.QtGui import *
 from processing.core.ProcessingLog import ProcessingLog
 from processing.algs.grass.GrassUtils import GrassUtils
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
+
+
+def convertDatetoDoy(dateString, lengthYearString, lengthMonthString, lengthDayString):
+    try:
+        year = int(dateString[0:lengthYearString])
+    except:
+        year = 1
+    try:
+        month = int(dateString[lengthYearString:lengthYearString + lengthMonthString])
+    except:
+        month = 1
+    try:
+        day = int(dateString[lengthYearString + lengthMonthString:lengthYearString + lengthMonthString + lengthDayString])
+    except:
+        day = 1
+    
+    # If day string has a length of 3 it means that it already represents a doy    
+    if lengthDayString == 3:
+        doy = day
+    # Otherwise calculate doy
+    else:
+        doy = datetime.datetime(year = year, month = month, day = day) - datetime.datetime(year = year, month = 1, day = 1)
+        doy = doy.days + 1
+    
+    yearDoyStr = "%04d%03d" % (year, doy)
+    return yearDoyStr       
 
 def getFiles(dataDir, filenameFormat, outputFileFormat, groupFiles, outputFiles, groupBy):
 
@@ -43,7 +70,7 @@ def getFiles(dataDir, filenameFormat, outputFileFormat, groupFiles, outputFiles,
         regex = 'Y{0,4}M{0,2}(D{2,3})'
     # decadal
     elif groupBy == 5:
-        regex = 'Y{0,4}(M{2}D{1})D{0,2}'
+        regex = '((Y{0,4})(M{0,2})(D{2,3}))'
     # whole directory
     elif groupBy == 6:
         fileName, fileExtension = os.path.splitext(filenameFormat)
@@ -68,6 +95,13 @@ def getFiles(dataDir, filenameFormat, outputFileFormat, groupFiles, outputFiles,
     # then replace it with * to find all the files that match the filename format
     matchingFormat = re.sub(regex, "*", filenameFormat)
     
+    # For decadal grouping need to save the length of year, month and day strings
+    # to be able to convert the date to doy later on
+    if groupBy == 5:
+        lengthYearString = len(match.group(2))
+        lengthMonthString = len(match.group(3))
+        lengthDayString = len(match.group(4))
+    
     # find all the matching files in the data dir
     os.chdir(dataDir)
     matchingFiles =  sorted(glob.glob(matchingFormat))
@@ -77,7 +111,14 @@ def getFiles(dataDir, filenameFormat, outputFileFormat, groupFiles, outputFiles,
         match = re.search(dateRegex,filename)
         if not match:
             continue
-        date = match.group()
+        # If aggregation is by decade and the datestring doesn't specify DOY then DOY must be
+        # calculated so that the images can be grouped by year and last two digits of DOY
+        if groupBy == 5:
+            date = convertDatetoDoy(match.group(), lengthYearString, lengthMonthString, lengthDayString)
+            # need to subtract 1 and add 10 since decade 1 has days 1-10, decade 2 has days 11-20, etc. 
+            date = str(int(date)-1+10)[:-1]
+        else:
+            date = match.group()
         if date in groupFiles:
             groupFiles[date] += ";"+dataDir+os.sep+filename
         else:
