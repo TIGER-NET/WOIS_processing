@@ -145,8 +145,8 @@ getFiles(os.path.dirname(dataDir), filenameFormat, outputFileFormat, groupFiles,
 os.chdir(oldDir)
 
 if len(groupFiles) == 0 or len(outputFiles) == 0:
-    progress.setText("No matching files found! r.series will not be executed.")
     loglines.append("No matching files found! r.series will not be executed.")
+    raise GeoAlgorithmExecutionException("No matching files found! r.series will not be executed.")
 else:
     # run r.series for each group of files
     GrassUtils.startGrassSession()
