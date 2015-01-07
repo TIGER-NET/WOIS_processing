@@ -27,9 +27,9 @@ import os
 from LAStoolsUtils import LAStoolsUtils
 from LAStoolsAlgorithm import LAStoolsAlgorithm
 
-from processing.parameters.ParameterBoolean import ParameterBoolean
-from processing.parameters.ParameterSelection import ParameterSelection
-from processing.parameters.ParameterNumber import ParameterNumber
+from processing.core.parameters import ParameterBoolean
+from processing.core.parameters import ParameterSelection
+from processing.core.parameters import ParameterNumber
 
 class hugeFileGroundClassify(LAStoolsAlgorithm):
 
@@ -59,7 +59,7 @@ class hugeFileGroundClassify(LAStoolsAlgorithm):
 
 #   first we tile the data with option '-reversible'
 
-        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lastile.exe")]
+        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lastile")]
         self.addParametersVerboseCommands(commands)
         self.addParametersPointInputCommands(commands)
         tile_size = self.getParameterValue(hugeFileGroundClassify.TILE_SIZE)
@@ -78,7 +78,7 @@ class hugeFileGroundClassify(LAStoolsAlgorithm):
 
 #   then we ground classify the reversible tiles
 
-        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lasground.exe")]
+        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lasground")]
         self.addParametersVerboseCommands(commands)
         self.addParametersTemporaryDirectoryAsInputFilesCommands(commands, "hugeFileGroundClassify*.laz")
         airborne = self.getParameterValue(hugeFileGroundClassify.AIRBORNE)
@@ -100,7 +100,7 @@ class hugeFileGroundClassify(LAStoolsAlgorithm):
 
 #   then we reverse the tiling
 
-        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lastile.exe")]
+        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lastile")]
         self.addParametersVerboseCommands(commands)
         self.addParametersTemporaryDirectoryAsInputFilesCommands(commands, "hugeFileGroundClassify*_g.laz")
         commands.append("-reverse_tiling")

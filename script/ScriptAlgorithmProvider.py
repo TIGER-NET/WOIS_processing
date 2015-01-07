@@ -25,18 +25,14 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
-import os.path
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
-from processing.core.ProcessingLog import ProcessingLog
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.gui.EditScriptAction import EditScriptAction
 from processing.gui.DeleteScriptAction import DeleteScriptAction
 from processing.gui.CreateNewScriptAction import CreateNewScriptAction
-from processing.script.ScriptAlgorithm import ScriptAlgorithm
 from processing.script.ScriptUtils import ScriptUtils
-from processing.script.WrongScriptException import WrongScriptException
 from processing.script.AddScriptFromFileAction import AddScriptFromFileAction
 from processing.gui.GetScriptsAndModels import GetScriptsAction
 import processing.resources_rc
@@ -46,7 +42,7 @@ class ScriptAlgorithmProvider(AlgorithmProvider):
 
     def __init__(self):
         AlgorithmProvider.__init__(self)
-        self.actions.extend([CreateNewScriptAction('Create new script',
+        self.actions.extend([CreateNewScriptAction(self.tr('Create new script', 'ScriptAlgorithmProvider'),
                             CreateNewScriptAction.SCRIPT_PYTHON),
                             AddScriptFromFileAction(),
                             GetScriptsAction()])
@@ -58,7 +54,7 @@ class ScriptAlgorithmProvider(AlgorithmProvider):
         AlgorithmProvider.initializeSettings(self)
         ProcessingConfig.addSetting(Setting(self.getDescription(),
                                     ScriptUtils.SCRIPTS_FOLDER,
-                                    'Scripts folder',
+                                    self.tr('Scripts folder', 'ScriptAlgorithmProvider'),
                                     ScriptUtils.scriptsFolder()))
 
     def unload(self):
@@ -72,28 +68,8 @@ class ScriptAlgorithmProvider(AlgorithmProvider):
         return 'script'
 
     def getDescription(self):
-        return 'Scripts'
+        return self.tr('Scripts', 'ScriptAlgorithmProvider')
 
     def _loadAlgorithms(self):
         folder = ScriptUtils.scriptsFolder()
-        self.loadFromFolder(folder)
-        folder = os.path.join(os.path.dirname(__file__), 'scripts')
-        self.loadFromFolder(folder)
-
-    def loadFromFolder(self, folder):
-        if not os.path.exists(folder):
-            return
-        for path, subdirs, files in os.walk(folder):
-            for descriptionFile in files:
-                if descriptionFile.endswith('py'):
-                    try:
-                        fullpath = os.path.join(path, descriptionFile)
-                        alg = ScriptAlgorithm(fullpath)
-                        if alg.name.strip() != '':
-                            self.algs.append(alg)
-                    except WrongScriptException, e:
-                        ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, e.msg)
-                    except Exception, e:
-                        ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
-                                'Could not load script:' + descriptionFile + '\n'
-                                + unicode(e))
+        self.algs = ScriptUtils.loadFromFolder(folder)

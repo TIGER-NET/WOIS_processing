@@ -37,12 +37,12 @@ class EditScriptAction(ContextAction):
     SCRIPT_R = 1
 
     def __init__(self, scriptType):
-        self.name = 'Edit script'
+        self.name = self.tr('Edit script', 'EditScriptAction')
         self.scriptType = scriptType
 
     def isEnabled(self):
         if self.scriptType == ScriptEditorDialog.SCRIPT_PYTHON:
-            return isinstance(self.alg, ScriptAlgorithm)
+            return isinstance(self.alg, ScriptAlgorithm) and self.alg.allowEdit
         elif self.scriptType == ScriptEditorDialog.SCRIPT_R:
             return isinstance(self.alg, RAlgorithm)
 

@@ -25,11 +25,32 @@ __copyright__ = '(C) 2013, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
+import csv
 import uuid
+import codecs
+import cStringIO
 
 from PyQt4.QtCore import *
 from qgis.core import *
 from processing.core.ProcessingConfig import ProcessingConfig
+
+
+GEOM_TYPE_MAP = {
+    QGis.WKBPoint: 'Point',
+    QGis.WKBLineString: 'LineString',
+    QGis.WKBPolygon: 'Polygon',
+    QGis.WKBMultiPoint: 'MultiPoint',
+    QGis.WKBMultiLineString: 'MultiLineString',
+    QGis.WKBMultiPolygon: 'MultiPolygon',
+    }
+
+
+TYPE_MAP = {
+    str : QVariant.String,
+    float: QVariant.Double,
+    int: QVariant.Int,
+    bool: QVariant.Bool
+    }
 
 
 def features(layer):
@@ -125,6 +146,7 @@ def values(layer, *attributes):
         ret[attr] = values
     return ret
 
+
 def testForUniqueness( fieldList1, fieldList2 ):
     '''Returns a modified version of fieldList2, removing naming
     collisions with fieldList1.'''
@@ -139,6 +161,7 @@ def testForUniqueness( fieldList1, fieldList2 ):
                     fieldList2[j] = QgsField(name, field.type(), len=field.length(), prec=field.precision(), comment=field.comment())
                     changed = True
     return fieldList2
+
 
 def spatialindex(layer):
     """Creates a spatial index for the passed vector layer.
@@ -172,6 +195,7 @@ def createUniqueFieldName(fieldName, fieldList):
     for newname in nextname(shortName):
         if not found(newname):
             return newname
+
 
 def findOrCreateField(layer, fieldList, fieldName, fieldLen=24, fieldPrec=15):
     idx = layer.fieldNameIndex(fieldName)
@@ -260,10 +284,10 @@ def combineVectorFields(layerA, layerB):
     """Create single field map from two input field maps.
     """
     fields = []
-    fieldsA = layerA.dataProvider().fields()
+    fieldsA = layerA.pendingFields()
     fields.extend(fieldsA)
     namesA = [unicode(f.name()).lower() for f in fieldsA]
-    fieldsB = layerB.dataProvider().fields()
+    fieldsB = layerB.pendingFields()
     for field in fieldsB:
         name = unicode(field.name()).lower()
         if name in namesA:
@@ -325,6 +349,7 @@ def duplicateInMemory(layer, newName='', addToRegistry=False):
 
     return memLayer
 
+
 def checkMinDistance(point, index, distance, points):
     """Check if distance from given point to all other points is greater
     than given value.
@@ -342,3 +367,122 @@ def checkMinDistance(point, index, distance, points):
             return False
 
     return True
+
+
+def _fieldName(f):
+    if isinstance(f, basestring):
+        return f
+    return f.name()
+
+
+def _toQgsField(f):
+    if isinstance(f, QgsField):
+        return f
+    return QgsField(f[0], TYPE_MAP.get(f[1], QVariant.String))
+
+
+class VectorWriter:
+
+    MEMORY_LAYER_PREFIX = 'memory:'
+
+    def __init__(self, fileName, encoding, fields, geometryType,
+                 crs, options=None):
+        self.fileName = fileName
+        self.isMemory = False
+        self.memLayer = None
+        self.writer = None
+
+        if encoding is None:
+            settings = QSettings()
+            encoding = settings.value('/Processing/encoding', 'System', type=str)
+
+        if self.fileName.startswith(self.MEMORY_LAYER_PREFIX):
+            self.isMemory = True
+
+            uri = GEOM_TYPE_MAP[geometryType]
+            if crs.isValid():
+                uri += '?crs=' + crs.authid() + '&'
+            fieldsdesc = ['field=' + _fieldName(f) for f in fields]
+
+            fieldsstring = '&'.join(fieldsdesc)
+            uri += fieldsstring
+            self.memLayer = QgsVectorLayer(uri, self.fileName, 'memory')
+            self.writer = self.memLayer.dataProvider()
+        else:
+            formats = QgsVectorFileWriter.supportedFiltersAndFormats()
+            OGRCodes = {}
+            for (key, value) in formats.items():
+                extension = unicode(key)
+                extension = extension[extension.find('*.') + 2:]
+                extension = extension[:extension.find(' ')]
+                OGRCodes[extension] = value
+
+            extension = self.fileName[self.fileName.rfind('.') + 1:]
+            if extension not in OGRCodes:
+                extension = 'shp'
+                self.filename = self.filename + 'shp'
+
+            qgsfields = QgsFields()
+            for field in fields:
+                qgsfields.append(_toQgsField(field))
+
+            self.writer = QgsVectorFileWriter(self.fileName, encoding,
+                qgsfields, geometryType, crs, OGRCodes[extension])
+
+    def addFeature(self, feature):
+        if self.isMemory:
+            self.writer.addFeatures([feature])
+        else:
+            self.writer.addFeature(feature)
+
+
+class TableWriter:
+
+    def __init__(self, fileName, encoding, fields):
+        self.fileName = fileName
+        if not self.fileName.lower().endswith('csv'):
+            self.fileName += '.csv'
+
+        self.encoding = encoding
+        if self.encoding is None or encoding == 'System':
+            self.encoding = 'utf-8'
+
+        with open(self.fileName, 'wb') as csvFile:
+            self.writer = UnicodeWriter(csvFile, encoding=self.encoding)
+            if len(fields) != 0:
+                self.writer.writerow(fields)
+
+    def addRecord(self, values):
+        with open(self.fileName, 'ab') as csvFile:
+            self.writer = UnicodeWriter(csvFile, encoding=self.encoding)
+            self.writer.writerow(values)
+
+    def addRecords(self, records):
+        with open(self.fileName, 'ab') as csvFile:
+            self.writer = UnicodeWriter(csvFile, encoding=self.encoding)
+            self.writer.writerows(records)
+
+
+class UnicodeWriter:
+
+    def __init__(self, f, dialect=csv.excel, encoding='utf-8', **kwds):
+        self.queue = cStringIO.StringIO()
+        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        self.stream = f
+        self.encoder = codecs.getincrementalencoder(encoding)()
+
+    def writerow(self, row):
+        row = map(unicode, row)
+        try:
+            self.writer.writerow([s.encode('utf-8') for s in row])
+        except:
+            self.writer.writerow(row)
+        data = self.queue.getvalue()
+        data = data.decode('utf-8')
+        data = self.encoder.encode(data)
+        self.stream.write(data)
+        self.queue.truncate(0)
+
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)

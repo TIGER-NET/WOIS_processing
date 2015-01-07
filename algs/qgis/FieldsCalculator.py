@@ -31,12 +31,12 @@ from qgis.utils import iface
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.GeoAlgorithmExecutionException import \
         GeoAlgorithmExecutionException
-from processing.parameters.ParameterVector import ParameterVector
-from processing.parameters.ParameterString import ParameterString
-from processing.parameters.ParameterNumber import ParameterNumber
-from processing.parameters.ParameterBoolean import ParameterBoolean
-from processing.parameters.ParameterSelection import ParameterSelection
-from processing.outputs.OutputVector import OutputVector
+from processing.core.parameters import ParameterVector
+from processing.core.parameters import ParameterString
+from processing.core.parameters import ParameterNumber
+from processing.core.parameters import ParameterBoolean
+from processing.core.parameters import ParameterSelection
+from processing.core.outputs import OutputVector
 from processing.tools import dataobjects, vector, system
 
 from ui.FieldsCalculatorDialog import FieldsCalculatorDialog
@@ -87,7 +87,8 @@ class FieldsCalculator(GeoAlgorithm):
 
         if output.value == '':
             ext = output.getDefaultFileExtension(self)
-            output.value = system.getTempFilenameInTempFolder(output.name + '.' + ext)
+            output.value = system.getTempFilenameInTempFolder(
+                output.name + '.' + ext)
 
         provider = layer.dataProvider()
         fields = layer.pendingFields()
@@ -102,10 +103,10 @@ class FieldsCalculator(GeoAlgorithm):
         da = QgsDistanceArea()
         da.setSourceCrs(layer.crs().srsid())
         canvas = iface.mapCanvas()
-        da.setEllipsoidalMode(canvas.mapRenderer().hasCrsTransformEnabled())
-        da.setEllipsoid(QgsProject.instance().readEntry('Measure',
-                                                        '/Ellipsoid',
-                                                        GEO_NONE)[0])
+        da.setEllipsoidalMode(
+            iface.mapCanvas().mapSettings().hasCrsTransformEnabled())
+        da.setEllipsoid(QgsProject.instance().readEntry(
+            'Measure', '/Ellipsoid', GEO_NONE)[0])
         exp.setGeomCalculator(da)
 
         if not exp.prepare(layer.pendingFields()):

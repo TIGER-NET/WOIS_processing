@@ -49,9 +49,10 @@ class ProcessingPlugin:
 
     def __init__(self, iface):
         self.iface = iface
-        Processing.initialize()
 
     def initGui(self):
+        Processing.initialize()
+
         self.commander = None
         self.toolbox = ProcessingToolbox()
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.toolbox)
@@ -61,18 +62,18 @@ class ProcessingPlugin:
         self.menu = QMenu(self.iface.mainWindow().menuBar())
         self.menu.setObjectName( 'processing' )
         self.menu.setTitle(QCoreApplication.translate('Processing',
-                           'Processing'))
+                           'Pro&cessing'))
 
         self.toolboxAction = self.toolbox.toggleViewAction()
         self.toolboxAction.setObjectName( 'toolboxAction' )
         self.toolboxAction.setIcon(QIcon(':/processing/images/alg.png'))
         self.toolboxAction.setText(QCoreApplication.translate('Processing',
-                                   'Toolbox'))
+                                   '&Toolbox'))
         self.menu.addAction(self.toolboxAction)
 
         self.modelerAction = QAction(QIcon(':/processing/images/model.png'),
                                      QCoreApplication.translate('Processing',
-                                     'Graphical modeler'),
+                                     'Graphical &Modeler...'),
                                      self.iface.mainWindow())
         self.modelerAction.setObjectName( 'modelerAction' )
         self.modelerAction.triggered.connect(self.openModeler)
@@ -80,7 +81,7 @@ class ProcessingPlugin:
 
         self.historyAction = QAction(QIcon(':/processing/images/history.gif'),
                                      QCoreApplication.translate('Processing',
-                                     'History and log'),
+                                     '&History and Log...'),
                                      self.iface.mainWindow())
         self.historyAction.setObjectName( 'historyAction' )
         self.historyAction.triggered.connect(self.openHistory)
@@ -88,7 +89,7 @@ class ProcessingPlugin:
 
         self.configAction = QAction(QIcon(':/processing/images/config.png'),
                                     QCoreApplication.translate('Processing',
-                                    'Options and configuration'),
+                                    '&Options...'),
                                     self.iface.mainWindow())
         self.configAction.setObjectName( 'configAction' )
         self.configAction.triggered.connect(self.openConfig)
@@ -96,7 +97,7 @@ class ProcessingPlugin:
 
         self.resultsAction = QAction(QIcon(':/processing/images/results.png'),
                                      QCoreApplication.translate('Processing',
-                                     '&Results viewer'),
+                                     '&Results Viewer...'),
                                      self.iface.mainWindow())
         self.resultsAction.setObjectName( 'resultsAction' )
         self.resultsAction.triggered.connect(self.openResults)

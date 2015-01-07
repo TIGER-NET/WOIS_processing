@@ -31,10 +31,10 @@ import os
 from LAStoolsUtils import LAStoolsUtils
 from LAStoolsAlgorithm import LAStoolsAlgorithm
 
-from processing.parameters.ParameterVector import ParameterVector
-from processing.parameters.ParameterBoolean import ParameterBoolean
-from processing.parameters.ParameterNumber import ParameterNumber
-from processing.parameters.ParameterSelection import ParameterSelection
+from processing.core.parameters import ParameterVector
+from processing.core.parameters import ParameterBoolean
+from processing.core.parameters import ParameterNumber
+from processing.core.parameters import ParameterSelection
 
 class lasclip(LAStoolsAlgorithm):
 
@@ -54,9 +54,10 @@ class lasclip(LAStoolsAlgorithm):
         self.addParameter(ParameterSelection(lasclip.OPERATION, "what to do with points", lasclip.OPERATIONS, 0))
         self.addParameter(ParameterNumber(lasclip.CLASSIFY_AS, "classify as", 0, None, 12))
         self.addParametersPointOutputGUI()
+        self.addParametersAdditionalGUI()
 
     def processAlgorithm(self, progress):
-        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lasclip.exe")]
+        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lasclip")]
         self.addParametersVerboseCommands(commands)
         self.addParametersPointInputCommands(commands)
         poly = self.getParameterValue(lasclip.POLYGON)
@@ -71,5 +72,6 @@ class lasclip(LAStoolsAlgorithm):
             classify_as = self.getParameterValue(lasclip.CLASSIFY_AS)
             commands.append(str(classify_as))
         self.addParametersPointOutputCommands(commands)
+        self.addParametersAdditionalCommands(commands)
 
         LAStoolsUtils.runLAStools(commands, progress)

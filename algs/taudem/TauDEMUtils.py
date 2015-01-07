@@ -82,14 +82,17 @@ class TauDEMUtils:
         loglines = []
         loglines.append('TauDEM execution console output')
         fused_command = ''.join(['"%s" ' % c for c in command])
+        progress.setInfo('TauDEM command:')
+        progress.setCommand(fused_command.replace('" "', ' ').strip('"'))
         proc = subprocess.Popen(
             fused_command,
             shell=True,
             stdout=subprocess.PIPE,
-            stdin=subprocess.PIPE,
+            stdin=open(os.devnull),
             stderr=subprocess.STDOUT,
             universal_newlines=True,
             ).stdout
         for line in iter(proc.readline, ''):
+            progress.setConsoleInfo(line)
             loglines.append(line)
         ProcessingLog.addToLog(ProcessingLog.LOG_INFO, loglines)

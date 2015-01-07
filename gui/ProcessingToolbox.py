@@ -17,6 +17,7 @@
 ***************************************************************************
 """
 
+
 __author__ = 'Victor Olaya'
 __date__ = 'August 2012'
 __copyright__ = '(C) 2012, Victor Olaya'
@@ -28,16 +29,16 @@ __revision__ = '$Format:%H$'
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.utils import iface
+from processing.modeler.ModelerUtils import ModelerUtils
 from processing.core.Processing import Processing
 from processing.core.ProcessingLog import ProcessingLog
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.GeoAlgorithm import GeoAlgorithm
-from processing.gui.MissingDependencyDialog import MissingDependencyDialog
+from processing.gui.MessageDialog import MessageDialog
 from processing.gui.AlgorithmClassification import AlgorithmDecorator
-from processing.gui.ParametersDialog import ParametersDialog
-from processing.gui.BatchProcessingDialog import BatchProcessingDialog
+from processing.gui.AlgorithmDialog import AlgorithmDialog
+from processing.gui.BatchAlgorithmDialog import BatchAlgorithmDialog
 from processing.gui.EditRenderingStylesDialog import EditRenderingStylesDialog
-from processing.modeler.Providers import Providers
 
 from processing.ui.ui_ProcessingToolbox import Ui_ProcessingToolbox
 
@@ -56,7 +57,7 @@ class ProcessingToolbox(QDockWidget, Ui_ProcessingToolbox):
                                    'Advanced interface'])
         settings = QSettings()
         if not settings.contains(self.USE_CATEGORIES):
-            settings.setValue(self.USE_CATEGORIES, False)
+            settings.setValue(self.USE_CATEGORIES, True)
         useCategories = settings.value(self.USE_CATEGORIES, type=bool)
         if useCategories:
             self.modeComboBox.setCurrentIndex(0)
@@ -175,7 +176,9 @@ class ProcessingToolbox(QDockWidget, Ui_ProcessingToolbox):
         item = self.algorithmTree.currentItem()
         if isinstance(item, TreeAlgorithmItem):
             alg = Processing.getAlgorithm(item.alg.commandLineName())
-            dlg = BatchProcessingDialog(alg)
+            alg = alg.getCopy()
+            dlg = BatchAlgorithmDialog(alg)
+            dlg.show()
             dlg.exec_()
 
     def executeAlgorithm(self):
@@ -184,13 +187,17 @@ class ProcessingToolbox(QDockWidget, Ui_ProcessingToolbox):
             alg = Processing.getAlgorithm(item.alg.commandLineName())
             message = alg.checkBeforeOpeningParametersDialog()
             if message:
-                dlg = MissingDependencyDialog(message)
+                dlg = MessageDialog()
+                dlg.setTitle(self.tr('Missing dependency'))
+                dlg.setMessage(
+                    self.tr('<h3>Missing dependency. This algorithm cannot '
+                            'be run :-( </h3>\n%s') % message)
                 dlg.exec_()
                 return
             alg = alg.getCopy()
             dlg = alg.getCustomParametersDialog()
             if not dlg:
-                dlg = ParametersDialog(alg)
+                dlg = AlgorithmDialog(alg)
             canvas = iface.mapCanvas()
             prevMapTool = canvas.mapTool()
             dlg.show()
@@ -259,7 +266,7 @@ class ProcessingToolbox(QDockWidget, Ui_ProcessingToolbox):
             if not ProcessingConfig.getSetting(name):
                 continue
             if providerName in providersToExclude \
-                        or len(Providers.providers[providerName].actions) != 0:
+                        or len(ModelerUtils.providers[providerName].actions) != 0:
                 continue
             algs = provider.values()
 

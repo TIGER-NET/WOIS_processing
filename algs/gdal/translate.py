@@ -27,14 +27,14 @@ __revision__ = '$Format:%H$'
 
 from qgis.core import *
 from processing.algs.gdal.GdalAlgorithm import GdalAlgorithm
-from processing.parameters.ParameterString import ParameterString
-from processing.parameters.ParameterRaster import ParameterRaster
-from processing.parameters.ParameterNumber import ParameterNumber
-from processing.parameters.ParameterBoolean import ParameterBoolean
-from processing.parameters.ParameterSelection import ParameterSelection
-from processing.parameters.ParameterExtent import ParameterExtent
-from processing.parameters.ParameterCrs import ParameterCrs
-from processing.outputs.OutputRaster import OutputRaster
+from processing.core.parameters import ParameterString
+from processing.core.parameters import ParameterRaster
+from processing.core.parameters import ParameterNumber
+from processing.core.parameters import ParameterBoolean
+from processing.core.parameters import ParameterSelection
+from processing.core.parameters import ParameterExtent
+from processing.core.parameters import ParameterCrs
+from processing.core.outputs import OutputRaster
 
 from processing.algs.gdal.GdalUtils import GdalUtils
 
@@ -51,6 +51,9 @@ class translate(GdalAlgorithm):
     SRS = 'SRS'
     SDS = 'SDS'
     EXTRA = 'EXTRA'
+    RTYPE = 'RTYPE'
+
+    TYPE = ['Byte','Int16','UInt16','UInt32','Int32','Float32','Float64','CInt16','CInt32','CFloat32','CFloat64']
 
     def commandLineName(self):
         return "gdalogr:translate"
@@ -79,6 +82,8 @@ class translate(GdalAlgorithm):
             False))
         self.addParameter(ParameterString(self.EXTRA,
                           'Additional creation parameters', '', optional=True))
+	self.addParameter(ParameterSelection(self.RTYPE, 'Output raster type',
+			  self.TYPE, 5))
         self.addOutput(OutputRaster(self.OUTPUT, 'Output layer'))
 
     def processAlgorithm(self, progress):
@@ -96,6 +101,8 @@ class translate(GdalAlgorithm):
         arguments = []
         arguments.append('-of')
         arguments.append(GdalUtils.getFormatShortNameFromFilename(out))
+        arguments.append('-ot')
+        arguments.append(self.TYPE[self.getParameterValue(self.RTYPE)])
         if outsizePerc == 'True':
             arguments.append('-outsize')
             arguments.append(outsize + '%')

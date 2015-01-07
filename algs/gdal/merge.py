@@ -27,9 +27,10 @@ __revision__ = '$Format:%H$'
 
 
 from processing.algs.gdal.GdalAlgorithm import GdalAlgorithm
-from processing.outputs.OutputRaster import OutputRaster
-from processing.parameters.ParameterBoolean import ParameterBoolean
-from processing.parameters.ParameterMultipleInput import ParameterMultipleInput
+from processing.core.outputs import OutputRaster
+from processing.core.parameters import ParameterBoolean
+from processing.core.parameters import ParameterMultipleInput
+from processing.core.parameters import ParameterSelection
 from processing.tools.system import *
 from processing.algs.gdal.GdalUtils import GdalUtils
 
@@ -40,6 +41,9 @@ class merge(GdalAlgorithm):
     OUTPUT = 'OUTPUT'
     PCT = 'PCT'
     SEPARATE = 'SEPARATE'
+    RTYPE = 'RTYPE'
+
+    TYPE = ['Byte','Int16','UInt16','UInt32','Int32','Float32','Float64','CInt16','CInt32','CFloat32','CFloat64']
 
     def defineCharacteristics(self):
         self.name = 'Merge'
@@ -50,10 +54,14 @@ class merge(GdalAlgorithm):
                           'Grab pseudocolor table from first layer', False))
         self.addParameter(ParameterBoolean(merge.SEPARATE, 'Layer stack',
                           False))
+        self.addParameter(ParameterSelection(self.RTYPE, 'Output raster type',
+			  self.TYPE, 5))
         self.addOutput(OutputRaster(merge.OUTPUT, 'Output layer'))
 
     def processAlgorithm(self, progress):
         arguments = []
+        arguments.append('-ot')
+        arguments.append(self.TYPE[self.getParameterValue(self.RTYPE)])
         if self.getParameterValue(merge.SEPARATE):
             arguments.append('-separate')
         if self.getParameterValue(merge.PCT):

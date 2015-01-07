@@ -31,8 +31,6 @@ from PyQt4.QtGui import *
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
 from processing.core.ProcessingLog import ProcessingLog
-from processing.modeler.SaveAsPythonScriptAction import \
-        SaveAsPythonScriptAction
 from processing.modeler.ModelerUtils import ModelerUtils
 from processing.modeler.ModelerAlgorithm import ModelerAlgorithm
 from processing.modeler.WrongModelException import WrongModelException
@@ -48,14 +46,13 @@ class ModelerAlgorithmProvider(AlgorithmProvider):
     def __init__(self):
         AlgorithmProvider.__init__(self)
         self.actions = [CreateNewModelAction(), AddModelFromFileAction(), GetModelsAction()]
-        self.contextMenuActions = [EditModelAction(), DeleteModelAction(),
-                                   SaveAsPythonScriptAction()]
+        self.contextMenuActions = [EditModelAction(), DeleteModelAction()]
 
     def initializeSettings(self):
         AlgorithmProvider.initializeSettings(self)
         ProcessingConfig.addSetting(Setting(self.getDescription(),
-                                    ModelerUtils.MODELS_FOLDER, 'Models folder'
-                                    , ModelerUtils.modelsFolder()))
+            ModelerUtils.MODELS_FOLDER, self.tr('Models folder', 'ModelerAlgorithmProvider'),
+            ModelerUtils.modelsFolder()))
 
     def setAlgsList(self, algs):
         ModelerUtils.allAlgs = algs
@@ -64,7 +61,7 @@ class ModelerAlgorithmProvider(AlgorithmProvider):
         return ModelerUtils.modelsFolder()
 
     def getDescription(self):
-        return 'Models'
+        return self.tr('Models', 'ModelerAlgorithmProvider')
 
     def getName(self):
         return 'model'
@@ -75,8 +72,6 @@ class ModelerAlgorithmProvider(AlgorithmProvider):
     def _loadAlgorithms(self):
         folder = ModelerUtils.modelsFolder()
         self.loadFromFolder(folder)
-        folder = os.path.join(os.path.dirname(__file__), 'models')
-        self.loadFromFolder(folder)
 
     def loadFromFolder(self, folder):
         if not os.path.exists(folder):
@@ -85,13 +80,15 @@ class ModelerAlgorithmProvider(AlgorithmProvider):
             for descriptionFile in files:
                 if descriptionFile.endswith('model'):
                     try:
-                        alg = ModelerAlgorithm()
                         fullpath = os.path.join(path, descriptionFile)
-                        alg.openModel(fullpath)
-                        if alg.name.strip() != '':
+                        alg = ModelerAlgorithm.fromFile(fullpath)
+                        if alg.name:
                             alg.provider = self
+                            alg.descriptionFile = fullpath
                             self.algs.append(alg)
+                        else:
+                            ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
+                                self.tr('Could not load model %s', 'ModelerAlgorithmProvider') % descriptionFile)
                     except WrongModelException, e:
                         ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
-                                'Could not load model ' + descriptionFile + '\n'
-                                + e.msg)
+                            self.tr('Could not load model %s\n%s', 'ModelerAlgorithmProvider') % (descriptionFile, e.msg))

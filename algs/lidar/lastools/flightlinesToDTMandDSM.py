@@ -27,9 +27,9 @@ import os
 from LAStoolsUtils import LAStoolsUtils
 from LAStoolsAlgorithm import LAStoolsAlgorithm
 
-from processing.parameters.ParameterSelection import ParameterSelection
-from processing.parameters.ParameterNumber import ParameterNumber
-from processing.parameters.ParameterString import ParameterString
+from processing.core.parameters import ParameterSelection
+from processing.core.parameters import ParameterNumber
+from processing.core.parameters import ParameterString
 
 class flightlinesToDTMandDSM(LAStoolsAlgorithm):
 
@@ -58,7 +58,7 @@ class flightlinesToDTMandDSM(LAStoolsAlgorithm):
 
 #   first we tile the data
 
-        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lastile.exe")]
+        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lastile")]
         self.addParametersVerboseCommands(commands)
         self.addParametersPointInputFolderCommands(commands)
         commands.append("-files_are_flightlines")
@@ -81,7 +81,7 @@ class flightlinesToDTMandDSM(LAStoolsAlgorithm):
 
 #   then we ground classify the tiles
 
-        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lasground.exe")]
+        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lasground")]
         self.addParametersVerboseCommands(commands)
         self.addParametersTemporaryDirectoryAsInputFilesCommands(commands, base_name+"*.laz")
         method = self.getParameterValue(flightlinesToDTMandDSM.TERRAIN)
@@ -103,7 +103,7 @@ class flightlinesToDTMandDSM(LAStoolsAlgorithm):
 
 #   then we rasterize the classified tiles into DTMs
 
-        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "las2dem.exe")]
+        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "las2dem")]
         self.addParametersVerboseCommands(commands)
         self.addParametersTemporaryDirectoryAsInputFilesCommands(commands, base_name+"*_g.laz")
         commands.append("-keep_class")
@@ -122,7 +122,7 @@ class flightlinesToDTMandDSM(LAStoolsAlgorithm):
 
 #   then we rasterize the classified tiles into DSMs
 
-        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "las2dem.exe")]
+        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "las2dem")]
         self.addParametersVerboseCommands(commands)
         self.addParametersTemporaryDirectoryAsInputFilesCommands(commands, base_name+"*_g.laz")
         commands.append("-first_only")

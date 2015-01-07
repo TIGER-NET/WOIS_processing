@@ -17,6 +17,7 @@
 ***************************************************************************
 """
 
+
 __author__ = 'Victor Olaya'
 __date__ = 'August 2012'
 __copyright__ = '(C) 2012, Victor Olaya'
@@ -26,22 +27,23 @@ __copyright__ = '(C) 2012, Victor Olaya'
 __revision__ = '$Format:%H$'
 
 import sys
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+
 from qgis.core import *
-import processing
 from qgis.utils import iface
+
+import processing
+from processing.modeler.ModelerUtils import ModelerUtils
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.ProcessingLog import ProcessingLog
-from processing.core.SilentProgress import SilentProgress
 from processing.gui.AlgorithmClassification import AlgorithmDecorator
 from processing.gui.MessageBarProgress import MessageBarProgress
 from processing.gui.RenderingStyles import RenderingStyles
 from processing.gui.Postprocessing import handleAlgorithmResults
-from processing.gui.UnthreadedAlgorithmExecutor import \
-        UnthreadedAlgorithmExecutor
-from processing.modeler.Providers import Providers
+from processing.gui.AlgorithmExecutor import runalg
 from processing.modeler.ModelerAlgorithmProvider import \
         ModelerAlgorithmProvider
 from processing.modeler.ModelerOnlyAlgorithmProvider import \
@@ -93,9 +95,8 @@ class Processing:
                 Processing.updateAlgsList()
         except:
             ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
-                                   'Could not load provider:'
-                                   + provider.getDescription() + '\n'
-                                   + unicode(sys.exc_info()[1]))
+                Processing.tr('Could not load provider: %s\n%s')
+                % (provider.getDescription(), unicode(sys.exc_info()[1])))
             Processing.removeProvider(provider)
 
     @staticmethod
@@ -119,8 +120,7 @@ class Processing:
 
     @staticmethod
     def getProviderFromName(name):
-        """Returns the provider with the given name.
-        """
+        """Returns the provider with the given name."""
         for provider in Processing.providers:
             if provider.getName() == name:
                 return provider
@@ -141,6 +141,7 @@ class Processing:
         Processing.addProvider(Grass7AlgorithmProvider())
         Processing.addProvider(ScriptAlgorithmProvider())
         Processing.addProvider(TauDEMAlgorithmProvider())
+        Processing.addProvider(Processing.modeler)
         Processing.modeler.initializeSettings()
 
         # And initialize
@@ -150,6 +151,9 @@ class Processing:
         ProcessingConfig.readSettings()
         RenderingStyles.loadStyles()
         Processing.loadFromProviders()
+
+        # Inform registered listeners that all providers' algorithms have been loaded
+        Processing.fireAlgsListHasChanged()
 
     @staticmethod
     def updateAlgsList():
@@ -168,17 +172,26 @@ class Processing:
 
     @staticmethod
     def updateProviders():
-        for provider in Processing.providers:
+        providers = [p for p in Processing.providers if p.getName() != "model"]
+        for provider in providers:
             provider.loadAlgorithms()
 
     @staticmethod
     def addAlgListListener(listener):
-        """Listener should implement a algsListHasChanged() method.
+        """
+        Listener should implement a algsListHasChanged() method.
 
         Whenever the list of algorithms changes, that method will be
         called for all registered listeners.
         """
         Processing.listeners.append(listener)
+
+    @staticmethod
+    def removeAlgListListener(listener):
+        try:
+            Processing.listeners.remove(listener)
+        except:
+            pass
 
     @staticmethod
     def fireAlgsListHasChanged():
@@ -189,40 +202,28 @@ class Processing:
     def loadAlgorithms():
         Processing.algs = {}
         Processing.updateProviders()
-        for provider in Processing.providers:
+        providers = [p for p in Processing.providers if p.getName() != "model"]
+        for provider in providers:
             providerAlgs = provider.algs
             algs = {}
             for alg in providerAlgs:
                 algs[alg.commandLineName()] = alg
             Processing.algs[provider.getName()] = algs
 
-        # This is a special provider, since it depends on others.
-        # TODO: Fix circular imports, so this provider can be
-        # incorporated as a normal one.
-        provider = Processing.modeler
-        provider.setAlgsList(Processing.algs)
-        provider.loadAlgorithms()
-        providerAlgs = provider.algs
-        algs = {}
-        for alg in providerAlgs:
-            algs[alg.commandLineName()] = alg
-        Processing.algs[provider.getName()] = algs
-
-        # And we do it again, in case there are models containing
-        # models.
-        # TODO: Improve this
-        provider.setAlgsList(Processing.algs)
-        provider.loadAlgorithms()
-        providerAlgs = provider.algs
-        algs = {}
-        for alg in providerAlgs:
-            algs[alg.commandLineName()] = alg
-        Processing.algs[provider.getName()] = algs
         provs = {}
         for provider in Processing.providers:
             provs[provider.getName()] = provider
-        provs[Processing.modeler.getName()] = Processing.modeler
-        Providers.providers = provs
+
+        ModelerUtils.allAlgs = Processing.algs
+        ModelerUtils.providers = provs
+
+        Processing.modeler.loadAlgorithms()
+
+        algs = {}
+        for alg in Processing.modeler.algs:
+            algs[alg.commandLineName()] = alg
+        Processing.algs[Processing.modeler.getName()] = algs
+
 
     @staticmethod
     def loadActions():
@@ -233,10 +234,6 @@ class Processing:
                 actions.append(action)
             Processing.actions[provider.getName()] = actions
 
-        provider = Processing.modeler
-        actions = list()
-        for action in provider.actions:
-            actions.append(action)
         Processing.actions[provider.getName()] = actions
 
     @staticmethod
@@ -246,11 +243,6 @@ class Processing:
             providerActions = provider.contextMenuActions
             for action in providerActions:
                 Processing.contextMenuActions.append(action)
-
-        provider = Processing.modeler
-        providerActions = provider.contextMenuActions
-        for action in providerActions:
-            Processing.contextMenuActions.append(action)
 
     @staticmethod
     def getAlgorithm(name):
@@ -269,8 +261,7 @@ class Processing:
 
     @staticmethod
     def getObject(uri):
-        """Returns the QGIS object identified by the given URI.
-        """
+        """Returns the QGIS object identified by the given URI."""
         return dataobjects.getObjectFromUri(uri)
 
     @staticmethod
@@ -287,9 +278,9 @@ class Processing:
             print 'Error: Algorithm not found\n'
             return
         alg = alg.getCopy()
-        
+
         if len(args) == 1 and isinstance(args[0], dict):
-            # Set params by name and try to run the alg even if not all parameter values are provided, 
+            # Set params by name and try to run the alg even if not all parameter values are provided,
             # by using the default values instead.
             setParams = []
             for (name, value) in args[0].items():
@@ -302,15 +293,17 @@ class Processing:
                     continue
                 print 'Error: Wrong parameter value %s for parameter %s.' \
                     % (value, name)
-                ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Error in %s. Wrong parameter value %s for parameter %s." \
+                ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
+                    Processing.tr('Error in %s. Wrong parameter value %s for parameter %s.') \
                     % (alg.name, value, name))
                 return
             # fill any missing parameters with default values if allowed
             for param in alg.parameters:
                 if param.name not in setParams:
                     if not param.setValue(None):
-                        print ("Error: Missing parameter value for parameter %s." % (param.name))
-                        ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Error in %s. Missing parameter value for parameter %s." \
+                        print ('Error: Missing parameter value for parameter %s.' % (param.name))
+                        ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
+                            Processing.tr('Error in %s. Missing parameter value for parameter %s.') \
                             % (alg.name, param.name))
                         return
         else:
@@ -344,22 +337,30 @@ class Processing:
             print 'Warning: Not all input layers use the same CRS.\n' \
                 + 'This can cause unexpected results.'
 
-        ProcessingLog.addToLog(ProcessingLog.LOG_ALGORITHM, alg.getAsCommand())
+        if iface is not None:
+          # Don't set the wait cursor twice, because then when you
+          # restore it, it will still be a wait cursor.
+          cursor = QApplication.overrideCursor()
+          if cursor is None or cursor == 0:
+              QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+          elif cursor.shape() != Qt.WaitCursor:
+              QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
 
-        # Don't set the wait cursor twice, because then when you
-        # restore it, it will still be a wait cursor.
-        cursor = QApplication.overrideCursor()
-        if cursor is None or cursor == 0:
-            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-        elif cursor.shape() != Qt.WaitCursor:
-            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-
-        progress = SilentProgress()
+        progress = None
         if iface is not None :
             progress = MessageBarProgress()
-        ret = UnthreadedAlgorithmExecutor.runalg(alg, progress)
+        ret = runalg(alg, progress)
         if onFinish is not None and ret:
             onFinish(alg, progress)
-        QApplication.restoreOverrideCursor()
-        progress.close()
+
+        if iface is not None:
+          QApplication.restoreOverrideCursor()
+          progress.close()
         return alg
+
+    @staticmethod
+    def tr(string, context=''):
+        if context == '':
+            context = 'Processing'
+        return QCoreApplication.translate(context, string)
+

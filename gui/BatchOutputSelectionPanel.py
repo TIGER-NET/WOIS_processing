@@ -25,37 +25,40 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
-import os.path
-from PyQt4 import QtGui, QtCore
+import os
+
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
+
 from processing.gui.AutofillDialog import AutofillDialog
-from processing.parameters.ParameterMultipleInput import ParameterMultipleInput
-from processing.parameters.ParameterRaster import ParameterRaster
-from processing.parameters.ParameterTable import ParameterTable
-from processing.parameters.ParameterVector import ParameterVector
-from processing.parameters.ParameterBoolean import ParameterBoolean
-from processing.parameters.ParameterSelection import ParameterSelection
-from processing.parameters.ParameterFixedTable import ParameterFixedTable
+from processing.core.parameters import ParameterMultipleInput
+from processing.core.parameters import ParameterRaster
+from processing.core.parameters import ParameterTable
+from processing.core.parameters import ParameterVector
+from processing.core.parameters import ParameterBoolean
+from processing.core.parameters import ParameterSelection
+from processing.core.parameters import ParameterFixedTable
 
 
-class BatchOutputSelectionPanel(QtGui.QWidget):
+class BatchOutputSelectionPanel(QWidget):
 
-    def __init__(self, output, alg, row, col, batchDialog):
+    def __init__(self, output, alg, row, col, panel):
         super(BatchOutputSelectionPanel, self).__init__(None)
         self.alg = alg
         self.row = row
         self.col = col
         self.output = output
-        self.batchDialog = batchDialog
-        self.table = batchDialog.table
-        self.horizontalLayout = QtGui.QHBoxLayout(self)
+        self.panel = panel
+        self.table = self.panel.tblParameters
+        self.horizontalLayout = QHBoxLayout(self)
         self.horizontalLayout.setSpacing(2)
         self.horizontalLayout.setMargin(0)
-        self.text = QtGui.QLineEdit()
+        self.text = QLineEdit()
         self.text.setText('')
-        self.text.setSizePolicy(QtGui.QSizePolicy.Expanding,
-                                QtGui.QSizePolicy.Expanding)
+        self.text.setSizePolicy(QSizePolicy.Expanding,
+                                QSizePolicy.Expanding)
         self.horizontalLayout.addWidget(self.text)
-        self.pushButton = QtGui.QPushButton()
+        self.pushButton = QPushButton()
         self.pushButton.setText('...')
         self.pushButton.clicked.connect(self.showSelectionDialog)
         self.horizontalLayout.addWidget(self.pushButton)
@@ -63,10 +66,16 @@ class BatchOutputSelectionPanel(QtGui.QWidget):
 
     def showSelectionDialog(self):
         filefilter = self.output.getFileFilter(self.alg)
-        filename = QtGui.QFileDialog.getSaveFileName(self, 'Save file', '',
+        settings = QSettings()
+        if settings.contains('/Processing/LastBatchOutputPath'):
+            path = unicode(settings.value('/Processing/LastBatchOutputPath'))
+        else:
+            path = ''
+        filename = QFileDialog.getSaveFileName(self, self.tr('Save file'), path,
                 filefilter)
         if filename:
             filename = unicode(filename)
+            settings.setValue('/Processing/LastBatchOutputPath', os.path.dirname(filename))
             dlg = AutofillDialog(self.alg)
             dlg.exec_()
             if dlg.mode is not None:
@@ -92,7 +101,7 @@ class BatchOutputSelectionPanel(QtGui.QWidget):
                                     ParameterMultipleInput)):
                                 s = unicode(widget.getText())
                                 s = os.path.basename(s)
-                                s = s[:s.rfind('.')]
+                                s = os.path.splitext(s)[0]
                             elif isinstance(param, ParameterBoolean):
                                 s = str(widget.currentIndex() == 0)
                             elif isinstance(param, ParameterSelection):

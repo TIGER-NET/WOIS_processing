@@ -27,10 +27,10 @@ __revision__ = '$Format:%H$'
 
 
 from processing.algs.gdal.GdalAlgorithm import GdalAlgorithm
-from processing.outputs.OutputRaster import OutputRaster
-from processing.parameters.ParameterBoolean import ParameterBoolean
-from processing.parameters.ParameterMultipleInput import ParameterMultipleInput
-from processing.parameters.ParameterSelection import ParameterSelection
+from processing.core.outputs import OutputRaster
+from processing.core.parameters import ParameterBoolean
+from processing.core.parameters import ParameterMultipleInput
+from processing.core.parameters import ParameterSelection
 from processing.tools.system import *
 from processing.algs.gdal.GdalUtils import GdalUtils
 import os
@@ -42,7 +42,7 @@ class buildvrt(GdalAlgorithm):
     RESOLUTION = 'RESOLUTION'
     SEPARATE = 'SEPARATE'
     PROJ_DIFFERENCE = 'PROJ_DIFFERENCE'
-    
+
     RESOLUTION_OPTIONS = ['average', 'highest', 'lowest']
 
     def defineCharacteristics(self):

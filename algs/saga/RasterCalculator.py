@@ -16,11 +16,7 @@
 *                                                                         *
 ***************************************************************************
 """
-from processing.parameters.ParameterMultipleInput import ParameterMultipleInput
-from processing.algs.saga.SagaAlgorithm import SagaAlgorithm
-from processing.core.GeoAlgorithm import GeoAlgorithm
-from processing.parameters.ParameterString import ParameterString
-from processing.algs.saga.SagaGroupNameDecorator import SagaGroupNameDecorator
+
 
 __author__ = 'Victor Olaya'
 __date__ = 'May 2014'
@@ -31,9 +27,14 @@ __copyright__ = '(C) 2014, Victor Olaya'
 __revision__ = '$Format:%H$'
 
 from PyQt4 import QtGui
-from processing.parameters.ParameterRaster import ParameterRaster
-from processing.outputs.OutputRaster import OutputRaster
+from processing.core.parameters import ParameterRaster
+from processing.core.outputs import OutputRaster
 from processing.tools.system import *
+from processing.core.parameters import ParameterMultipleInput
+from processing.algs.saga.SagaAlgorithm import SagaAlgorithm
+from processing.core.GeoAlgorithm import GeoAlgorithm
+from processing.core.parameters import ParameterString
+from processing.algs.saga.SagaGroupNameDecorator import SagaGroupNameDecorator
 
 
 class RasterCalculator(SagaAlgorithm):
@@ -59,21 +60,9 @@ class RasterCalculator(SagaAlgorithm):
         self.cmdname = 'Grid Calculator'
         self.undecoratedGroup = "grid_calculus"
         self.group = SagaGroupNameDecorator.getDecoratedName(self.undecoratedGroup)
-        grids = ParameterRaster(self.GRIDS, 'Input layers', True)
-        grids.hidden = True
-        self.addParameter(grids)
-        self.addParameter(ParameterMultipleInput(self.XGRIDS, 'Input layers',
-                          ParameterMultipleInput.TYPE_RASTER, False))
+        self.addParameter(ParameterRaster(self.GRIDS, 'Main input layer'))
+        self.addParameter(ParameterMultipleInput(self.XGRIDS, 'Additional layers',
+                          ParameterMultipleInput.TYPE_RASTER, True))
         self.addParameter(ParameterString(self.FORMULA, "Formula"))
         self.addOutput(OutputRaster(self.RESULT, "Result"))
 
-
-    def processAlgorithm(self, progress):
-        xgrids = self.getParameterValue(self.XGRIDS)
-        layers = xgrids.split(';')
-        grid = layers[0]
-        self.setParameterValue(self.GRIDS, grid)
-        xgrids = ";".join(layers[1:])
-        if xgrids == "": xgrids = None
-        self.setParameterValue(self.XGRIDS, xgrids)
-        SagaAlgorithm.processAlgorithm(self, progress)

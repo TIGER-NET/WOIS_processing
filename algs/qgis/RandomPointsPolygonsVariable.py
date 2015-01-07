@@ -34,11 +34,11 @@ from qgis.core import *
 
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.ProcessingLog import ProcessingLog
-from processing.parameters.ParameterVector import ParameterVector
-from processing.parameters.ParameterTableField import ParameterTableField
-from processing.parameters.ParameterNumber import ParameterNumber
-from processing.parameters.ParameterSelection import ParameterSelection
-from processing.outputs.OutputVector import OutputVector
+from processing.core.parameters import ParameterVector
+from processing.core.parameters import ParameterTableField
+from processing.core.parameters import ParameterNumber
+from processing.core.parameters import ParameterSelection
+from processing.core.outputs import OutputVector
 from processing.tools import dataobjects, vector
 
 
@@ -91,6 +91,9 @@ class RandomPointsPolygonsVariable(GeoAlgorithm):
                 pointCount = int(f[fieldName])
             else:
                 pointCount = int(round(f[fieldName] * da.measure(fGeom)))
+
+            if strategy == 0 and pointCount == 0:
+                continue
 
             index = QgsSpatialIndex()
             points = dict()

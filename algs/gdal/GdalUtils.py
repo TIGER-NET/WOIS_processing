@@ -69,15 +69,19 @@ class GdalUtils:
         loglines = []
         loglines.append('GDAL execution console output')
         fused_command = ''.join(['%s ' % c for c in commands])
+        progress.setInfo('GDAL command:')
+        progress.setCommand(fused_command)
         proc = subprocess.Popen(
             fused_command,
             shell=True,
             stdout=subprocess.PIPE,
-            stdin=subprocess.PIPE,
+            stdin=open(os.devnull),
             stderr=subprocess.STDOUT,
-            universal_newlines=False,
+            universal_newlines=True,
             ).stdout
+        progress.setInfo('GDAL command output:')
         for line in iter(proc.readline, ''):
+            progress.setConsoleInfo(line)
             loglines.append(line)
         ProcessingLog.addToLog(ProcessingLog.LOG_INFO, loglines)
         GdalUtils.consoleOutput = loglines
@@ -105,9 +109,11 @@ class GdalUtils:
                 continue
             shortName = driver.ShortName
             metadata = driver.GetMetadata()
-            if gdal.DCAP_CREATE not in metadata \
-                    or metadata[gdal.DCAP_CREATE] != 'YES':
-                continue
+            #===================================================================
+            # if gdal.DCAP_CREATE not in metadata \
+            #         or metadata[gdal.DCAP_CREATE] != 'YES':
+            #     continue
+            #===================================================================
             if gdal.DMD_EXTENSION in metadata:
                 extensions = metadata[gdal.DMD_EXTENSION].split('/')
                 if extensions:
@@ -138,7 +144,7 @@ class GdalUtils:
     def escapeAndJoin(strList):
         joined = ''
         for s in strList:
-            if s[0]!='-' and ' ' in s:
+            if s[0] != '-' and ' ' in s:
                 escaped = '"' + s.replace('\\', '\\\\').replace('"', '\\"') \
                     + '"'
             else:

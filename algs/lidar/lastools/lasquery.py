@@ -29,7 +29,7 @@ __revision__ = '$Format:%H$'
 
 import os
 from LAStoolsUtils import LAStoolsUtils
-from processing.parameters.ParameterExtent import ParameterExtent
+from processing.core.parameters import ParameterExtent
 from LAStoolsAlgorithm import LAStoolsAlgorithm
 from qgis.core import QgsMapLayer, QgsMapLayerRegistry, QgsVectorLayer
 
@@ -42,10 +42,11 @@ class lasquery(LAStoolsAlgorithm):
         self.group = "LAStools"
         self.addParametersVerboseGUI()
         self.addParameter(ParameterExtent(self.AOI, 'area of interest'))
+        self.addParametersAdditionalGUI()
 
     def processAlgorithm(self, progress):
 
-        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lasview.exe")]
+        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lasview")]
         self.addParametersVerboseCommands(commands)
 
 	# get area-of-interest
@@ -70,5 +71,6 @@ class lasquery(LAStoolsAlgorithm):
         commands.append(aoiCoords[2])
         commands.append(aoiCoords[1])
         commands.append(aoiCoords[3])
+        self.addParametersAdditionalCommands(commands)
 
         LAStoolsUtils.runLAStools(commands, progress)

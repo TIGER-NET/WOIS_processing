@@ -35,11 +35,11 @@ from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.GeoAlgorithmExecutionException import \
     GeoAlgorithmExecutionException
 
-from processing.parameters.ParameterRaster import ParameterRaster
-from processing.parameters.ParameterVector import ParameterVector
-from processing.parameters.ParameterNumber import ParameterNumber
-from processing.parameters.ParameterSelection import ParameterSelection
-from processing.outputs.OutputFile import OutputFile
+from processing.core.parameters import ParameterRaster
+from processing.core.parameters import ParameterVector
+from processing.core.parameters import ParameterNumber
+from processing.core.parameters import ParameterSelection
+from processing.core.outputs import OutputFile
 
 from processing.tools.system import *
 
@@ -63,7 +63,7 @@ class DropAnalysis(GeoAlgorithm):
     STEPS = ['Logarithmic', 'Linear']
 
     def getIcon(self):
-        return QIcon(os.path.dirname(__file__) + '/../images/taudem.png')
+        return QIcon(os.path.dirname(__file__) + '/../../images/taudem.png')
 
     def defineCharacteristics(self):
         self.name = 'Stream Drop Analysis'
@@ -77,7 +77,7 @@ class DropAnalysis(GeoAlgorithm):
         self.addParameter(ParameterRaster(self.PIT_FILLED_GRID,
                           'Pit Filled Elevation Grid', False))
         self.addParameter(ParameterRaster(self.ACCUM_STREAM_SOURCE_GRID,
-                          'Contributing Area Grid', False))
+                          'Accumulated Stream Source Grid', False))
         self.addParameter(ParameterVector(self.OUTLETS_SHAPE,
                           'Outlets Shapefile',
                           [ParameterVector.VECTOR_TYPE_POINT], False))

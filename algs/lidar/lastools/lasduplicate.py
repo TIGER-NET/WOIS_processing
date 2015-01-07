@@ -27,8 +27,8 @@ import os
 from LAStoolsUtils import LAStoolsUtils
 from LAStoolsAlgorithm import LAStoolsAlgorithm
 
-from processing.parameters.ParameterBoolean import ParameterBoolean
-from processing.parameters.ParameterFile import ParameterFile
+from processing.core.parameters import ParameterBoolean
+from processing.core.parameters import ParameterFile
 
 class lasduplicate(LAStoolsAlgorithm):
 
@@ -47,10 +47,11 @@ class lasduplicate(LAStoolsAlgorithm):
         self.addParameter(ParameterBoolean(lasduplicate.SINGLE_RETURNS, "mark surviving duplicate as single return", False))
         self.addParameter(ParameterFile(lasduplicate.RECORD_REMOVED, "record removed duplictates to LAS/LAZ file"))
         self.addParametersPointOutputGUI()
+        self.addParametersAdditionalGUI()
 
 
     def processAlgorithm(self, progress):
-        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lasduplicate.exe")]
+        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lasduplicate")]
         self.addParametersVerboseCommands(commands)
         self.addParametersPointInputCommands(commands)
         if self.getParameterValue(lasduplicate.LOWEST_Z):
@@ -64,5 +65,6 @@ class lasduplicate(LAStoolsAlgorithm):
             commands.append("-record_removed")
             commands.append(record_removed)
         self.addParametersPointOutputCommands(commands)
+        self.addParametersAdditionalCommands(commands)
 
         LAStoolsUtils.runLAStools(commands, progress)

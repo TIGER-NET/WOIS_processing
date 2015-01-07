@@ -27,8 +27,8 @@ import os
 from LAStoolsUtils import LAStoolsUtils
 from LAStoolsAlgorithm import LAStoolsAlgorithm
 
-from processing.parameters.ParameterNumber import ParameterNumber
-from processing.parameters.ParameterSelection import ParameterSelection
+from processing.core.parameters import ParameterNumber
+from processing.core.parameters import ParameterSelection
 
 class lasoverage(LAStoolsAlgorithm):
 
@@ -46,10 +46,11 @@ class lasoverage(LAStoolsAlgorithm):
         self.addParameter(ParameterNumber(lasoverage.CHECK_STEP, "size of grid used for scan angle check", 0, None, 1.0))
         self.addParameter(ParameterSelection(lasoverage.OPERATION, "mode of operation", lasoverage.OPERATIONS, 0))
         self.addParametersPointOutputGUI()
+        self.addParametersAdditionalGUI()
 
 
     def processAlgorithm(self, progress):
-        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lasoverage.exe")]
+        commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lasoverage")]
         self.addParametersVerboseCommands(commands)
         self.addParametersPointInputCommands(commands)
         self.addParametersHorizontalFeetCommands(commands)
@@ -64,5 +65,6 @@ class lasoverage(LAStoolsAlgorithm):
         elif operation == 2:
             commands.append("-remove_overage")
         self.addParametersPointOutputCommands(commands)
+        self.addParametersAdditionalCommands(commands)
 
         LAStoolsUtils.runLAStools(commands, progress)

@@ -27,12 +27,12 @@ __revision__ = '$Format:%H$'
 
 from qgis.core import *
 from processing.algs.gdal.GdalAlgorithm import GdalAlgorithm
-from processing.parameters.ParameterRaster import ParameterRaster
-from processing.parameters.ParameterSelection import ParameterSelection
-from processing.parameters.ParameterCrs import ParameterCrs
-from processing.parameters.ParameterNumber import ParameterNumber
-from processing.parameters.ParameterString import ParameterString
-from processing.outputs.OutputRaster import OutputRaster
+from processing.core.parameters import ParameterRaster
+from processing.core.parameters import ParameterSelection
+from processing.core.parameters import ParameterCrs
+from processing.core.parameters import ParameterNumber
+from processing.core.parameters import ParameterString
+from processing.core.outputs import OutputRaster
 from processing.algs.gdal.GdalUtils import GdalUtils
 
 
@@ -46,6 +46,9 @@ class warp(GdalAlgorithm):
     METHOD_OPTIONS = ['near', 'bilinear', 'cubic', 'cubicspline', 'lanczos']
     TR = 'TR'
     EXTRA = 'EXTRA'
+    RTYPE = 'RTYPE'
+
+    TYPE = ['Byte','Int16','UInt16','UInt32','Int32','Float32','Float64','CInt16','CInt32','CFloat32','CFloat64']
 
     def defineCharacteristics(self):
         self.name = 'Warp (reproject)'
@@ -56,16 +59,20 @@ class warp(GdalAlgorithm):
         self.addParameter(ParameterCrs(self.DEST_SRS,
                           'Destination SRS (EPSG Code)', 'EPSG:4326'))
         self.addParameter(ParameterNumber(self.TR,
-            'Output file resolution in target georeferenced units \
-            (leave 0 for no change)', 0.0, None, 0.0))
+            'Output file resolution in target georeferenced units (leave 0 for no change)',
+            0.0, None, 0.0))
         self.addParameter(ParameterSelection(self.METHOD, 'Resampling method',
                           self.METHOD_OPTIONS))
         self.addParameter(ParameterString(self.EXTRA,
                           'Additional creation parameters', '', optional=True))
+        self.addParameter(ParameterSelection(self.RTYPE, 'Output raster type',
+			  self.TYPE, 5))
         self.addOutput(OutputRaster(self.OUTPUT, 'Output layer'))
 
     def processAlgorithm(self, progress):
         arguments = []
+        arguments.append('-ot')
+        arguments.append(self.TYPE[self.getParameterValue(self.RTYPE)])
         arguments.append('-s_srs')
         arguments.append(str(self.getParameterValue(self.SOURCE_SRS)))
         arguments.append('-t_srs')
