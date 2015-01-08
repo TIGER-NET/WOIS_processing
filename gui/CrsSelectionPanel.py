@@ -42,6 +42,7 @@ class CrsSelectionPanel(QWidget, Ui_Form):
 
         self.btnSelect.clicked.connect(self.browseCRS)
         self.authId = QgsCoordinateReferenceSystem(default).authid()
+        self.proj4string = QgsCoordinateReferenceSystem(default).toProj4()
         self.updateText()
 
     def setAuthId(self, authid):
@@ -53,6 +54,9 @@ class CrsSelectionPanel(QWidget, Ui_Form):
         selector.setSelectedAuthId(self.authId)
         if selector.exec_():
             self.authId = selector.selectedAuthId()
+            proj = QgsCoordinateReferenceSystem()
+            proj.createFromSrsId(selector.selectedCrsId())
+            self.proj4string = proj.toProj4()
             self.updateText()
 
     def updateText(self):
@@ -60,4 +64,7 @@ class CrsSelectionPanel(QWidget, Ui_Form):
             self.leText.setText(self.authId)
 
     def getValue(self):
-        return self.authId
+        if self.authId.upper().startswith("EPSG:"):
+            return self.authId
+        else:
+            return self.proj4string
