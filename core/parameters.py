@@ -517,7 +517,7 @@ class ParameterRaster(ParameterDataObject):
                 if layer.name() == self.value:
                     self.value = unicode(layer.dataProvider().dataSourceUri())
                     return True
-            if os.path.exists(self.value):
+            if os.path.exists(self.value) or QgsRasterLayer(self.value).isValid():
                 path = self.value
                 layer = QgsRasterLayer(path)
                 # If the layer has multiple sublayers, let the user chose one.
