@@ -27,11 +27,13 @@ __copyright__ = '(C) 2012, Victor Olaya'
 __revision__ = '$Format:%H$'
 
 import sys
+import re
 from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 from qgis.core import *
+from qgis.gui import *
 from processing.tools.system import *
 from processing.tools import dataobjects
-
 
 def getParameterFromString(s):
     tokens = s.split("|")
@@ -515,7 +517,54 @@ class ParameterRaster(ParameterDataObject):
                 if layer.name() == self.value:
                     self.value = unicode(layer.dataProvider().dataSourceUri())
                     return True
-            return os.path.exists(self.value)
+            if os.path.exists(self.value):
+                path = self.value
+                layer = QgsRasterLayer(path)
+                # If the layer has multiple sublayers, let the user chose one.
+                # Based on QgisApp::askUserForGDALSublayers
+                if layer and layer.dataProvider().name() == "gdal" and len(layer.subLayers()) > 1:
+                    layers = []
+                    subLayerNum = 0
+                    # simplify raster sublayer name
+                    for subLayer in layer.subLayers():
+                        # if netcdf/hdf use all text after filename
+                        if bool(re.match('netcdf', subLayer, re.I)) or bool(re.match('hdf', subLayer, re.I)):
+                            subLayer = subLayer.split(path)[1]
+                            subLayer = subLayer[1:] 
+                        else:
+                            # remove driver name and file name
+                            subLayer.replace(subLayer.split(":")[0], "")
+                            subLayer.replace(path, "")
+                        # remove any : or " left over
+                        if subLayer.startswith(":"):
+                            subLayer = subLayer[1:]
+                        if subLayer.startswith("\""):
+                            subLayer = subLayer[1:]
+                        if subLayer.endswith(":"):
+                            subLayer = subLayer[:-1]
+                        if subLayer.endswith("\""):
+                            subLayer = subLayer[:-1]
+                            
+                        layers.append(str(subLayerNum)+"|"+subLayer)
+                        subLayerNum = subLayerNum + 1
+                    
+                    # Use QgsSublayersDialog
+                    # Would be good if QgsSublayersDialog had an option to allow only one sublayer to be selected 
+                    chooseSublayersDialog = QgsSublayersDialog(QgsSublayersDialog.Gdal, "gdal") 
+                    chooseSublayersDialog.populateLayerTable( layers, "|" )
+                    
+                    if chooseSublayersDialog.exec_():
+                        self.value = layer.subLayers()[chooseSublayersDialog.selectionIndexes()[0]]
+                        return True
+                    else:
+                        return False
+                else:
+                    # If layer has only one sub layer self.value is already set to layer's path
+                    return True
+            else:
+                # Layer could not be found
+                return False
+                    
 
     def getFileFilter(self):
         exts = dataobjects.getSupportedOutputRasterLayerExtensions()
