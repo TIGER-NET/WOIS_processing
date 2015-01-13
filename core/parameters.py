@@ -465,8 +465,9 @@ class ParameterRange(Parameter):
 
 class ParameterRaster(ParameterDataObject):
 
-    def __init__(self, name='', description='', optional=False):
+    def __init__(self, name='', description='', optional=False, showSublayersDialog = True):
         ParameterDataObject.__init__(self, name, description)
+        self.showSublayersDialog = parseBool(showSublayersDialog)
         self.optional = parseBool(optional)
         self.value = None
         self.exported = None
@@ -522,7 +523,7 @@ class ParameterRaster(ParameterDataObject):
                 layer = QgsRasterLayer(path)
                 # If the layer has multiple sublayers, let the user chose one.
                 # Based on QgisApp::askUserForGDALSublayers
-                if layer and layer.dataProvider().name() == "gdal" and len(layer.subLayers()) > 1:
+                if self.showSublayersDialog and layer and layer.dataProvider().name() == "gdal" and len(layer.subLayers()) > 1:
                     layers = []
                     subLayerNum = 0
                     # simplify raster sublayer name
