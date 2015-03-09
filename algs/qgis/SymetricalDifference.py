@@ -25,8 +25,7 @@ __copyright__ = '(C) 2014, Alexander Bruy'
 
 __revision__ = '$Format:%H$'
 
-from PyQt4.QtCore import *
-from qgis.core import *
+from qgis.core import QgsFeature, QgsGeometry, QgsFeatureRequest, NULL
 from processing.core.ProcessingLog import ProcessingLog
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.parameters import ParameterVector
@@ -43,12 +42,12 @@ class SymetricalDifference(GeoAlgorithm):
     def defineCharacteristics(self):
         self.name = 'Symetrical difference'
         self.group = 'Vector overlay tools'
-        self.addParameter(ParameterVector(self.INPUT, 'Input layer',
-                          [ParameterVector.VECTOR_TYPE_ANY]))
+        self.addParameter(ParameterVector(self.INPUT,
+            self.tr('Input layer'), [ParameterVector.VECTOR_TYPE_ANY]))
         self.addParameter(ParameterVector(self.OVERLAY,
-                          'Difference layer',
-                          [ParameterVector.VECTOR_TYPE_ANY]))
-        self.addOutput(OutputVector(self.OUTPUT, 'Symetrical difference'))
+            self.tr('Difference layer'), [ParameterVector.VECTOR_TYPE_ANY]))
+        self.addOutput(OutputVector(self.OUTPUT,
+            self.tr('Symetrical difference')))
 
     def processAlgorithm(self, progress):
         layerA = dataobjects.getObjectFromUri(
@@ -140,10 +139,8 @@ class SymetricalDifference(GeoAlgorithm):
         del writer
 
         if not GEOS_EXCEPT:
-            ProcessingLog.addToLog(
-                    ProcessingLog.LOG_WARNING,
-                    'Geometry exception while computing symetrical difference')
+            ProcessingLog.addToLog(ProcessingLog.LOG_WARNING,
+                self.tr('Geometry exception while computing symetrical difference'))
         if not FEATURE_EXCEPT:
-            ProcessingLog.addToLog(
-                    ProcessingLog.LOG_WARNING,
-                    'Feature exception while computing symetrical difference')
+            ProcessingLog.addToLog(ProcessingLog.LOG_WARNING,
+                self.tr('Feature exception while computing symetrical difference'))

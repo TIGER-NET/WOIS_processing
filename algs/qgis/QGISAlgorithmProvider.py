@@ -27,7 +27,13 @@ __revision__ = '$Format:%H$'
 
 import os
 
-from PyQt4.QtGui import *
+try:
+    import matplotlib.pyplot
+    hasMatplotlib = True
+except:
+    hasMatplotlib = False
+
+from PyQt4.QtGui import QIcon
 
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.script.ScriptUtils import ScriptUtils
@@ -119,12 +125,7 @@ from SetRasterStyle import SetRasterStyle
 from SelectByExpression import SelectByExpression
 from HypsometricCurves import HypsometricCurves
 from SplitLinesWithLines import SplitLinesWithLines
-# from VectorLayerHistogram import VectorLayerHistogram
-# from VectorLayerScatterplot import VectorLayerScatterplot
-# from MeanAndStdDevPlot import MeanAndStdDevPlot
-# from BarPlot import BarPlot
-# from PolarPlot import PolarPlot
-# from RasterLayerHistogram import RasterLayerHistogram
+from processing.algs.qgis.FieldsMapper import FieldsMapper
 
 import processing.resources_rc
 
@@ -170,14 +171,23 @@ class QGISAlgorithmProvider(AlgorithmProvider):
                         PostGISExecuteSQL(), ImportIntoPostGIS(),
                         SetVectorStyle(), SetRasterStyle(),
                         SelectByExpression(), HypsometricCurves(),
-                        SplitLinesWithLines()
-                        # ------ raster ------
-                        # CreateConstantRaster(),
-                        # ------ graphics ------
-                        # VectorLayerHistogram(), VectorLayerScatterplot(),
-                        # RasterLayerHistogram(), MeanAndStdDevPlot(),
-                        # BarPlot(), PolarPlot()
-                       ]
+                        SplitLinesWithLines(), CreateConstantRaster(),
+                        FieldsMapper(),
+                        ]
+
+        if hasMatplotlib:
+            from VectorLayerHistogram import VectorLayerHistogram
+            from RasterLayerHistogram import RasterLayerHistogram
+            from VectorLayerScatterplot import VectorLayerScatterplot
+            from MeanAndStdDevPlot import MeanAndStdDevPlot
+            from BarPlot import BarPlot
+            from PolarPlot import PolarPlot
+
+            self.alglist.extend([
+                VectorLayerHistogram(), RasterLayerHistogram(),
+                VectorLayerScatterplot(), MeanAndStdDevPlot(), BarPlot(),
+                PolarPlot(),
+            ])
 
         folder = os.path.join(os.path.dirname(__file__), 'scripts')
         scripts = ScriptUtils.loadFromFolder(folder)
@@ -197,7 +207,7 @@ class QGISAlgorithmProvider(AlgorithmProvider):
         return 'qgis'
 
     def getDescription(self):
-        return 'QGIS geoalgorithms'
+        return self.tr('QGIS geoalgorithms')
 
     def getIcon(self):
         return self._icon

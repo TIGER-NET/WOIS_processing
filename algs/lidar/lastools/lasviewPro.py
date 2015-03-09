@@ -28,7 +28,6 @@ from LAStoolsUtils import LAStoolsUtils
 from LAStoolsAlgorithm import LAStoolsAlgorithm
 
 from processing.core.parameters import ParameterSelection
-from processing.core.parameters import ParameterBoolean
 from processing.core.parameters import ParameterNumber
 
 class lasviewPro(LAStoolsAlgorithm):
@@ -46,9 +45,12 @@ class lasviewPro(LAStoolsAlgorithm):
         self.group = "LAStools Production"
         self.addParametersPointInputFolderGUI()
         self.addParametersFilesAreFlightlinesGUI()
-        self.addParameter(ParameterNumber(lasviewPro.POINTS, "max number of points sampled", 100000, 20000000, 5000000))
-        self.addParameter(ParameterSelection(lasviewPro.COLORING, "color by", lasviewPro.COLORINGS, 0))
-        self.addParameter(ParameterSelection(lasviewPro.SIZE, "window size (x y) in pixels", lasviewPro.SIZES, 0))
+        self.addParameter(ParameterNumber(lasviewPro.POINTS,
+            self.tr("max number of points sampled"), 100000, 20000000, 5000000))
+        self.addParameter(ParameterSelection(lasviewPro.COLORING,
+            self.tr("color by"), lasviewPro.COLORINGS, 0))
+        self.addParameter(ParameterSelection(lasviewPro.SIZE,
+            self.tr("window size (x y) in pixels"), lasviewPro.SIZES, 0))
         self.addParametersAdditionalGUI()
         self.addParametersVerboseGUI()
 

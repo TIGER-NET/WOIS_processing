@@ -43,21 +43,25 @@ class flightlinesToDTMandDSM(LAStoolsAlgorithm):
         self.name = "flightlinesToDTMandDSM"
         self.group = "LAStools Pipelines"
         self.addParametersPointInputFolderGUI()
-        self.addParameter(ParameterNumber(flightlinesToDTMandDSM.TILE_SIZE, "tile size (side length of square tile)",  0, None, 1000.0))
-        self.addParameter(ParameterNumber(flightlinesToDTMandDSM.BUFFER, "buffer around each tile (avoids edge artifacts)",  0, None, 25.0))
-        self.addParameter(ParameterSelection(flightlinesToDTMandDSM.TERRAIN, "terrain type", flightlinesToDTMandDSM.TERRAINS, 1))
+        self.addParameter(ParameterNumber(flightlinesToDTMandDSM.TILE_SIZE,
+            self.tr("tile size (side length of square tile)"),
+            0, None, 1000.0))
+        self.addParameter(ParameterNumber(flightlinesToDTMandDSM.BUFFER,
+            self.tr("buffer around each tile (avoids edge artifacts)"),
+            0, None, 25.0))
+        self.addParameter(ParameterSelection(flightlinesToDTMandDSM.TERRAIN,
+            self.tr("terrain type"), flightlinesToDTMandDSM.TERRAINS, 1))
         self.addParametersStepGUI()
         self.addParametersTemporaryDirectoryGUI()
         self.addParametersOutputDirectoryGUI()
-        self.addParameter(ParameterString(flightlinesToDTMandDSM.BASE_NAME, "tile base name (using 'sydney' creates sydney_274000_4714000...)","tile"))
+        self.addParameter(ParameterString(flightlinesToDTMandDSM.BASE_NAME,
+            self.tr("tile base name (using 'sydney' creates sydney_274000_4714000...)"), "tile"))
         self.addParametersRasterOutputFormatGUI()
         self.addParametersCoresGUI()
         self.addParametersVerboseGUI()
 
     def processAlgorithm(self, progress):
-
-#   first we tile the data
-
+        # first we tile the data
         commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lastile")]
         self.addParametersVerboseCommands(commands)
         self.addParametersPointInputFolderCommands(commands)
@@ -79,8 +83,7 @@ class flightlinesToDTMandDSM(LAStoolsAlgorithm):
 
         LAStoolsUtils.runLAStools(commands, progress)
 
-#   then we ground classify the tiles
-
+        # then we ground classify the tiles
         commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "lasground")]
         self.addParametersVerboseCommands(commands)
         self.addParametersTemporaryDirectoryAsInputFilesCommands(commands, base_name+"*.laz")
@@ -101,8 +104,7 @@ class flightlinesToDTMandDSM(LAStoolsAlgorithm):
 
         LAStoolsUtils.runLAStools(commands, progress)
 
-#   then we rasterize the classified tiles into DTMs
-
+        # then we rasterize the classified tiles into DTMs
         commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "las2dem")]
         self.addParametersVerboseCommands(commands)
         self.addParametersTemporaryDirectoryAsInputFilesCommands(commands, base_name+"*_g.laz")
@@ -120,8 +122,7 @@ class flightlinesToDTMandDSM(LAStoolsAlgorithm):
 
         LAStoolsUtils.runLAStools(commands, progress)
 
-#   then we rasterize the classified tiles into DSMs
-
+        # then we rasterize the classified tiles into DSMs
         commands = [os.path.join(LAStoolsUtils.LAStoolsPath(), "bin", "las2dem")]
         self.addParametersVerboseCommands(commands)
         self.addParametersTemporaryDirectoryAsInputFilesCommands(commands, base_name+"*_g.laz")

@@ -29,8 +29,8 @@ __revision__ = '$Format:%H$'
 
 import os
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt4.QtCore import QSettings
+from PyQt4.QtGui import QDialog, QAbstractItemView, QPushButton, QDialogButtonBox, QFileDialog, QStandardItemModel, QStandardItem
 
 from processing.ui.ui_DlgMultipleSelection import Ui_DlgMultipleSelection
 
@@ -90,6 +90,9 @@ class MultipleFileInputDialog(QDialog, Ui_DlgMultipleSelection):
 
         files = QFileDialog.getOpenFileNames(self,
             self.tr('Select file(s)'), path, self.tr('All files (*.*)'))
+
+        if len(files) == 0:
+            return
 
         model = self.lstLayers.model()
         for filePath in files:

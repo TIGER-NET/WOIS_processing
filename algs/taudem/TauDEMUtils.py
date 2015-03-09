@@ -31,7 +31,8 @@ import subprocess
 
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.ProcessingLog import ProcessingLog
-from processing.tools.system import *
+from processing.tools.system import isMac
+from PyQt4.QtCore import QCoreApplication
 
 
 class TauDEMUtils:
@@ -80,9 +81,9 @@ class TauDEMUtils:
     @staticmethod
     def executeTauDEM(command, progress):
         loglines = []
-        loglines.append('TauDEM execution console output')
+        loglines.append(TauDEMUtils.tr('TauDEM execution console output'))
         fused_command = ''.join(['"%s" ' % c for c in command])
-        progress.setInfo('TauDEM command:')
+        progress.setInfo(TauDEMUtils.tr('TauDEM command:'))
         progress.setCommand(fused_command.replace('" "', ' ').strip('"'))
         proc = subprocess.Popen(
             fused_command,
@@ -91,8 +92,14 @@ class TauDEMUtils:
             stdin=open(os.devnull),
             stderr=subprocess.STDOUT,
             universal_newlines=True,
-            ).stdout
+        ).stdout
         for line in iter(proc.readline, ''):
             progress.setConsoleInfo(line)
             loglines.append(line)
         ProcessingLog.addToLog(ProcessingLog.LOG_INFO, loglines)
+
+    @staticmethod
+    def tr(string, context=''):
+        if context == '':
+            context = 'TauDEMUtils'
+        return QCoreApplication.translate(context, string)

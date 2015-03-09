@@ -47,11 +47,16 @@ class lasoverlapPro(LAStoolsAlgorithm):
         self.addParametersPointInputFolderGUI()
         self.addParametersFilesAreFlightlinesGUI()
         self.addParametersFilter1ReturnClassFlagsGUI()
-        self.addParameter(ParameterNumber(lasoverlapPro.CHECK_STEP, "size of grid used for overlap check", 0, None, 2.0))
-        self.addParameter(ParameterSelection(lasoverlapPro.ATTRIBUTE, "attribute to check", lasoverlapPro.ATTRIBUTES, 0))
-        self.addParameter(ParameterSelection(lasoverlapPro.OPERATION, "operation on attribute per cell", lasoverlapPro.OPERATIONS, 0))
-        self.addParameter(ParameterBoolean(lasoverlapPro.CREATE_OVERLAP_RASTER, "create overlap raster", True))
-        self.addParameter(ParameterBoolean(lasoverlapPro.CREATE_DIFFERENCE_RASTER, "create difference raster", True))
+        self.addParameter(ParameterNumber(lasoverlapPro.CHECK_STEP,
+            self.tr("size of grid used for overlap check"), 0, None, 2.0))
+        self.addParameter(ParameterSelection(lasoverlapPro.ATTRIBUTE,
+            self.tr("attribute to check"), lasoverlapPro.ATTRIBUTES, 0))
+        self.addParameter(ParameterSelection(lasoverlapPro.OPERATION,
+            self.tr("operation on attribute per cell"), lasoverlapPro.OPERATIONS, 0))
+        self.addParameter(ParameterBoolean(lasoverlapPro.CREATE_OVERLAP_RASTER,
+            self.tr("create overlap raster"), True))
+        self.addParameter(ParameterBoolean(lasoverlapPro.CREATE_DIFFERENCE_RASTER,
+            self.tr("create difference raster"), True))
         self.addParametersOutputDirectoryGUI()
         self.addParametersOutputAppendixGUI()
         self.addParametersRasterOutputFormatGUI()
@@ -77,9 +82,9 @@ class lasoverlapPro(LAStoolsAlgorithm):
         operation = self.getParameterValue(lasoverlapPro.OPERATION)
         if operation != 0:
             commands.append("-" + lasoverlapPro.OPERATIONS[operation])
-        if self.getParameterValue(lasoverlapPro.CREATE_OVERLAP_RASTER) != True:
+        if not self.getParameterValue(lasoverlapPro.CREATE_OVERLAP_RASTER):
             commands.append("-no_over")
-        if self.getParameterValue(lasoverlapPro.CREATE_DIFFERENCE_RASTER) != True:
+        if not self.getParameterValue(lasoverlapPro.CREATE_DIFFERENCE_RASTER):
             commands.append("-no_diff")
         self.addParametersOutputDirectoryCommands(commands)
         self.addParametersOutputAppendixCommands(commands)

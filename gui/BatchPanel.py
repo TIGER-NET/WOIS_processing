@@ -25,10 +25,9 @@ __copyright__ = '(C) 2014, Alexander Bruy'
 
 __revision__ = '$Format:%H$'
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt4.QtGui import QWidget, QIcon, QTableWidgetItem, QComboBox, QLineEdit
 
-from qgis.core import *
+from qgis.core import QgsApplication
 
 from processing.gui.FileSelectionPanel import FileSelectionPanel
 from processing.gui.CrsSelectionPanel import CrsSelectionPanel
@@ -36,6 +35,7 @@ from processing.gui.ExtentSelectionPanel import ExtentSelectionPanel
 from processing.gui.FixedTablePanel import FixedTablePanel
 from processing.gui.BatchInputSelectionPanel import BatchInputSelectionPanel
 from processing.gui.BatchOutputSelectionPanel import BatchOutputSelectionPanel
+from processing.gui.GeometryPredicateSelectionPanel import GeometryPredicateSelectionPanel
 
 from processing.core.parameters import ParameterFile
 from processing.core.parameters import ParameterRaster
@@ -47,6 +47,7 @@ from processing.core.parameters import ParameterBoolean
 from processing.core.parameters import ParameterSelection
 from processing.core.parameters import ParameterFixedTable
 from processing.core.parameters import ParameterMultipleInput
+from processing.core.parameters import ParameterGeometryPredicate
 
 from processing.ui.ui_widgetBatchPanel import Ui_Form
 
@@ -60,10 +61,8 @@ class BatchPanel(QWidget, Ui_Form):
         self.btnAdvanced.hide()
 
         # Set icons
-        self.btnAdd.setIcon(
-                QgsApplication.getThemeIcon('/mActionSignPlus.png'))
-        self.btnRemove.setIcon(
-                QgsApplication.getThemeIcon('/mActionSignMinus.png'))
+        self.btnAdd.setIcon(QgsApplication.getThemeIcon('/mActionSignPlus.png'))
+        self.btnRemove.setIcon(QgsApplication.getThemeIcon('/mActionSignMinus.png'))
         self.btnAdvanced.setIcon(QIcon(':/processing/images/alg.png'))
 
         self.alg = alg
@@ -139,6 +138,11 @@ class BatchPanel(QWidget, Ui_Form):
             item = CrsSelectionPanel(param.default)
         elif isinstance(param, ParameterFile):
             item = FileSelectionPanel(param.isFolder)
+        elif isinstance(param, ParameterGeometryPredicate):
+            item = GeometryPredicateSelectionPanel(param.enabledPredicates, rows=1)
+            width = max(self.tblParameters.columnWidth(col),
+                        item.sizeHint().width())
+            self.tblParameters.setColumnWidth(col, width)
         else:
             item = QLineEdit()
             try:
@@ -217,6 +221,10 @@ class BatchPanel(QWidget, Ui_Form):
             widgetValue = widget.getText()
             for row in range(1, self.tblParameters.rowCount()):
                 self.tblParameters.cellWidget(row, column).setText(widgetValue)
+        elif isinstance(widget, GeometryPredicateSelectionPanel):
+            widgetValue = widget.value()
+            for row in range(1, self.tblParameters.rowCount()):
+                self.tblParameters.cellWidget(row, column).setValue(widgetValue)
         else:
             pass
 

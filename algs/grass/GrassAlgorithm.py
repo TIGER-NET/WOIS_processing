@@ -28,21 +28,21 @@ __revision__ = '$Format:%H$'
 import os
 import time
 import uuid
-import re
 import importlib
-from qgis.core import *
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+import re
+
+from PyQt4.QtGui import QIcon
+
+from qgis.core import QgsRasterLayer
 from qgis.utils import iface
 
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.ProcessingLog import ProcessingLog
-from processing.core.GeoAlgorithmExecutionException import \
-    GeoAlgorithmExecutionException
+from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
 
-from processing.core.parameters import *
-from processing.core.outputs import *
+from processing.core.parameters import getParameterFromString, ParameterVector, ParameterMultipleInput, ParameterExtent, ParameterNumber, ParameterSelection, ParameterRaster, ParameterTable, ParameterBoolean, ParameterString
+from processing.core.outputs import getOutputFromString, OutputRaster, OutputVector, OutputFile, OutputHTML
 
 from GrassUtils import GrassUtils
 
@@ -122,7 +122,7 @@ class GrassAlgorithm(GeoAlgorithm):
                     if isinstance(parameter, ParameterVector):
                         hasVectorInput = True
                     if isinstance(parameter, ParameterMultipleInput) \
-                        and parameter.datatype < 3:
+                       and parameter.datatype < 3:
                         hasVectorInput = True
                 elif line.startswith('*Parameter'):
                     param = getParameterFromString(line[1:])
@@ -138,17 +138,16 @@ class GrassAlgorithm(GeoAlgorithm):
                 line = lines.readline().strip('\n').strip()
             except Exception, e:
                 ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
-                                       'Could not open GRASS algorithm: '
-                                       + self.descriptionFile + '\n' + line)
+                    self.tr('Could not open GRASS algorithm: %s.\n%s' % (self.descriptionFile, line)))
                 raise e
         lines.close()
 
         self.addParameter(ParameterExtent(self.GRASS_REGION_EXTENT_PARAMETER,
-                          'GRASS region extent'))
+            self.tr('GRASS region extent')))
         if hasRasterOutput:
             self.addParameter(ParameterNumber(
                 self.GRASS_REGION_CELLSIZE_PARAMETER,
-                'GRASS region cellsize (leave 0 for default)',
+                self.tr('GRASS region cellsize (leave 0 for default)'),
                 0, None, 0.0))
         if hasVectorInput:
             param = ParameterNumber(self.GRASS_SNAP_TOLERANCE_PARAMETER,
@@ -185,10 +184,10 @@ class GrassAlgorithm(GeoAlgorithm):
                     for layername in layers:
                         layer = dataobjects.getObjectFromUri(layername)
                         if isinstance(layer, QgsRasterLayer):
-                            cellsize = max(cellsize,
-                                    (layer.extent().xMaximum()
-                                    - layer.extent().xMinimum())
-                                    / layer.width())
+                            cellsize = max(cellsize, (
+                                layer.extent().xMaximum()
+                                - layer.extent().xMinimum())
+                                / layer.width())
 
         if cellsize == 0:
             cellsize = 1
@@ -198,9 +197,9 @@ class GrassAlgorithm(GeoAlgorithm):
         if system.isWindows():
             path = GrassUtils.grassPath()
             if path == '':
-                raise GeoAlgorithmExecutionException('GRASS folder is not \
-                    configured.\nPlease configure it before running GRASS \
-                    algorithms.')
+                raise GeoAlgorithmExecutionException(
+                    self.tr('GRASS folder is not configured.\nPlease '
+                            'configure it before running GRASS algorithms.'))
 
         commands = []
         self.exportedLayers = {}
@@ -289,12 +288,7 @@ class GrassAlgorithm(GeoAlgorithm):
         for param in self.parameters:
             if param.value is None or param.value == '':
                 continue
-            if param.name == self.GRASS_REGION_CELLSIZE_PARAMETER \
-                or param.name == self.GRASS_REGION_EXTENT_PARAMETER \
-                or param.name == self.GRASS_MIN_AREA_PARAMETER or param.name \
-                == self.GRASS_SNAP_TOLERANCE_PARAMETER or param.name \
-                == self.GRASS_OUTPUT_TYPE_PARAMETER or param.name \
-                == self.GRASS_REGION_ALIGN_TO_RESOLUTION:
+            if param.name in [ self.GRASS_REGION_CELLSIZE_PARAMETER, self.GRASS_REGION_EXTENT_PARAMETER, self.GRASS_MIN_AREA_PARAMETER, self.GRASS_SNAP_TOLERANCE_PARAMETER, self.GRASS_OUTPUT_TYPE_PARAMETER, self.GRASS_REGION_ALIGN_TO_RESOLUTION ]:
                 continue
             if isinstance(param, (ParameterRaster, ParameterVector)):
                 value = param.value
@@ -391,7 +385,7 @@ class GrassAlgorithm(GeoAlgorithm):
         # 4: Run GRASS
 
         loglines = []
-        loglines.append('GRASS execution commands')
+        loglines.append(self.tr('GRASS execution commands'))
         for line in commands:
             progress.setCommand(line)
             loglines.append(line)
@@ -495,11 +489,12 @@ class GrassAlgorithm(GeoAlgorithm):
     def checkBeforeOpeningParametersDialog(self):
         msg = GrassUtils.checkGrassIsInstalled()
         if msg is not None:
-            html = '<p>This algorithm requires GRASS to be run. \
-                Unfortunately, it seems that GRASS is not installed in \
-                your system, or it is not correctly configured to be used \
-                from QGIS</p>'
-            html += '<p><a href="http://docs.qgis.org/2.0/en/docs/user_manual/processing/3rdParty.html">Click here</a> to know more about how to install and configure GRASS to be used with QGIS</p>'
+            html = self.tr(
+                '<p>This algorithm requires GRASS to be run. Unfortunately, '
+                'it seems that GRASS is not installed in your system, or it '
+                'is not correctly configured to be used from QGIS</p>'
+                '<p><a href="http://docs.qgis.org/testing/en/docs/user_manual/processing/3rdParty.html">Click here</a> '
+                'to know more about how to install and configure GRASS to be used with QGIS</p>')
             return html
 
     def checkParameterValuesBeforeExecuting(self):
@@ -515,15 +510,17 @@ class GrassAlgorithm(GeoAlgorithm):
     def getPostProcessingErrorMessage(self, wrongLayers):
         html = GeoAlgorithm.getPostProcessingErrorMessage(self, wrongLayers)
         msg = GrassUtils.checkGrassIsInstalled(True)
-        html += '<p>This algorithm requires GRASS to be run. A test \
-            to check if GRASS is correctly installed and configured in \
-            your system has been performed, with the following \
-            result:</p><ul><i>'
+        html += self.tr(
+            '<p>This algorithm requires GRASS to be run. A test to check '
+            'if GRASS is correctly installed and configured in your system '
+            'has been performed, with the following result:</p><ul><i>')
         if msg is None:
-            html += 'GRASS seems to be correctly installed and \
-                configured</i></li></ul>'
+            html += self.tr('GRASS seems to be correctly installed and '
+                            'configured</i></li></ul>')
         else:
             html += msg + '</i></li></ul>'
-            html += '<p><a href= "http://docs.qgis.org/2.0/en/docs/user_manual/processing/3rdParty.html">Click here</a> to know more about how to install and configure GRASS to be used with QGIS</p>'
+            html += self.tr(
+                '<p><a href="http://docs.qgis.org/testing/en/docs/user_manual/processing/3rdParty.html">Click here</a> '
+                'to know more about how to install and configure GRASS to be used with QGIS</p>')
 
         return html

@@ -27,8 +27,6 @@ import os
 from LAStoolsUtils import LAStoolsUtils
 from LAStoolsAlgorithm import LAStoolsAlgorithm
 
-from processing.core.parameters import ParameterNumber
-from processing.core.parameters import ParameterString
 from processing.core.parameters import ParameterSelection
 
 class las2lasPro_project(LAStoolsAlgorithm):
@@ -51,12 +49,18 @@ class las2lasPro_project(LAStoolsAlgorithm):
         self.name = "las2lasPro_project"
         self.group = "LAStools Production"
         self.addParametersPointInputFolderGUI()
-        self.addParameter(ParameterSelection(las2lasPro_project.SOURCE_PROJECTION, "source projection", las2lasPro_project.PROJECTIONS, 0))
-        self.addParameter(ParameterSelection(las2lasPro_project.SOURCE_UTM, "source utm zone", las2lasPro_project.UTM_ZONES, 0))
-        self.addParameter(ParameterSelection(las2lasPro_project.SOURCE_SP, "source state plane code", las2lasPro_project.STATE_PLANES, 0))
-        self.addParameter(ParameterSelection(las2lasPro_project.TARGET_PROJECTION, "target projection", las2lasPro_project.PROJECTIONS, 0))
-        self.addParameter(ParameterSelection(las2lasPro_project.TARGET_UTM, "target utm zone", las2lasPro_project.UTM_ZONES, 0))
-        self.addParameter(ParameterSelection(las2lasPro_project.TARGET_SP, "target state plane code", las2lasPro_project.STATE_PLANES, 0))
+        self.addParameter(ParameterSelection(las2lasPro_project.SOURCE_PROJECTION,
+            self.tr("source projection"), las2lasPro_project.PROJECTIONS, 0))
+        self.addParameter(ParameterSelection(las2lasPro_project.SOURCE_UTM,
+            self.tr("source utm zone"), las2lasPro_project.UTM_ZONES, 0))
+        self.addParameter(ParameterSelection(las2lasPro_project.SOURCE_SP,
+            self.tr("source state plane code"), las2lasPro_project.STATE_PLANES, 0))
+        self.addParameter(ParameterSelection(las2lasPro_project.TARGET_PROJECTION,
+            self.tr("target projection"), las2lasPro_project.PROJECTIONS, 0))
+        self.addParameter(ParameterSelection(las2lasPro_project.TARGET_UTM,
+            self.tr("target utm zone"), las2lasPro_project.UTM_ZONES, 0))
+        self.addParameter(ParameterSelection(las2lasPro_project.TARGET_SP,
+            self.tr("target state plane code"), las2lasPro_project.STATE_PLANES, 0))
         self.addParametersOutputDirectoryGUI()
         self.addParametersOutputAppendixGUI()
         self.addParametersPointOutputFormatGUI()

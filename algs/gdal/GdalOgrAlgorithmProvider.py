@@ -26,8 +26,7 @@ __copyright__ = '(C) 2012, Victor Olaya'
 __revision__ = '$Format:%H$'
 
 import os
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt4.QtGui import QIcon
 
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.core.ProcessingLog import ProcessingLog
@@ -101,7 +100,7 @@ class GdalOgrAlgorithmProvider(AlgorithmProvider):
         return os.path.dirname(__file__) + '/scripts'
 
     def getDescription(self):
-        return 'GDAL/OGR'
+        return self.tr('GDAL/OGR')
 
     def getName(self):
         return 'gdalogr'
@@ -124,8 +123,9 @@ class GdalOgrAlgorithmProvider(AlgorithmProvider):
             ColorRelief(), GridInvDist(), GridAverage(), GridNearest(),
             GridDataMetrics(),
             # ----- OGR tools -----
-            OgrInfo(), Ogr2Ogr(), Ogr2OgrClip(), Ogr2OgrClipExtent(), Ogr2OgrToPostGis(), Ogr2OgrToPostGisList(), OgrSql(),
-            ]
+            OgrInfo(), Ogr2Ogr(), Ogr2OgrClip(), Ogr2OgrClipExtent(),
+            Ogr2OgrToPostGis(), Ogr2OgrToPostGisList(), OgrSql(),
+        ]
 
         # And then we add those that are created as python scripts
         folder = self.scriptsFolder()

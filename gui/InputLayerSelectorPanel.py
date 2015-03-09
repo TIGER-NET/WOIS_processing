@@ -27,8 +27,8 @@ __revision__ = '$Format:%H$'
 
 import os
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt4.QtCore import QSettings
+from PyQt4.QtGui import QWidget, QIcon, QFileDialog
 from processing.tools import dataobjects
 
 from processing.ui.ui_widgetLayerSelector import Ui_Form
@@ -71,7 +71,7 @@ class InputLayerSelectorPanel(QWidget, Ui_Form):
             filename = dataobjects.getRasterSublayer(filename, self.param)
             self.cmbText.addItem(filename, filename)
             self.cmbText.setCurrentIndex(self.cmbText.count() - 1)
-            
+
 
     def getValue(self):
         return self.cmbText.itemData(self.cmbText.currentIndex())
