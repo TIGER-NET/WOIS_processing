@@ -266,7 +266,7 @@ class Processing:
         Processing.runAlgorithm(name, handleAlgorithmResults, *args)
 
     @staticmethod
-    def runAlgorithm(algOrName, onFinish, *args):
+    def runAlgorithm(algOrName, onFinish, *args, **kwargs):
         if isinstance(algOrName, GeoAlgorithm):
             alg = algOrName
         else:
@@ -337,24 +337,30 @@ class Processing:
                 + 'This can cause unexpected results.'
 
         if iface is not None:
-          # Don't set the wait cursor twice, because then when you
-          # restore it, it will still be a wait cursor.
-          cursor = QApplication.overrideCursor()
-          if cursor is None or cursor == 0:
-              QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-          elif cursor.shape() != Qt.WaitCursor:
-              QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+            # Don't set the wait cursor twice, because then when you
+            # restore it, it will still be a wait cursor.
+            overrideCursor = False
+            cursor = QApplication.overrideCursor()
+            if cursor is None or cursor == 0:
+                QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+                overrideCursor = True
+            elif cursor.shape() != Qt.WaitCursor:
+                QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+                overrideCursor = True
 
         progress = None
-        if iface is not None :
+        if kwargs is not None and "progress" in kwargs.keys():
+            progress = kwargs["progress"] 
+        elif iface is not None :
             progress = MessageBarProgress()
         ret = runalg(alg, progress)
         if onFinish is not None and ret:
             onFinish(alg, progress)
 
-        if iface is not None:
-          QApplication.restoreOverrideCursor()
-          progress.close()
+        if iface is not None and overrideCursor:
+            QApplication.restoreOverrideCursor()
+        if isinstance(progress, MessageBarProgress):
+            progress.close()
         return alg
 
     @staticmethod
