@@ -25,30 +25,43 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
-from PyQt4.QtGui import QWidget
+import os
+
+from PyQt4 import uic
+
+from math import log10, floor
 from processing.gui.NumberInputDialog import NumberInputDialog
 
-from processing.ui.ui_widgetNumberSelector import Ui_Form
+pluginPath = os.path.split(os.path.dirname(__file__))[0]
+WIDGET, BASE = uic.loadUiType(
+    os.path.join(pluginPath, 'ui', 'widgetNumberSelector.ui'))
 
-class NumberInputPanel(QWidget, Ui_Form):
+
+class NumberInputPanel(BASE, WIDGET):
 
     def __init__(self, number, minimum, maximum, isInteger):
-        QWidget.__init__(self)
+        super(NumberInputPanel, self).__init__(None)
         self.setupUi(self)
 
         self.isInteger = isInteger
         if self.isInteger:
             self.spnValue.setDecimals(0)
-            if maximum == 0 or maximum:
-                self.spnValue.setMaximum(maximum)
-            else:
-                self.spnValue.setMaximum(99999999)
-            if minimum == 0 or minimum:
-                self.spnValue.setMinimum(minimum)
-            else:
-                self.spnValue.setMinimum(-99999999)
+        else:
+            #Guess reasonable step value
+            if (maximum == 0 or maximum) and (minimum == 0 or minimum):
+                self.spnValue.setSingleStep(self.calculateStep(minimum, maximum))
+
+        if maximum == 0 or maximum:
+            self.spnValue.setMaximum(maximum)
+        else:
+            self.spnValue.setMaximum(99999999)
+        if minimum == 0 or minimum:
+            self.spnValue.setMinimum(minimum)
+        else:
+            self.spnValue.setMinimum(-99999999)
 
         self.spnValue.setValue(float(number))
+        self.spnValue.setClearValue(float(number))
 
         self.btnCalc.clicked.connect(self.showNumberInputDialog)
 
@@ -60,3 +73,12 @@ class NumberInputPanel(QWidget, Ui_Form):
 
     def getValue(self):
         return self.spnValue.value()
+
+    def calculateStep(self, minimum, maximum):
+        valueRange = maximum - minimum
+        if valueRange <= 1.0:
+            step = valueRange / 10.0
+            # round to 1 significant figure
+            return round(step, -int(floor(log10(step))))
+        else:
+            return 1.0

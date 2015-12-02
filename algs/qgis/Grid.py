@@ -34,47 +34,45 @@ from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecution
 from processing.core.parameters import ParameterExtent
 from processing.core.parameters import ParameterNumber
 from processing.core.parameters import ParameterSelection
+from processing.core.parameters import ParameterCrs
 from processing.core.outputs import OutputVector
 
 
 class Grid(GeoAlgorithm):
     TYPE = 'TYPE'
     EXTENT = 'EXTENT'
-    WIDTH = 'WIDTH'
-    HEIGHT = 'HEIGHT'
     HSPACING = 'HSPACING'
     VSPACING = 'VSPACING'
-    CENTERX = 'CENTERX'
-    CENTERY = 'CENTERY'
     CRS = 'CRS'
     OUTPUT = 'OUTPUT'
 
-    TYPES = ['Rectangle (line)',
-             'Rectangle (polygon)',
-             'Diamond (polygon)',
-             'Hexagon (polygon)'
-             ]
-
     def defineCharacteristics(self):
-        self.name = 'Create grid'
-        self.group = 'Vector creation tools'
+        self.name, self.i18n_name = self.trAlgorithm('Create grid')
+        self.group, self.i18n_group = self.trAlgorithm('Vector creation tools')
+
+        self.types = [self.tr('Rectangle (line)'),
+                      self.tr('Rectangle (polygon)'),
+                      self.tr('Diamond (polygon)'),
+                      self.tr('Hexagon (polygon)')]
 
         self.addParameter(ParameterSelection(self.TYPE,
-            self.tr('Grid type'), self.TYPES))
+                                             self.tr('Grid type'), self.types))
         self.addParameter(ParameterExtent(self.EXTENT,
-            self.tr('Grid extent')))
+                                          self.tr('Grid extent')))
         self.addParameter(ParameterNumber(self.HSPACING,
-            self.tr('Horizontal spacing'), default=10.0))
+                                          self.tr('Horizontal spacing'), default=10.0))
         self.addParameter(ParameterNumber(self.VSPACING,
-            self.tr('Vertical spacing'), default=10.0))
+                                          self.tr('Vertical spacing'), default=10.0))
+        self.addParameter(ParameterCrs(self.CRS, 'Grid CRS'))
 
-        self.addOutput(OutputVector(self.OUTPUT, self.tr('Output')))
+        self.addOutput(OutputVector(self.OUTPUT, self.tr('Grid')))
 
     def processAlgorithm(self, progress):
         idx = self.getParameterValue(self.TYPE)
         extent = self.getParameterValue(self.EXTENT).split(',')
         hSpacing = self.getParameterValue(self.HSPACING)
         vSpacing = self.getParameterValue(self.VSPACING)
+        crs = QgsCoordinateReferenceSystem(self.getParameterValue(self.CRS))
 
         bbox = QgsRectangle(float(extent[0]), float(extent[2]),
                             float(extent[1]), float(extent[3]))
@@ -85,7 +83,6 @@ class Grid(GeoAlgorithm):
         centerY = bbox.center().y()
         originX = centerX - width / 2.0
         originY = centerY - height / 2.0
-        crs = QgsCoordinateReferenceSystem(self.getParameterValue(self.CRS))
 
         if hSpacing <= 0 or vSpacing <= 0:
             raise GeoAlgorithmExecutionException(
@@ -99,7 +96,7 @@ class Grid(GeoAlgorithm):
             raise GeoAlgorithmExecutionException(
                 self.tr('Vertical spacing is too small for the covered area'))
 
-        if self.TYPES[idx].find('polygon') >= 0:
+        if self.types[idx].find('polygon') >= 0:
             geometryType = QGis.WKBPolygon
         else:
             geometryType = QGis.WKBLineString
@@ -111,7 +108,7 @@ class Grid(GeoAlgorithm):
                   ]
 
         writer = self.getOutputFromName(self.OUTPUT).getVectorWriter(fields,
-            geometryType, crs)
+                                                                     geometryType, crs)
 
         if idx == 0:
             self._rectangleGridLine(
@@ -213,11 +210,11 @@ class Grid(GeoAlgorithm):
                     y3 = originY + (((row * 2) + 3) * halfVSpacing)
 
                 polyline = []
-                polyline.append(QgsPoint(x1,  y2))
-                polyline.append(QgsPoint(x2,  y1))
-                polyline.append(QgsPoint(x3,  y2))
-                polyline.append(QgsPoint(x2,  y3))
-                polyline.append(QgsPoint(x1,  y2))
+                polyline.append(QgsPoint(x1, y2))
+                polyline.append(QgsPoint(x2, y1))
+                polyline.append(QgsPoint(x3, y2))
+                polyline.append(QgsPoint(x2, y3))
+                polyline.append(QgsPoint(x1, y2))
 
                 ft.setGeometry(QgsGeometry.fromPolygon([polyline]))
                 ft.setAttributes([x1, y1, x3, y3])

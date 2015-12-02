@@ -113,12 +113,15 @@ from lastools.hugeFileGroundClassify import hugeFileGroundClassify
 from lastools.hugeFileNormalize import hugeFileNormalize
 
 from fusion.OpenViewerAction import OpenViewerAction
+from fusion.ASCII2DTM import ASCII2DTM
 from fusion.CanopyMaxima import CanopyMaxima
 from fusion.CanopyModel import CanopyModel
 from fusion.Catalog import Catalog
 from fusion.ClipData import ClipData
 from fusion.CloudMetrics import CloudMetrics
 from fusion.Cover import Cover
+from fusion.DTM2TIF import DTM2TIF
+from fusion.FirstLastReturn import FirstLastReturn
 from fusion.GridMetrics import GridMetrics
 from fusion.GridSurfaceCreate import GridSurfaceCreate
 from fusion.TinSurfaceCreate import TinSurfaceCreate
@@ -126,7 +129,9 @@ from fusion.Csv2Grid import Csv2Grid
 from fusion.GroundFilter import GroundFilter
 from fusion.MergeData import MergeData
 from fusion.FilterData import FilterData
+from fusion.PolyClipData import PolyClipData
 from fusion.FusionUtils import FusionUtils
+
 
 class LidarToolsAlgorithmProvider(AlgorithmProvider):
 
@@ -186,7 +191,7 @@ class LidarToolsAlgorithmProvider(AlgorithmProvider):
                 hugeFileGroundClassify(), hugeFileNormalize()
             ]
         else:
-            lastoolsPipe = [ ]
+            lastoolsPipe = []
         for alg in lastoolsPipe:
             alg.group = 'LAStools Pipelines'
         self.algsList.extend(lastoolsPipe)
@@ -198,7 +203,8 @@ class LidarToolsAlgorithmProvider(AlgorithmProvider):
             fusiontools = [
                 Catalog(), CloudMetrics(), CanopyMaxima(), CanopyModel(), ClipData(),
                 Csv2Grid(), Cover(), FilterData(), GridMetrics(), GroundFilter(),
-                GridSurfaceCreate(), MergeData(), TinSurfaceCreate()
+                GridSurfaceCreate(), MergeData(), TinSurfaceCreate(), PolyClipData(),
+                                DTM2TIF(), FirstLastReturn(), ASCII2DTM()
             ]
             for alg in fusiontools:
                 alg.group = 'Fusion'
@@ -209,15 +215,17 @@ class LidarToolsAlgorithmProvider(AlgorithmProvider):
         ProcessingConfig.addSetting(Setting(
             self.getDescription(),
             LAStoolsUtils.LASTOOLS_FOLDER,
-            self.tr('LAStools folder'), LAStoolsUtils.LAStoolsPath()))
+            self.tr('LAStools folder'), LAStoolsUtils.LAStoolsPath(),
+            valuetype=Setting.FOLDER))
         ProcessingConfig.addSetting(Setting(
             self.getDescription(),
             FusionUtils.FUSION_FOLDER,
-            self.tr('Fusion folder'), FusionUtils.FusionPath()))
+            self.tr('Fusion folder'), FusionUtils.FusionPath(),
+            valuetype=Setting.FOLDER))
         ProcessingConfig.addSetting(Setting(
             self.getDescription(),
             LAStoolsUtils.WINE_FOLDER,
-            self.tr('Wine folder'), ''))
+            self.tr('Wine folder'), '', valuetype=Setting.FOLDER))
 
     def getName(self):
         return 'lidartools'

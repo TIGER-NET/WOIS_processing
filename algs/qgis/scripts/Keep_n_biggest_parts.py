@@ -1,7 +1,7 @@
 ##Vector geometry tools=group
 ##Polygons=vector polygon
 ##To_keep=number 1
-##Results=output vector
+##Biggest parts=output vector
 
 from qgis.core import QGis, QgsGeometry
 from operator import itemgetter
@@ -20,7 +20,7 @@ writer = processing.VectorWriter(Results, None, polyPrder.fields(),
 
 
 for n, feat in enumerate(processing.features(polyLayer)):
-        progress.setPercentage(int(100*n/count))
+        progress.setPercentage(int(100 * n / count))
         geom = feat.geometry()
         if geom.isMultipart():
                 featres = feat
@@ -33,7 +33,7 @@ for n, feat in enumerate(processing.features(polyLayer)):
                         featres.setGeometry(geom)
                 else:
                         featres.setGeometry(geom)
-                        geomres = [geoms[i].asPolygon() for i,a in geomarea[-1 * To_keep :]]
+                        geomres = [geoms[i].asPolygon() for i, a in geomarea[-1 * To_keep:]]
                         featres.setGeometry(QgsGeometry.fromMultiPolygon(geomres))
                 writer.addFeature(featres)
         else:

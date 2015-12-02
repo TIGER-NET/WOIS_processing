@@ -33,6 +33,7 @@ __revision__ = '$Format:%H$'
 import os
 import locale
 
+from PyQt4 import uic
 from PyQt4.QtCore import QCoreApplication, QVariant
 from PyQt4.QtGui import QWidget, QLayout, QVBoxLayout, QHBoxLayout, QToolButton, QIcon, QLabel, QCheckBox, QComboBox, QLineEdit, QPlainTextEdit
 
@@ -72,15 +73,17 @@ from processing.core.outputs import OutputVector
 
 from processing.tools import dataobjects
 
-from processing.ui.ui_widgetParametersPanel import Ui_Form
+pluginPath = os.path.split(os.path.dirname(__file__))[0]
+WIDGET, BASE = uic.loadUiType(
+    os.path.join(pluginPath, 'ui', 'widgetParametersPanel.ui'))
 
 
-class ParametersPanel(QWidget, Ui_Form):
+class ParametersPanel(BASE, WIDGET):
 
     NOT_SELECTED = QCoreApplication.translate('ParametersPanel', '[Not selected]')
 
     def __init__(self, parent, alg):
-        QWidget.__init__(self)
+        super(ParametersPanel, self).__init__(None)
         self.setupUi(self)
 
         self.grpAdvanced.hide()
@@ -132,8 +135,7 @@ class ParametersPanel(QWidget, Ui_Form):
                 layout.setMargin(0)
                 layout.addWidget(widget)
                 button = QToolButton()
-                icon = QIcon(
-                    os.path.dirname(__file__) + '/../images/iterate.png')
+                icon = QIcon(os.path.join(pluginPath, 'images', 'iterate.png'))
                 button.setIcon(icon)
                 button.setToolTip(self.tr('Iterate over this layer'))
                 button.setCheckable(True)
@@ -232,7 +234,7 @@ class ParametersPanel(QWidget, Ui_Form):
                 for layer in layers:
                     items.append((self.getExtendedLayerName(layer), layer))
                 # if already set, put first in list
-                for i,(name,layer) in enumerate(items):
+                for i, (name, layer) in enumerate(items):
                     if layer and layer.source() == param.value:
                         items.insert(0, items.pop(i))
                 item = InputLayerSelectorPanel(items, param)
@@ -254,7 +256,7 @@ class ParametersPanel(QWidget, Ui_Form):
                 for layer in layers:
                     items.append((layer.name(), layer))
                 # if already set, put first in list
-                for i,(name,layer) in enumerate(items):
+                for i, (name, layer) in enumerate(items):
                     if layer and layer.source() == param.value:
                         items.insert(0, items.pop(i))
                 item = InputLayerSelectorPanel(items, param)
@@ -323,7 +325,7 @@ class ParametersPanel(QWidget, Ui_Form):
                 item = textEdit
             else:
                 item = QLineEdit()
-                item.setText(str(param.default))
+                item.setText(unicode(param.default))
         elif isinstance(param, ParameterGeometryPredicate):
             item = GeometryPredicateSelectionPanel(param.enabledPredicates)
             if param.left:
@@ -342,7 +344,7 @@ class ParametersPanel(QWidget, Ui_Form):
             item.setValue(param.default)
         else:
             item = QLineEdit()
-            item.setText(str(param.default))
+            item.setText(unicode(param.default))
 
         return item
 
@@ -367,7 +369,8 @@ class ParametersPanel(QWidget, Ui_Form):
         if datatype == ParameterTableField.DATA_TYPE_STRING:
             fieldTypes = [QVariant.String]
         elif datatype == ParameterTableField.DATA_TYPE_NUMBER:
-            fieldTypes = [QVariant.Int, QVariant.Double]
+            fieldTypes = [QVariant.Int, QVariant.Double, QVariant.ULongLong,
+                          QVariant.UInt]
 
         fieldNames = set()
         for field in layer.pendingFields():

@@ -27,6 +27,8 @@ __revision__ = '$Format:%H$'
 
 
 from processing.core.parameters import ParameterVector
+from processing.core.parameters import ParameterBoolean
+
 from processing.core.outputs import OutputHTML
 
 from processing.algs.gdal.GdalUtils import GdalUtils
@@ -36,26 +38,33 @@ from processing.algs.gdal.OgrAlgorithm import OgrAlgorithm
 class OgrInfo(OgrAlgorithm):
 
     INPUT = 'INPUT'
+    SUMMARY_ONLY = 'SUMMARY_ONLY'
     OUTPUT = 'OUTPUT'
 
     def defineCharacteristics(self):
-        self.name = 'Information'
-        self.group = '[OGR] Miscellaneous'
+        self.name, self.i18n_name = self.trAlgorithm('Information')
+        self.group, self.i18n_group = self.trAlgorithm('[OGR] Miscellaneous')
 
         self.addParameter(ParameterVector(self.INPUT, self.tr('Input layer'),
                           [ParameterVector.VECTOR_TYPE_ANY], False))
+        self.addParameter(ParameterBoolean(self.SUMMARY_ONLY,
+                                           self.tr('Summary output only'),
+                                           True))
 
         self.addOutput(OutputHTML(self.OUTPUT, self.tr('Layer information')))
 
-    def processAlgorithm(self, progress):
-        arguments = []
+    def getConsoleCommands(self):
+        arguments = ["ogrinfo"]
         arguments.append('-al')
-        arguments.append('-so')
+        if self.getParameterValue(self.SUMMARY_ONLY):
+            arguments.append('-so')
         layer = self.getParameterValue(self.INPUT)
         conn = self.ogrConnectionString(layer)
         arguments.append(conn)
-        GdalUtils.runGdal(['ogrinfo', GdalUtils.escapeAndJoin(arguments)],
-                          progress)
+        return arguments
+
+    def processAlgorithm(self, progress):
+        GdalUtils.runGdal(self.getConsoleCommands(), progress)
         output = self.getOutputValue(self.OUTPUT)
         f = open(output, 'w')
         f.write('<pre>')

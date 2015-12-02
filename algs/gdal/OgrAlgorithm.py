@@ -42,7 +42,7 @@ class OgrAlgorithm(GdalAlgorithm):
 
         layer = dataobjects.getObjectFromUri(uri, False)
         if layer is None:
-            return uri
+            return '"' + uri + '"'
         provider = layer.dataProvider().name()
         if provider == 'spatialite':
             # dbname='/geodata/osm_ch.sqlite' table="places" (Geometry) sql=
@@ -61,13 +61,13 @@ class OgrAlgorithm(GdalAlgorithm):
             while not conn:
                 try:
                     conn = psycopg2.connect(dsUri.connectionInfo())
-                except psycopg2.OperationalError, e:
-                    (ok, user, passwd ) = QgsCredentials.instance().get(conninfo, dsUri.username(), dsUri.password())
+                except psycopg2.OperationalError as e:
+                    (ok, user, passwd) = QgsCredentials.instance().get(conninfo, dsUri.username(), dsUri.password())
                     if not ok:
                         break
 
-                    dsUri.setUsername( user )
-                    dsUri.setPassword( passwd )
+                    dsUri.setUsername(user)
+                    dsUri.setPassword(passwd)
 
             if not conn:
                 raise RuntimeError('Could not connect to PostgreSQL database - check connection info')
@@ -76,6 +76,35 @@ class OgrAlgorithm(GdalAlgorithm):
                 QgsCredentials.instance().put(conninfo, user, passwd)
 
             ogrstr = "PG:%s" % dsUri.connectionInfo()
+        elif provider == "oracle":
+            # OCI:user/password@host:port/service:table
+            dsUri = QgsDataSourceURI(layer.dataProvider().dataSourceUri())
+            ogrstr = "OCI:"
+            if dsUri.username() != "":
+                ogrstr += dsUri.username()
+                if dsUri.password() != "":
+                    ogrstr += "/" + dsUri.password()
+                delim = "@"
+
+            if dsUri.host() != "":
+                ogrstr += delim + dsUri.host()
+                delim = ""
+                if dsUri.port() != "" and dsUri.port() != '1521':
+                    ogrstr += ":" + dsUri.port()
+                ogrstr += "/"
+                if dsUri.database() != "":
+                    ogrstr += dsUri.database()
+            elif dsUri.database() != "":
+                ogrstr += delim + dsUri.database()
+
+            if ogrstr == "OCI:":
+                raise RuntimeError('Invalid oracle data source - check connection info')
+
+            ogrstr += ":"
+            if dsUri.schema() != "":
+                ogrstr += dsUri.schema() + "."
+
+            ogrstr += dsUri.table()
         else:
             ogrstr = unicode(layer.source()).split("|")[0]
 
@@ -85,7 +114,7 @@ class OgrAlgorithm(GdalAlgorithm):
         if 'host' in uri:
             regex = re.compile('(table=")(.+?)(\.)(.+?)"')
             r = regex.search(uri)
-            return '"' + r.groups()[1] + '.' + r.groups()[3] +'"'
+            return '"' + r.groups()[1] + '.' + r.groups()[3] + '"'
         elif 'dbname' in uri:
             regex = re.compile('(table=")(.+?)"')
             r = regex.search(uri)

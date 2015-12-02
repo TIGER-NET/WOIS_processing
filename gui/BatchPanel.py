@@ -25,7 +25,10 @@ __copyright__ = '(C) 2014, Alexander Bruy'
 
 __revision__ = '$Format:%H$'
 
-from PyQt4.QtGui import QWidget, QIcon, QTableWidgetItem, QComboBox, QLineEdit
+import os
+
+from PyQt4 import uic
+from PyQt4.QtGui import QWidget, QIcon, QTableWidgetItem, QComboBox, QLineEdit, QHeaderView
 
 from qgis.core import QgsApplication
 
@@ -49,21 +52,23 @@ from processing.core.parameters import ParameterFixedTable
 from processing.core.parameters import ParameterMultipleInput
 from processing.core.parameters import ParameterGeometryPredicate
 
-from processing.ui.ui_widgetBatchPanel import Ui_Form
+pluginPath = os.path.split(os.path.dirname(__file__))[0]
+WIDGET, BASE = uic.loadUiType(
+    os.path.join(pluginPath, 'ui', 'widgetBatchPanel.ui'))
 
 
-class BatchPanel(QWidget, Ui_Form):
+class BatchPanel(BASE, WIDGET):
 
     def __init__(self, parent, alg):
-        QWidget.__init__(self)
+        super(BatchPanel, self).__init__(None)
         self.setupUi(self)
 
         self.btnAdvanced.hide()
 
         # Set icons
-        self.btnAdd.setIcon(QgsApplication.getThemeIcon('/mActionSignPlus.png'))
-        self.btnRemove.setIcon(QgsApplication.getThemeIcon('/mActionSignMinus.png'))
-        self.btnAdvanced.setIcon(QIcon(':/processing/images/alg.png'))
+        self.btnAdd.setIcon(QgsApplication.getThemeIcon('/symbologyAdd.svg'))
+        self.btnRemove.setIcon(QgsApplication.getThemeIcon('/symbologyRemove.svg'))
+        self.btnAdvanced.setIcon(QIcon(os.path.join(pluginPath, 'images', 'alg.png')))
 
         self.alg = alg
         self.parent = parent
@@ -115,6 +120,13 @@ class BatchPanel(QWidget, Ui_Form):
         for i in xrange(3):
             self.addRow()
 
+        self.tblParameters.horizontalHeader().setResizeMode(QHeaderView.Interactive)
+        self.tblParameters.horizontalHeader().setDefaultSectionSize(250)
+        self.tblParameters.horizontalHeader().setMinimumSectionSize(150)
+        self.tblParameters.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
+        self.tblParameters.verticalHeader().setResizeMode(QHeaderView.ResizeToContents)
+        self.tblParameters.horizontalHeader().setStretchLastSection(True)
+
     def getWidgetFromParameter(self, param, row, col):
         if isinstance(param, (ParameterRaster, ParameterVector, ParameterTable,
                               ParameterMultipleInput)):
@@ -146,7 +158,7 @@ class BatchPanel(QWidget, Ui_Form):
         else:
             item = QLineEdit()
             try:
-                item.setText(str(param.default))
+                item.setText(unicode(param.default))
             except:
                 pass
 

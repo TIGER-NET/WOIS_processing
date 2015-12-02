@@ -1,7 +1,7 @@
 ##Table=group
-##input=vector
-##fields=string
-##output=output table
+##Input=vector
+##Fields=string
+##Frequency=output table
 
 from processing.tools.vector import TableWriter
 from collections import defaultdict
@@ -16,7 +16,7 @@ for f in fields:
     if idx == -1:
         raise GeoAlgorithmExecutionException('Field not found:' + f)
     fieldIdxs.append(idx)
-writer = TableWriter(output, None,  fields + ['FREQ'])
+writer = TableWriter(output, None, fields + ['FREQ'])
 
 counts = {}
 feats = processing.features(layer)

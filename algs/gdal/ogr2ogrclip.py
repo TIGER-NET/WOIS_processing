@@ -34,6 +34,7 @@ from processing.tools.system import isWindows
 from processing.algs.gdal.OgrAlgorithm import OgrAlgorithm
 from processing.algs.gdal.GdalUtils import GdalUtils
 
+
 class Ogr2OgrClip(OgrAlgorithm):
 
     OUTPUT_LAYER = 'OUTPUT_LAYER'
@@ -42,19 +43,19 @@ class Ogr2OgrClip(OgrAlgorithm):
     OPTIONS = 'OPTIONS'
 
     def defineCharacteristics(self):
-        self.name = 'Clip vectors by polygon'
-        self.group = '[OGR] Geoprocessing'
+        self.name, self.i18n_name = self.trAlgorithm('Clip vectors by polygon')
+        self.group, self.i18n_group = self.trAlgorithm('[OGR] Geoprocessing')
 
         self.addParameter(ParameterVector(self.INPUT_LAYER,
-            self.tr('Input layer'), [ParameterVector.VECTOR_TYPE_ANY], False))
+                                          self.tr('Input layer'), [ParameterVector.VECTOR_TYPE_ANY], False))
         self.addParameter(ParameterVector(self.CLIP_LAYER,
-            self.tr('Clip layer'), [ParameterVector.VECTOR_TYPE_POLYGON], False))
+                                          self.tr('Clip layer'), [ParameterVector.VECTOR_TYPE_POLYGON], False))
         self.addParameter(ParameterString(self.OPTIONS,
-            self.tr('Additional creation options'), '', optional=True))
+                                          self.tr('Additional creation options'), '', optional=True))
 
-        self.addOutput(OutputVector(self.OUTPUT_LAYER, self.tr('Output layer')))
+        self.addOutput(OutputVector(self.OUTPUT_LAYER, self.tr('Clipped (polygon)')))
 
-    def processAlgorithm(self, progress):
+    def getConsoleCommands(self):
         inLayer = self.getParameterValue(self.INPUT_LAYER)
         ogrLayer = self.ogrConnectionString(inLayer)[1:-1]
         clipLayer = self.getParameterValue(self.CLIP_LAYER)
@@ -85,4 +86,7 @@ class Ogr2OgrClip(OgrAlgorithm):
         else:
             commands = ['ogr2ogr', GdalUtils.escapeAndJoin(arguments)]
 
-        GdalUtils.runGdal(commands, progress)
+        return commands
+
+    def commandName(self):
+        return "ogr2ogr"

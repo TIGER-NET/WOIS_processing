@@ -2,14 +2,14 @@
 ##input=vector
 ##class_field=field input
 ##value_field=field input
-##output=output vector
+##N unique values=output vector
 
 layer = processing.getObject(input)
 provider = layer.dataProvider()
 fields = provider.fields()
 fields.append(QgsField('UNIQ_COUNT', QVariant.Int))
 writer = processing.VectorWriter(output, None, fields, provider.geometryType(),
-                      layer.crs())
+                                 layer.crs())
 
 class_field_index = layer.fieldNameIndex(class_field)
 value_field_index = layer.fieldNameIndex(value_field)

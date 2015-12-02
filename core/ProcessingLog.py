@@ -31,6 +31,8 @@ import codecs
 import datetime
 from processing.tools.system import userFolder
 from processing.core.ProcessingConfig import ProcessingConfig
+from qgis.core import *
+
 
 class ProcessingLog:
 
@@ -38,7 +40,7 @@ class ProcessingLog:
     LOG_INFO = 'INFO'
     LOG_WARNING = 'WARNING'
     LOG_ALGORITHM = 'ALGORITHM'
-    DATE_FORMAT = u'%a %b %d %Y %H:%M:%S'.encode('utf-8')
+    DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
     recentAlgs = []
 
     @staticmethod
@@ -51,7 +53,7 @@ class ProcessingLog:
                                   encoding='utf-8')
         logfile.write('Started logging at ' +
                       datetime.datetime.now().strftime(
-                          ProcessingLog.DATE_FORMAT).decode('utf-8') + '\n')
+                          ProcessingLog.DATE_FORMAT) + '\n')
         logfile.close()
 
     @staticmethod
@@ -66,20 +68,15 @@ class ProcessingLog:
             # added. To avoid it stopping the normal functioning of the
             # algorithm, we catch all errors, assuming that is better
             # to miss some log info that breaking the algorithm.
-            if isinstance(msg, list):
-                a = '|'.join(m.strip('\n') for m in msg)
-                text = a
-            else:
-                text = msg.replace('\n', '|')
-            line = msgtype + '|' + datetime.datetime.now().strftime(
-                ProcessingLog.DATE_FORMAT).decode('utf-8') + '|' \
-                + text + '\n'
-            logfile = codecs.open(ProcessingLog.logFilename(), 'a',
-                                  encoding='utf-8')
-            logfile.write(line)
-            logfile.close()
             if msgtype == ProcessingLog.LOG_ALGORITHM:
-                algname = text[len('Processing.runalg("'):]
+                line = msgtype + '|' + datetime.datetime.now().strftime(
+                    ProcessingLog.DATE_FORMAT) + '|' \
+                    + msg + '\n'
+                logfile = codecs.open(ProcessingLog.logFilename(), 'a',
+                                      encoding='utf-8')
+                logfile.write(line)
+                logfile.close()
+                algname = msg[len('Processing.runalg("'):]
                 algname = algname[:algname.index('"')]
                 if algname not in ProcessingLog.recentAlgs:
                     ProcessingLog.recentAlgs.append(algname)
@@ -87,6 +84,13 @@ class ProcessingLog:
                     ProcessingConfig.setSettingValue(
                         ProcessingConfig.RECENT_ALGORITHMS,
                         recentAlgsString)
+            else:
+                if isinstance(msg, list):
+                    msg = '\n'.join([m for m in msg])
+                msgtypes = {ProcessingLog.LOG_ERROR: QgsMessageLog.CRITICAL,
+                            ProcessingLog.LOG_INFO: QgsMessageLog.INFO,
+                            ProcessingLog.LOG_WARNING: QgsMessageLog.WARNING, }
+                QgsMessageLog.logMessage(msg, "Processing", msgtypes[msgtype])
         except:
             pass
 
@@ -113,10 +117,7 @@ class ProcessingLog:
             elif line.startswith(ProcessingLog.LOG_INFO):
                 info.append(LogEntry(tokens[1], text))
 
-        entries[ProcessingLog.LOG_ERROR] = errors
         entries[ProcessingLog.LOG_ALGORITHM] = algorithms
-        entries[ProcessingLog.LOG_INFO] = info
-        entries[ProcessingLog.LOG_WARNING] = warnings
         return entries
 
     @staticmethod
@@ -178,6 +179,7 @@ class LogEntry:
 
 
 class Tailer(object):
+
     """Implements tailing and heading functionality like GNU tail and
     head commands.
     """

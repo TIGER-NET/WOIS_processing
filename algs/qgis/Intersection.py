@@ -25,7 +25,7 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
-from qgis.core import QGis, QgsFeatureRequest, QgsFeature, QgsGeometry
+from qgis.core import QGis, QgsFeatureRequest, QgsFeature, QgsGeometry, QgsWKBTypes
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.ProcessingLog import ProcessingLog
 from processing.core.parameters import ParameterVector
@@ -40,6 +40,7 @@ wkbTypeGroups = {
 for key, value in wkbTypeGroups.items():
     for const in value:
         wkbTypeGroups[const] = key
+
 
 class Intersection(GeoAlgorithm):
 
@@ -56,7 +57,7 @@ class Intersection(GeoAlgorithm):
 
         fields = vector.combineVectorFields(vlayerA, vlayerB)
         writer = self.getOutputFromName(self.OUTPUT).getVectorWriter(fields,
-                vproviderA.geometryType(), vproviderA.crs())
+                                                                     vproviderA.geometryType(), vproviderA.crs())
         inFeatA = QgsFeature()
         inFeatB = QgsFeature()
         outFeat = QgsFeature()
@@ -78,7 +79,7 @@ class Intersection(GeoAlgorithm):
                     if geom.intersects(tmpGeom):
                         atMapB = inFeatB.attributes()
                         int_geom = QgsGeometry(geom.intersection(tmpGeom))
-                        if int_geom.wkbType() == QGis.WKBUnknown:
+                        if int_geom.wkbType() == QGis.WKBUnknown or QgsWKBTypes.flatType(int_geom.geometry().wkbType()) == QgsWKBTypes.GeometryCollection:
                             int_com = geom.combine(tmpGeom)
                             int_sym = geom.symDifference(tmpGeom)
                             int_geom = QgsGeometry(int_com.difference(int_sym))
@@ -92,7 +93,7 @@ class Intersection(GeoAlgorithm):
                                 writer.addFeature(outFeat)
                         except:
                             ProcessingLog.addToLog(ProcessingLog.LOG_INFO,
-                                self.tr('Feature geometry error: One or more output features ignored due to invalid geometry.'))
+                                                   self.tr('Feature geometry error: One or more output features ignored due to invalid geometry.'))
                             continue
                 except:
                     break
@@ -100,10 +101,10 @@ class Intersection(GeoAlgorithm):
         del writer
 
     def defineCharacteristics(self):
-        self.name = 'Intersection'
-        self.group = 'Vector overlay tools'
+        self.name, self.i18n_name = self.trAlgorithm('Intersection')
+        self.group, self.i18n_group = self.trAlgorithm('Vector overlay tools')
         self.addParameter(ParameterVector(self.INPUT,
-            self.tr('Input layer'), [ParameterVector.VECTOR_TYPE_ANY]))
+                                          self.tr('Input layer'), [ParameterVector.VECTOR_TYPE_ANY]))
         self.addParameter(ParameterVector(self.INPUT2,
-            self.tr('Intersect layer'), [ParameterVector.VECTOR_TYPE_ANY]))
+                                          self.tr('Intersect layer'), [ParameterVector.VECTOR_TYPE_ANY]))
         self.addOutput(OutputVector(self.OUTPUT, self.tr('Intersection')))
