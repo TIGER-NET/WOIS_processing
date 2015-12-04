@@ -154,14 +154,16 @@ class OutputRaster(Output):
     compatible = None
 
     def getFileFilter(self, alg):
-        exts = dataobjects.getSupportedOutputRasterLayerExtensions()
+        exts = alg.provider.getSupportedOutputRasterLayerExtensions()
+        if exts == ['tif']:
+            exts = dataobjects.getSupportedOutputRasterLayerExtensions()
         for i in range(len(exts)):
             exts[i] = self.tr('%s files (*.%s)', 'OutputVector') % (exts[i].upper(), exts[i].lower())
         return ';;'.join(exts)
 
     def getDefaultFileExtension(self, alg):
         supported = alg.provider.getSupportedOutputRasterLayerExtensions()
-        default = ProcessingConfig.getSetting(ProcessingConfig.DEFAULT_OUTPUT_VECTOR_LAYER_EXT)
+        default = ProcessingConfig.getSetting(ProcessingConfig.DEFAULT_OUTPUT_RASTER_LAYER_EXT)
         ext = default if default in supported else supported[0]
         return ext
 
@@ -251,7 +253,7 @@ class OutputVector(Output):
     compatible = None
 
     def getFileFilter(self, alg):
-        exts = dataobjects.getSupportedOutputVectorLayerExtensions()
+        exts = alg.provider.getSupportedOutputVectorLayerExtensions()
         for i in range(len(exts)):
             exts[i] = self.tr('%s files (*.%s)', 'OutputVector') % (exts[i].upper(), exts[i].lower())
         return ';;'.join(exts)
