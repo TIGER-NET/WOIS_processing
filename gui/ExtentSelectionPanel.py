@@ -65,6 +65,18 @@ class ExtentSelectionPanel(BASE, WIDGET):
         self.prevMapTool = canvas.mapTool()
         self.tool = RectangleMapTool(canvas)
         self.tool.rectangleCreated.connect(self.updateExtent)
+        
+        if default:
+            tokens = unicode(default).split(',')
+            if len(tokens) == 4:
+                try:
+                    float(tokens[0])
+                    float(tokens[1])
+                    float(tokens[2])
+                    float(tokens[3])
+                    self.leText.setText(unicode(default))
+                except:
+                    pass
 
     def canUseAutoExtent(self):
         for param in self.params:
