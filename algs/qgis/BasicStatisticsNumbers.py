@@ -26,6 +26,7 @@ __copyright__ = '(C) 2012, Victor Olaya'
 __revision__ = '$Format:%H$'
 
 import math
+import codecs
 
 from qgis.core import QgsStatisticalSummary
 from processing.core.GeoAlgorithm import GeoAlgorithm
@@ -56,6 +57,7 @@ class BasicStatisticsNumbers(GeoAlgorithm):
     MAJORITY = 'MAJORITY'
     FIRSTQUARTILE = 'FIRSTQUARTILE'
     THIRDQUARTILE = 'THIRDQUARTILE'
+    NULLVALUES = 'NULLVALUES'
     IQR = 'IQR'
 
     def defineCharacteristics(self):
@@ -85,6 +87,7 @@ class BasicStatisticsNumbers(GeoAlgorithm):
         self.addOutput(OutputNumber(self.MAJORITY, self.tr('Majority (most frequently occurring value)')))
         self.addOutput(OutputNumber(self.FIRSTQUARTILE, self.tr('First quartile')))
         self.addOutput(OutputNumber(self.THIRDQUARTILE, self.tr('Third quartile')))
+        self.addOutput(OutputNumber(self.NULLVALUES, self.tr('NULL (missed) values')))
         self.addOutput(OutputNumber(self.IQR, self.tr('Interquartile Range (IQR)')))
 
     def processAlgorithm(self, progress):
@@ -93,8 +96,6 @@ class BasicStatisticsNumbers(GeoAlgorithm):
         fieldName = self.getParameterValue(self.FIELD_NAME)
 
         outputFile = self.getOutputValue(self.OUTPUT_HTML_FILE)
-
-        index = layer.fieldNameIndex(fieldName)
 
         cvValue = 0
         minValue = 0
@@ -107,6 +108,7 @@ class BasicStatisticsNumbers(GeoAlgorithm):
         majority = 0
         firstQuartile = 0
         thirdQuartile = 0
+        nullValues = 0
         iqr = 0
 
         isFirst = True
@@ -115,12 +117,13 @@ class BasicStatisticsNumbers(GeoAlgorithm):
         features = vector.features(layer)
         count = len(features)
         total = 100.0 / float(count)
-        current = 0
-        for ft in features:
-            if ft.attributes()[index]:
-                values.append(float(ft.attributes()[index]))
+        for current, ft in enumerate(features):
+            value = ft[fieldName]
+            if value or value == 0:
+                values.append(float(value))
+            else:
+                nullValues += 1
 
-            current += 1
             progress.setPercentage(int(current * total))
 
         stat = QgsStatisticalSummary()
@@ -144,21 +147,24 @@ class BasicStatisticsNumbers(GeoAlgorithm):
         iqr = stat.interQuartileRange()
 
         data = []
-        data.append('Count: ' + unicode(count))
-        data.append('Unique values: ' + unicode(uniqueValue))
-        data.append('Minimum value: ' + unicode(minValue))
-        data.append('Maximum value: ' + unicode(maxValue))
-        data.append('Range: ' + unicode(rValue))
-        data.append('Sum: ' + unicode(sumValue))
-        data.append('Mean value: ' + unicode(meanValue))
-        data.append('Median value: ' + unicode(medianValue))
-        data.append('Standard deviation: ' + unicode(stdDevValue))
-        data.append('Coefficient of Variation: ' + unicode(cvValue))
-        data.append('Minority (rarest occurring value): ' + unicode(minority))
-        data.append('Majority (most frequently occurring value): ' + unicode(majority))
-        data.append('First quartile: ' + unicode(firstQuartile))
-        data.append('Third quartile: ' + unicode(thirdQuartile))
-        data.append('Interquartile Range (IQR): ' + unicode(iqr))
+        data.append(self.tr('Analyzed layer: {}').format(layer.name()))
+        data.append(self.tr('Analyzed field: {}').format(fieldName))
+        data.append(self.tr('Count: {}').format(count))
+        data.append(self.tr('Unique values: {}').format(uniqueValue))
+        data.append(self.tr('Minimum value: {}').format(minValue))
+        data.append(self.tr('Maximum value: {}').format(maxValue))
+        data.append(self.tr('Range: {}').format(rValue))
+        data.append(self.tr('Sum: {}').format(sumValue))
+        data.append(self.tr('Mean value: {}').format(meanValue))
+        data.append(self.tr('Median value: {}').format(medianValue))
+        data.append(self.tr('Standard deviation: {}').format(stdDevValue))
+        data.append(self.tr('Coefficient of Variation: {}').format(cvValue))
+        data.append(self.tr('Minority (rarest occurring value): {}').format(minority))
+        data.append(self.tr('Majority (most frequently occurring value): {}').format(majority))
+        data.append(self.tr('First quartile: {}').format(firstQuartile))
+        data.append(self.tr('Third quartile: {}').format(thirdQuartile))
+        data.append(self.tr('NULL (missing) values: {}').format(nullValues))
+        data.append(self.tr('Interquartile Range (IQR): {}').format(iqr))
 
         self.createHTML(outputFile, data)
 
@@ -175,10 +181,15 @@ class BasicStatisticsNumbers(GeoAlgorithm):
         self.setOutputValue(self.MAJORITY, majority)
         self.setOutputValue(self.FIRSTQUARTILE, firstQuartile)
         self.setOutputValue(self.THIRDQUARTILE, thirdQuartile)
+        self.setOutputValue(self.NULLVALUES, nullValues)
         self.setOutputValue(self.IQR, iqr)
 
     def createHTML(self, outputFile, algData):
-        f = open(outputFile, 'w')
+        f = codecs.open(outputFile, 'w', encoding='utf-8')
+        f.write('<html><head>\n')
+        f.write('<meta http-equiv="Content-Type" content="text/html; \
+                charset=utf-8" /></head><body>\n')
         for s in algData:
-            f.write('<p>' + unicode(s) + '</p>')
+            f.write('<p>' + unicode(s) + '</p>\n')
+        f.write('</body></html>\n')
         f.close()

@@ -58,8 +58,6 @@ pluginPath = os.path.split(os.path.dirname(__file__))[0]
 
 class ScriptAlgorithm(GeoAlgorithm):
 
-    _icon = QtGui.QIcon(os.path.join(pluginPath, 'images', 'script.png'))
-
     def __init__(self, descriptionFile, script=None):
         """The script parameter can be used to directly pass the code
         of the script without a file.
@@ -69,8 +67,11 @@ class ScriptAlgorithm(GeoAlgorithm):
         """
 
         GeoAlgorithm.__init__(self)
+        self._icon = QtGui.QIcon(os.path.join(pluginPath, 'images', 'script.png'))
+
         self.script = script
         self.allowEdit = True
+        self.noCRSWarning = False
         self.descriptionFile = descriptionFile
         if script is not None:
             self.defineCharacteristicsFromScript()
@@ -120,6 +121,12 @@ class ScriptAlgorithm(GeoAlgorithm):
                 except:
                     pass
 
+    def checkInputCRS(self):
+        if self.noCRSWarning:
+            return True
+        else:
+            return GeoAlgorithm.checkInputCRS(self)
+
     def createDescriptiveName(self, s):
         return s.replace('_', ' ')
 
@@ -136,6 +143,9 @@ class ScriptAlgorithm(GeoAlgorithm):
             return
         if line == "nomodeler":
             self.showInModeler = False
+            return
+        if line == "nocrswarning":
+            self.noCRSWarning = True
             return
         tokens = line.split('=', 1)
         desc = self.createDescriptiveName(tokens[0])
@@ -207,7 +217,10 @@ class ScriptAlgorithm(GeoAlgorithm):
             param = ParameterSelection(name, descName, options)
         elif token.lower().strip().startswith('boolean'):
             default = token.strip()[len('boolean') + 1:]
-            param = ParameterBoolean(name, descName, default)
+            if default:
+                param = ParameterBoolean(name, descName, default)
+            else:
+                param = ParameterBoolean(name, descName)
         elif token.lower().strip() == 'extent':
             param = ParameterExtent(name, descName)
         elif token.lower().strip() == 'file':
@@ -216,7 +229,10 @@ class ScriptAlgorithm(GeoAlgorithm):
             param = ParameterFile(name, descName, True)
         elif token.lower().strip().startswith('number'):
             default = token.strip()[len('number') + 1:]
-            param = ParameterNumber(name, descName, default=default)
+            if default:
+                param = ParameterNumber(name, descName, default=default)
+            else:
+                param = ParameterNumber(name, descName)
         elif token.lower().strip().startswith('field'):
             field = token.strip()[len('field') + 1:]
             found = False
@@ -228,15 +244,22 @@ class ScriptAlgorithm(GeoAlgorithm):
                 param = ParameterTableField(name, descName, field)
         elif token.lower().strip().startswith('string'):
             default = token.strip()[len('string') + 1:]
-            param = ParameterString(name, descName, default)
+            if default:
+                param = ParameterString(name, descName, default)
+            else:
+                param = ParameterString(name, descName)
         elif token.lower().strip().startswith('longstring'):
             default = token.strip()[len('longstring') + 1:]
-            param = ParameterString(name, descName, default, multiline=True)
+            if default:
+                param = ParameterString(name, descName, default, multiline=True)
+            else:
+                param = ParameterString(name, descName, multiline=True)
         elif token.lower().strip().startswith('crs'):
             default = token.strip()[len('crs') + 1:]
-            if not default:
-                default = 'EPSG:4326'
-            param = ParameterCrs(name, descName, default)
+            if default:
+                param = ParameterCrs(name, descName, default)
+            else:
+                param = ParameterCrs(name, descName)
 
         return param
 

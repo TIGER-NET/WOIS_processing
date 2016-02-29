@@ -68,8 +68,7 @@ class translate(GdalAlgorithm):
     def defineCharacteristics(self):
         self.name, self.i18n_name = self.trAlgorithm('Translate (convert format)')
         self.group, self.i18n_group = self.trAlgorithm('[GDAL] Conversion')
-        self.addParameter(ParameterRaster(self.INPUT, self.tr('Input layer'),
-                          False))
+        self.addParameter(ParameterRaster(self.INPUT, self.tr('Input layer'), False))
         self.addParameter(ParameterNumber(self.OUTSIZE,
                                           self.tr('Set the size of the output file (In pixels or %)'),
                                           1, None, 100))
@@ -81,7 +80,7 @@ class translate(GdalAlgorithm):
         self.addParameter(ParameterSelection(self.EXPAND,
                                              self.tr('Expand'), ['none', 'gray', 'rgb', 'rgba']))
         self.addParameter(ParameterCrs(self.SRS,
-                                       self.tr('Output projection for output file [leave blank to use input projection]'), None))
+                                       self.tr('Output projection for output file [leave blank to use input projection]'), None, optional=True))
         self.addParameter(ParameterExtent(self.PROJWIN,
                                           self.tr('Subset based on georeferenced coordinates')))
         self.addParameter(ParameterBoolean(self.SDS,
@@ -156,11 +155,17 @@ class translate(GdalAlgorithm):
             arguments.append('-expand')
             arguments.append(expand)
         regionCoords = projwin.split(',')
-        arguments.append('-projwin')
-        arguments.append(regionCoords[0])
-        arguments.append(regionCoords[3])
-        arguments.append(regionCoords[1])
-        arguments.append(regionCoords[2])
+        try:
+            projwin = []
+            projwin.append('-projwin')
+            projwin.append(regionCoords[0])
+            projwin.append(regionCoords[3])
+            projwin.append(regionCoords[1])
+            projwin.append(regionCoords[2])
+        except IndexError:
+            projwin = []
+        if projwin:
+            arguments.extend(projwin)
         if crsId:
             arguments.append('-a_srs')
             arguments.append(unicode(crsId))

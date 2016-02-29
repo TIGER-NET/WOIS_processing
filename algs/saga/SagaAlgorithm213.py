@@ -103,7 +103,10 @@ class SagaAlgorithm213(SagaAlgorithm212):
                             if exportCommand is not None:
                                 commands.append(exportCommand)
                         param.value = ";".join(layers)
-                elif param.datatype == ParameterMultipleInput.TYPE_VECTOR_ANY:
+                elif param.datatype in [ParameterMultipleInput.TYPE_VECTOR_ANY,
+                                        ParameterMultipleInput.TYPE_VECTOR_LINE,
+                                        ParameterMultipleInput.TYPE_VECTOR_POLYGON,
+                                        ParameterMultipleInput.TYPE_VECTOR_POINT]:
                     for layerfile in layers:
                         layer = dataobjects.getObjectFromUri(layerfile, False)
                         if layer:
@@ -121,7 +124,7 @@ class SagaAlgorithm213(SagaAlgorithm212):
             if param.value is None:
                 continue
             if isinstance(param, (ParameterRaster, ParameterVector,
-                          ParameterTable)):
+                                  ParameterTable)):
                 value = param.value
                 if value in self.exportedLayers.keys():
                     command += ' -' + param.name + ' "' \

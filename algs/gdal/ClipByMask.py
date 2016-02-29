@@ -27,8 +27,6 @@ __revision__ = '$Format:%H$'
 
 from osgeo import gdal
 
-from processing.algs.gdal.GdalAlgorithm import GdalAlgorithm
-
 from processing.core.parameters import ParameterRaster
 from processing.core.parameters import ParameterVector
 from processing.core.parameters import ParameterBoolean
@@ -38,11 +36,14 @@ from processing.core.parameters import ParameterNumber
 
 from processing.core.outputs import OutputRaster
 
-from processing.algs.gdal.OgrAlgorithm import OgrAlgorithm
+from processing.algs.gdal.GdalAlgorithm import GdalAlgorithm
 from processing.algs.gdal.GdalUtils import GdalUtils
 
+from processing.tools import dataobjects
+from processing.tools.vector import ogrConnectionString
 
-class ClipByMask(GdalAlgorithm, OgrAlgorithm):
+
+class ClipByMask(GdalAlgorithm):
 
     INPUT = 'INPUT'
     OUTPUT = 'OUTPUT'
@@ -69,7 +70,7 @@ class ClipByMask(GdalAlgorithm, OgrAlgorithm):
         self.group, self.i18n_group = self.trAlgorithm('[GDAL] Extraction')
         self.addParameter(ParameterRaster(self.INPUT, self.tr('Input layer'), False))
         self.addParameter(ParameterVector(self.MASK, self.tr('Mask layer'),
-                          [ParameterVector.VECTOR_TYPE_POLYGON]))
+                                          [ParameterVector.VECTOR_TYPE_POLYGON]))
         self.addParameter(ParameterString(self.NO_DATA,
                                           self.tr("Nodata value, leave blank to take the nodata value from input"),
                                           '-9999'))
@@ -112,7 +113,9 @@ class ClipByMask(GdalAlgorithm, OgrAlgorithm):
     def getConsoleCommands(self):
         out = self.getOutputValue(self.OUTPUT)
         mask = self.getParameterValue(self.MASK)
-        ogrMask = self.ogrConnectionString(mask)[1:-1]
+        maskLayer = dataobjects.getObjectFromUri(
+            self.getParameterValue(self.MASK))
+        ogrMask = ogrConnectionString(mask)[1:-1]
         noData = unicode(self.getParameterValue(self.NO_DATA))
         addAlphaBand = self.getParameterValue(self.ALPHA_BAND)
         cropToCutline = self.getParameterValue(self.CROP_TO_CUTLINE)
@@ -147,6 +150,9 @@ class ClipByMask(GdalAlgorithm, OgrAlgorithm):
 
         arguments.append('-cutline')
         arguments.append(ogrMask)
+        if maskLayer and maskLayer.subsetString() != '':
+            arguments.append('-cwhere')
+            arguments.append(maskLayer.subsetString())
 
         if cropToCutline:
             arguments.append('-crop_to_cutline')

@@ -45,7 +45,7 @@ def getParameterFromString(s):
 
 
 def parseBool(s):
-    if s == unicode(None):
+    if s is None or s == unicode(None).lower():
         return None
     return unicode(s).lower() == unicode(True).lower()
 
@@ -57,10 +57,11 @@ class Parameter:
     take as input.
     """
 
-    def __init__(self, name='', description='', optional=False):
+    def __init__(self, name='', description='', default=None, optional=False):
         self.name = name
         self.description = description
-        self.value = None
+        self.default = default
+        self.value = default
 
         self.isAdvanced = False
 
@@ -83,8 +84,18 @@ class Parameter:
                 return False
             self.value = None
             return True
+
         self.value = unicode(obj)
         return True
+
+    def setDefaultValue(self):
+        """
+        Sets the value of the parameter to the default one
+
+        Returns true if the default value is correct for the type
+        of parameter.
+        """
+        return self.setValue(self.default)
 
     def __str__(self):
         return u'{} <{}>'.format(self.name, self.__class__.__name__)
@@ -111,17 +122,16 @@ class Parameter:
 
 class ParameterBoolean(Parameter):
 
-    def __init__(self, name='', description='', default=True, optional=False):
-        Parameter.__init__(self, name, description, optional)
-        self.default = parseBool(default)
-        self.value = None
+    def __init__(self, name='', description='', default=None, optional=False):
+        Parameter.__init__(self, name, description, parseBool(default), optional)
 
     def setValue(self, value):
         if value is None:
             if not self.optional:
                 return False
-            self.value = self.default
+            self.value = None
             return True
+
         if isinstance(value, basestring):
             self.value = unicode(value).lower() == unicode(True).lower()
         else:
@@ -134,20 +144,18 @@ class ParameterBoolean(Parameter):
 
 class ParameterCrs(Parameter):
 
-    def __init__(self, name='', description='', default='EPSG:4326', optional=False):
+    def __init__(self, name='', description='', default=None, optional=False):
         '''The value is a string that uniquely identifies the
         coordinate reference system. Typically it is the auth id of the CRS
         (if the authority is EPSG) or proj4 string of the CRS (in case
         of other authorities or user defined projections).'''
-        Parameter.__init__(self, name, description, optional)
-        self.value = None
-        self.default = default
+        Parameter.__init__(self, name, description, default, optional)
 
     def setValue(self, value):
-        if value is None:
+        if value is None or value.strip() == '':
             if not self.optional:
                 return False
-            self.value = self.default
+            self.value = None if value is None else value.strip()
             return True
 
         # TODO: check it is a valid authid
@@ -176,11 +184,9 @@ class ParameterExtent(Parameter):
 
     USE_MIN_COVERING_EXTENT = 'USE_MIN_COVERING_EXTENT'
 
-    def __init__(self, name='', description='', default='0,1,0,1', optional=False):
-        Parameter.__init__(self, name, description, optional)
-        self.default = default
+    def __init__(self, name='', description='', default=None, optional=False):
+        Parameter.__init__(self, name, description, default, optional)
         # The value is a string in the form "xmin, xmax, ymin, ymax"
-        self.value = None
 
     def setValue(self, text):
         if text is None:
@@ -188,7 +194,8 @@ class ParameterExtent(Parameter):
                 return False
             self.value = None
             return True
-        tokens = text.split(',')
+
+        tokens = unicode(text).split(',')
         if len(tokens) != 4:
             return False
         try:
@@ -211,8 +218,7 @@ class ParameterExtent(Parameter):
 class ParameterFile(Parameter):
 
     def __init__(self, name='', description='', isFolder=False, optional=True, ext=None):
-        Parameter.__init__(self, name, description, parseBool(optional))
-        self.value = None
+        Parameter.__init__(self, name, description, None, parseBool(optional))
         self.ext = ext
         self.isFolder = parseBool(isFolder)
 
@@ -220,13 +226,15 @@ class ParameterFile(Parameter):
         return '"' + unicode(self.value) + '"'
 
     def setValue(self, obj):
-        self.value = unicode(obj)
-        if self.value.strip() == '' or self.value is None:
+        if obj is None or obj.strip() == '':
             if not self.optional:
                 return False
-            self.value = ''
-        if self.ext is not None and self.value != '':
-            return self.value.endswith(self.ext)
+            self.value = None if obj is None else obj.strip()
+            return True
+
+        if self.ext is not None and obj != '' and not obj.endswith(self.ext):
+            return False
+        self.value = unicode(obj)
         return True
 
     def typeName(self):
@@ -246,13 +254,12 @@ class ParameterFixedTable(Parameter):
 
     def __init__(self, name='', description='', numRows=3,
                  cols=['value'], fixedNumOfRows=False, optional=False):
-        Parameter.__init__(self, name, description, optional)
+        Parameter.__init__(self, name, description, None, optional)
         self.cols = cols
         if isinstance(cols, basestring):
             self.cols = self.cols.split(";")
         self.numRows = int(numRows)
         self.fixedNumOfRows = parseBool(fixedNumOfRows)
-        self.value = None
 
     def setValue(self, obj):
         if obj is None:
@@ -260,6 +267,7 @@ class ParameterFixedTable(Parameter):
                 return False
             self.value = None
             return True
+
         # TODO: check that it contains a correct number of elements
         if isinstance(obj, (str, unicode)):
             self.value = obj
@@ -298,9 +306,8 @@ class ParameterMultipleInput(ParameterDataObject):
     TYPE_FILE = 4
 
     def __init__(self, name='', description='', datatype=-1, optional=False):
-        ParameterDataObject.__init__(self, name, description, optional)
+        ParameterDataObject.__init__(self, name, description, None, optional)
         self.datatype = int(float(datatype))
-        self.value = None
         self.exported = None
 
     def setValue(self, obj):
@@ -434,14 +441,19 @@ class ParameterMultipleInput(ParameterDataObject):
 class ParameterNumber(Parameter):
 
     def __init__(self, name='', description='', minValue=None, maxValue=None,
-                 default=0.0, optional=False):
-        Parameter.__init__(self, name, description, optional)
-        try:
-            self.default = int(unicode(default))
-            self.isInteger = True
-        except:
-            self.default = float(default)
+                 default=None, optional=False):
+        Parameter.__init__(self, name, description, default, optional)
+
+        if default is not None:
+            try:
+                self.default = int(unicode(default))
+                self.isInteger = True
+            except ValueError:
+                self.default = float(default)
+                self.isInteger = False
+        else:
             self.isInteger = False
+
         if minValue is not None:
             self.min = int(float(minValue)) if self.isInteger else float(minValue)
         else:
@@ -450,14 +462,15 @@ class ParameterNumber(Parameter):
             self.max = int(float(maxValue)) if self.isInteger else float(maxValue)
         else:
             self.max = None
-        self.value = None
+        self.value = self.default
 
     def setValue(self, n):
         if n is None:
             if not self.optional:
                 return False
-            self.value = self.default
+            self.value = None
             return True
+
         try:
             if float(n) - int(float(n)) == 0:
                 value = int(float(n))
@@ -480,17 +493,18 @@ class ParameterNumber(Parameter):
 
 class ParameterRange(Parameter):
 
-    def __init__(self, name='', description='', default='0,1', optional=False):
-        Parameter.__init__(self, name, description, optional)
-        self.default = default
-        self.value = None
+    def __init__(self, name='', description='', default=None, optional=False):
+        Parameter.__init__(self, name, description, default, optional)
 
-        values = default.split(',')
-        try:
-            int(values[0])
-            int(values[1])
-            self.isInteger = True
-        except:
+        if default is not None:
+            values = default.split(',')
+            try:
+                int(values[0])
+                int(values[1])
+                self.isInteger = True
+            except:
+                self.isInteger = False
+        else:
             self.isInteger = False
 
     def setValue(self, text):
@@ -499,6 +513,7 @@ class ParameterRange(Parameter):
                 return False
             self.value = None
             return True
+
         tokens = text.split(',')
         if len(tokens) != 2:
             return False
@@ -517,9 +532,8 @@ class ParameterRange(Parameter):
 class ParameterRaster(ParameterDataObject):
 
     def __init__(self, name='', description='', optional=False, showSublayersDialog=True):
-        ParameterDataObject.__init__(self, name, description, optional)
+        ParameterDataObject.__init__(self, name, description, None, optional)
         self.showSublayersDialog = parseBool(showSublayersDialog)
-        self.value = None
         self.exported = None
 
     def getSafeExportedLayer(self):
@@ -557,6 +571,7 @@ class ParameterRaster(ParameterDataObject):
                 return False
             self.value = None
             return True
+
         if isinstance(obj, QgsRasterLayer):
             self.value = unicode(obj.dataProvider().dataSourceUri())
             return True
@@ -576,9 +591,9 @@ class ParameterRaster(ParameterDataObject):
 
 class ParameterSelection(Parameter):
 
-    def __init__(self, name='', description='', options=[], default=0, isSource=False,
+    def __init__(self, name='', description='', options=[], default=None, isSource=False,
                  optional=False):
-        Parameter.__init__(self, name, description, optional)
+        Parameter.__init__(self, name, description, default, optional)
         isSource = parseBool(isSource)
         self.options = options
         if isSource:
@@ -594,15 +609,21 @@ class ParameterSelection(Parameter):
                     pass
         elif isinstance(self.options, basestring):
             self.options = self.options.split(";")
-        self.value = None
-        self.default = int(default)
+
+        if default is not None:
+            try:
+                self.default = int(default)
+            except:
+                self.default = 0
+            self.value = self.default
 
     def setValue(self, n):
         if n is None:
             if not self.optional:
                 return False
-            self.value = self.default
+            self.value = 0
             return True
+
         try:
             n = int(n)
             self.value = n
@@ -616,19 +637,18 @@ class ParameterString(Parameter):
     NEWLINE = '\n'
     ESCAPED_NEWLINE = '\\n'
 
-    def __init__(self, name='', description='', default='', multiline=False,
+    def __init__(self, name='', description='', default=None, multiline=False,
                  optional=False):
-        Parameter.__init__(self, name, description, optional)
-        self.default = default
-        self.value = None
+        Parameter.__init__(self, name, description, default, optional)
         self.multiline = parseBool(multiline)
 
     def setValue(self, obj):
         if obj is None:
             if not self.optional:
                 return False
-            self.value = ''
+            self.value = None
             return True
+
         self.value = unicode(obj).replace(
             ParameterString.ESCAPED_NEWLINE,
             ParameterString.NEWLINE
@@ -647,8 +667,7 @@ class ParameterString(Parameter):
 class ParameterTable(ParameterDataObject):
 
     def __init__(self, name='', description='', optional=False):
-        ParameterDataObject.__init__(self, name, description, optional)
-        self.value = None
+        ParameterDataObject.__init__(self, name, description, None, optional)
         self.exported = None
 
     def setValue(self, obj):
@@ -658,6 +677,7 @@ class ParameterTable(ParameterDataObject):
                 return False
             self.value = None
             return True
+
         if isinstance(obj, QgsVectorLayer):
             source = unicode(obj.source())
             self.value = source
@@ -720,9 +740,8 @@ class ParameterTableField(Parameter):
 
     def __init__(self, name='', description='', parent=None, datatype=-1,
                  optional=False):
-        Parameter.__init__(self, name, description, optional)
+        Parameter.__init__(self, name, description, None, optional)
         self.parent = parent
-        self.value = None
         self.datatype = int(datatype)
 
     def getValueAsCommandLineParameter(self):
@@ -734,10 +753,10 @@ class ParameterTableField(Parameter):
                 return False
             self.value = None
             return True
-        elif len(value) > 0:
-            self.value = unicode(value)
-        else:
-            return self.optional
+
+        elif len(value) == 0 and not self.optional:
+            return False
+        self.value = unicode(value)
         return True
 
     def __str__(self):
@@ -765,13 +784,12 @@ class ParameterVector(ParameterDataObject):
 
     def __init__(self, name='', description='', shapetype=[-1],
                  optional=False):
-        ParameterDataObject.__init__(self, name, description, optional)
+        ParameterDataObject.__init__(self, name, description, None, optional)
         if isinstance(shapetype, int):
             shapetype = [shapetype]
         elif isinstance(shapetype, basestring):
             shapetype = [int(t) for t in shapetype.split(',')]
         self.shapetype = shapetype
-        self.value = None
         self.exported = None
 
     def setValue(self, obj):
@@ -781,6 +799,7 @@ class ParameterVector(ParameterDataObject):
                 return False
             self.value = None
             return True
+
         if isinstance(obj, QgsVectorLayer):
             self.value = unicode(obj.source())
             return True
@@ -857,11 +876,10 @@ class ParameterGeometryPredicate(Parameter):
 
     def __init__(self, name='', description='', left=None, right=None,
                  optional=False, enabledPredicates=None):
-        Parameter.__init__(self, name, description, optional)
+        Parameter.__init__(self, name, description, None, optional)
         self.left = left
         self.right = right
         self.value = None
-        self.default = []
         self.enabledPredicates = enabledPredicates
         if self.enabledPredicates is None:
             self.enabledPredicates = self.predicates
@@ -875,8 +893,9 @@ class ParameterGeometryPredicate(Parameter):
                 return False
             self.value = None
             return True
-        elif len(value) == 0:
-            return self.optional
+        elif len(value) == 0 and not self.optional:
+            return False
+
         if isinstance(value, unicode):
             self.value = value.split(';') # relates to ModelerAlgorithm.resolveValue
         else:

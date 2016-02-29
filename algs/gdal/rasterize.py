@@ -34,11 +34,14 @@ from processing.core.parameters import ParameterNumber
 from processing.core.parameters import ParameterBoolean
 from processing.core.parameters import ParameterString
 from processing.core.outputs import OutputRaster
-from processing.algs.gdal.OgrAlgorithm import OgrAlgorithm
+
+from processing.algs.gdal.GdalAlgorithm import GdalAlgorithm
 from processing.algs.gdal.GdalUtils import GdalUtils
 
+from processing.tools.vector import ogrConnectionString, ogrLayerName
 
-class rasterize(OgrAlgorithm):
+
+class rasterize(GdalAlgorithm):
 
     INPUT = 'INPUT'
     FIELD = 'FIELD'
@@ -112,7 +115,7 @@ class rasterize(OgrAlgorithm):
 
     def getConsoleCommands(self):
         inLayer = self.getParameterValue(self.INPUT)
-        ogrLayer = self.ogrConnectionString(inLayer)[1:-1]
+        ogrLayer = ogrConnectionString(inLayer)[1:-1]
         noData = unicode(self.getParameterValue(self.NO_DATA))
         jpegcompression = unicode(self.getParameterValue(self.JPEGCOMPRESSION))
         predictor = unicode(self.getParameterValue(self.PREDICTOR))
@@ -131,6 +134,8 @@ class rasterize(OgrAlgorithm):
         arguments.append('-ot')
         arguments.append(self.TYPE[self.getParameterValue(self.RTYPE)])
         dimType = self.getParameterValue(self.DIMENSIONS)
+        arguments.append('-of')
+        arguments.append(GdalUtils.getFormatShortNameFromFilename(out))
         if dimType == 0:
             # size in pixels
             arguments.append('-ts')
@@ -164,7 +169,7 @@ class rasterize(OgrAlgorithm):
             arguments.append(extra)
         arguments.append('-l')
 
-        arguments.append(self.ogrLayerName(inLayer))
+        arguments.append(ogrLayerName(inLayer))
         arguments.append(ogrLayer)
 
         arguments.append(unicode(self.getOutputValue(self.OUTPUT)))

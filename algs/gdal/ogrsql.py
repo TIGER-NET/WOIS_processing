@@ -32,13 +32,15 @@ from processing.core.parameters import ParameterSelection
 from processing.core.outputs import OutputVector
 
 from processing.algs.gdal.GdalUtils import GdalUtils
-from processing.algs.gdal.OgrAlgorithm import OgrAlgorithm
+from processing.algs.gdal.GdalAlgorithm import GdalAlgorithm
+
+from processing.tools.vector import ogrConnectionString
 
 
 DIALECTS = [None, 'ogrsql', 'sqlite']
 
 
-class OgrSql(OgrAlgorithm):
+class OgrSql(GdalAlgorithm):
 
     INPUT = 'INPUT'
     OUTPUT = 'OUTPUT'
@@ -50,7 +52,7 @@ class OgrSql(OgrAlgorithm):
         self.group, self.i18n_group = self.trAlgorithm('[OGR] Miscellaneous')
 
         self.addParameter(ParameterVector(self.INPUT, self.tr('Input layer'),
-                          [ParameterVector.VECTOR_TYPE_ANY], False))
+                                          [ParameterVector.VECTOR_TYPE_ANY], False))
         self.addParameter(ParameterString(self.SQL, self.tr('SQL'), ''))
 
         self.addParameter(ParameterSelection(
@@ -83,7 +85,7 @@ class OgrSql(OgrAlgorithm):
         arguments.append(outFile)
 
         layer = self.getParameterValue(self.INPUT)
-        conn = self.ogrConnectionString(layer)[1:-1]
+        conn = ogrConnectionString(layer)[1:-1]
         arguments.append(conn)
 
         return ['ogr2ogr', GdalUtils.escapeAndJoin(arguments)]
