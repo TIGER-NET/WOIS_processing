@@ -64,8 +64,14 @@ def scanraster(layer, progress):
 
 
 def mapToPixel(mX, mY, geoTransform):
-    (pX, pY) = gdal.ApplyGeoTransform(
-        gdal.InvGeoTransform(geoTransform)[1], mX, mY)
+    try:
+        # GDAL 1.x
+        (pX, pY) = gdal.ApplyGeoTransform(
+            gdal.InvGeoTransform(geoTransform)[1], mX, mY)
+    except TypeError:
+        # GDAL 2.x
+        (pX, pY) = gdal.ApplyGeoTransform(
+            gdal.InvGeoTransform(geoTransform), mX, mY)
     return (int(pX), int(pY))
 
 
@@ -107,7 +113,7 @@ class RasterWriter:
         driver = gdal.GetDriverByName(format)
         dst_ds = driver.Create(self.fileName, self.nx, self.ny, 1,
                                gdal.GDT_Float32)
-        dst_ds.SetProjection(unicode(self.crs.toWkt()))
+        dst_ds.SetProjection(str(self.crs.toWkt()))
         dst_ds.SetGeoTransform([self.minx, self.cellsize, 0,
                                 self.maxy, self.cellsize, 0])
         dst_ds.GetRasterBand(1).WriteArray(self.matrix)

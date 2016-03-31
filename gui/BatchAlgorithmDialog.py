@@ -67,29 +67,7 @@ class BatchAlgorithmDialog(AlgorithmDialogBase):
         self.mainWidget = BatchPanel(self, self.alg)
         self.setMainWidget()
 
-    def setParamValue(self, param, widget, alg=None):
-        if isinstance(param, (ParameterRaster, ParameterVector, ParameterTable,
-                              ParameterMultipleInput)):
-            value = widget.getText()
-            if unicode(value).strip() == '':
-                value = None
-            return param.setValue(value)
-        elif isinstance(param, ParameterBoolean):
-            return param.setValue(widget.currentIndex() == 0)
-        elif isinstance(param, ParameterSelection):
-            return param.setValue(widget.currentIndex())
-        elif isinstance(param, ParameterFixedTable):
-            return param.setValue(widget.table)
-        elif isinstance(param, ParameterExtent):
-            if alg is not None:
-                widget.useNewAlg(alg)
-            return param.setValue(widget.getValue())
-        elif isinstance(param, (ParameterCrs, ParameterFile)):
-            return param.setValue(widget.getValue())
-        elif isinstance(param, ParameterGeometryPredicate):
-            return param.setValue(widget.value())
-        else:
-            return param.setValue(widget.text())
+        self.textShortHelp.setVisible(False)
 
     def accept(self):
         self.algs = []
@@ -106,7 +84,7 @@ class BatchAlgorithmDialog(AlgorithmDialogBase):
                     col += 1
                     continue
                 widget = self.mainWidget.tblParameters.cellWidget(row, col)
-                if not self.setParamValue(param, widget, alg):
+                if not self.mainWidget.setParamValue(param, widget, alg):
                     self.lblProgress.setText(
                         self.tr('<b>Missing parameter value: %s (row %d)</b>') % (param.description, row + 1))
                     self.algs = None
@@ -118,7 +96,7 @@ class BatchAlgorithmDialog(AlgorithmDialogBase):
                     continue
                 if isinstance(param, ParameterExtent):
                     widget = self.mainWidget.tblParameters.cellWidget(row, col)
-                    if not self.setParamValue(param, widget, alg):
+                    if not self.mainWidget.setParamValue(param, widget, alg):
                         self.lblProgress.setText(
                             self.tr('<b>Missing parameter value: %s (row %d)</b>') % (param.description, row + 1))
                         self.algs = None

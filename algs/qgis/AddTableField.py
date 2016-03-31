@@ -81,20 +81,17 @@ class AddTableField(GeoAlgorithm):
         provider = layer.dataProvider()
         fields = provider.fields()
         fields.append(QgsField(fieldName, self.TYPES[fieldType], '',
-                      fieldLength, fieldPrecision))
+                               fieldLength, fieldPrecision))
         writer = output.getVectorWriter(fields, provider.geometryType(),
                                         layer.crs())
         outFeat = QgsFeature()
-        inGeom = QgsGeometry()
-        nElement = 0
         features = vector.features(layer)
-        nFeat = len(features)
-        for inFeat in features:
-            progress.setPercentage(int(100 * nElement / nFeat))
-            nElement += 1
-            inGeom = inFeat.geometry()
-            outFeat.setGeometry(inGeom)
-            atMap = inFeat.attributes()
+        total = 100.0 / len(features)
+        for current, feat in enumerate(features):
+            progress.setPercentage(int(current * total))
+            geom = feat.geometry()
+            outFeat.setGeometry(geom)
+            atMap = feat.attributes()
             atMap.append(None)
             outFeat.setAttributes(atMap)
             writer.addFeature(outFeat)

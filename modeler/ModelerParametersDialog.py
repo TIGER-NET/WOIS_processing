@@ -131,7 +131,7 @@ class ModelerParametersDialog(QDialog):
             if output.hidden:
                 continue
             if isinstance(output, (OutputRaster, OutputVector, OutputTable,
-                          OutputHTML, OutputFile, OutputDirectory)):
+                                   OutputHTML, OutputFile, OutputDirectory)):
                 label = QLabel(output.description + '<'
                                + output.__class__.__name__ + '>')
                 item = QLineEdit()
@@ -284,7 +284,7 @@ class ModelerParametersDialog(QDialog):
         elif isinstance(param, ParameterSelection):
             item = QComboBox()
             item.addItems(param.options)
-            item.setCurrentIndex(param.default)
+            item.setCurrentIndex(param.default or 1)
         elif isinstance(param, ParameterFixedTable):
             item = FixedTablePanel(param)
         elif isinstance(param, ParameterRange):
@@ -303,13 +303,13 @@ class ModelerParametersDialog(QDialog):
             options = [(self.resolveValueDescription(s), s) for s in strings]
             if param.multiline:
                 item = MultilineTextPanel(options)
-                item.setText(unicode(param.default))
+                item.setText(unicode(param.default or ""))
             else:
                 item = QComboBox()
                 item.setEditable(True)
                 for desc, val in options:
                     item.addItem(desc, val)
-                item.setEditText(unicode(param.default))
+                item.setEditText(unicode(param.default or ""))
         elif isinstance(param, ParameterTableField):
             item = QComboBox()
             item.setEditable(True)
@@ -596,7 +596,7 @@ class ModelerParametersDialog(QDialog):
 
     def setParamValue(self, alg, param, widget):
         if isinstance(param, (ParameterRaster, ParameterVector,
-                      ParameterTable)):
+                              ParameterTable)):
             return self.setParamValueLayerOrTable(alg, param, widget)
         elif isinstance(param, ParameterBoolean):
             if widget.currentIndex() < 2:

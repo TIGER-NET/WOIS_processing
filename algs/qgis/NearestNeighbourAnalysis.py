@@ -26,6 +26,7 @@ __copyright__ = '(C) 2012, Victor Olaya'
 __revision__ = '$Format:%H$'
 
 import math
+import codecs
 from qgis.core import QgsFeatureRequest, QgsFeature, QgsDistanceArea
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.parameters import ParameterVector
@@ -78,11 +79,10 @@ class NearestNeighbourAnalysis(GeoAlgorithm):
         A = layer.extent()
         A = float(A.width() * A.height())
 
-        current = 0
         features = vector.features(layer)
         count = len(features)
-        total = 100.0 / float(len(features))
-        for feat in features:
+        total = 100.0 / count
+        for current, feat in enumerate(features):
             neighbourID = spatialIndex.nearestNeighbor(
                 feat.geometry().asPoint(), 2)[1]
             request = QgsFeatureRequest().setFilterFid(neighbourID)
@@ -90,7 +90,6 @@ class NearestNeighbourAnalysis(GeoAlgorithm):
             sumDist += distance.measureLine(neighbour.geometry().asPoint(),
                                             feat.geometry().asPoint())
 
-            current += 1
             progress.setPercentage(int(current * total))
 
         do = float(sumDist) / count
@@ -115,7 +114,11 @@ class NearestNeighbourAnalysis(GeoAlgorithm):
         self.setOutputValue(self.Z_SCORE, float(data[4].split(': ')[1]))
 
     def createHTML(self, outputFile, algData):
-        f = open(outputFile, 'w')
+        f = codecs.open(outputFile, 'w', encoding='utf-8')
+        f.write('<html><head>')
+        f.write('<meta http-equiv="Content-Type" content="text/html; \
+                charset=utf-8" /></head><body>')
         for s in algData:
             f.write('<p>' + unicode(s) + '</p>')
+        f.write('</body></html>')
         f.close()

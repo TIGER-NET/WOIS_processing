@@ -33,7 +33,15 @@ try:
 except:
     hasMatplotlib = False
 
+try:
+    import shapely
+    hasShapely = True
+except:
+    hasShapely = False
+
 from PyQt4.QtGui import QIcon
+
+from qgis.core import QGis
 
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.script.ScriptUtils import ScriptUtils
@@ -96,7 +104,6 @@ from HubLines import HubLines
 from Merge import Merge
 from GeometryConvert import GeometryConvert
 from ConcaveHull import ConcaveHull
-from Polygonize import Polygonize
 from RasterLayerStatistics import RasterLayerStatistics
 from StatisticsByCategories import StatisticsByCategories
 from EquivalentNumField import EquivalentNumField
@@ -140,10 +147,10 @@ pluginPath = os.path.normpath(os.path.join(
 
 class QGISAlgorithmProvider(AlgorithmProvider):
 
-    _icon = QIcon(os.path.join(pluginPath, 'images', 'qgis.png'))
-
     def __init__(self):
         AlgorithmProvider.__init__(self)
+        self._icon = QIcon(os.path.join(pluginPath, 'images', 'qgis.png'))
+
         self.alglist = [SumLines(), PointsInPolygon(),
                         PointsInPolygonWeighted(), PointsInPolygonUnique(),
                         BasicStatisticsStrings(), BasicStatisticsNumbers(),
@@ -169,7 +176,7 @@ class QGISAlgorithmProvider(AlgorithmProvider):
                         SaveSelectedFeatures(), JoinAttributes(),
                         AutoincrementalField(), Explode(), FieldsPyculator(),
                         EquivalentNumField(), PointsLayerFromTable(),
-                        StatisticsByCategories(), ConcaveHull(), Polygonize(),
+                        StatisticsByCategories(), ConcaveHull(),
                         RasterLayerStatistics(), PointsDisplacement(),
                         ZonalStatistics(), PointsFromPolygons(),
                         PointsFromLines(), RandomPointsExtent(),
@@ -198,6 +205,14 @@ class QGISAlgorithmProvider(AlgorithmProvider):
                 VectorLayerScatterplot(), MeanAndStdDevPlot(), BarPlot(),
                 PolarPlot(),
             ])
+
+        if hasShapely:
+            from Polygonize import Polygonize
+            self.alglist.extend([Polygonize()])
+
+        if QGis.QGIS_VERSION_INT >= 21300:
+            from ExecuteSQL import ExecuteSQL
+            self.alglist.extend([ExecuteSQL()])
 
         folder = os.path.join(os.path.dirname(__file__), 'scripts')
         scripts = ScriptUtils.loadFromFolder(folder)

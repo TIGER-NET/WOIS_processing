@@ -88,10 +88,10 @@ class Grass7Utils:
         if folder is None:
             if isWindows():
                 testfolder = os.path.dirname(unicode(QgsApplication.prefixPath()))
-                testfolder = os.path.join(testfolder, 'grass7')
+                testfolder = os.path.join(testfolder, 'grass')
                 if os.path.isdir(testfolder):
                     for subfolder in os.listdir(testfolder):
-                        if subfolder.startswith('grass7'):
+                        if subfolder.startswith('grass-7'):
                             folder = os.path.join(testfolder, subfolder)
                             break
             else:
@@ -363,10 +363,10 @@ class Grass7Utils:
             cmdpath = os.path.join(path, 'bin', 'r.out.gdal.exe')
             if not os.path.exists(cmdpath):
                 return Grass7Utils.tr(
-                    'The specified GRASS GIS 7 folder does not contain a valid '
-                    'set of GRASS GIS 7 modules.\nPlease, go to the Processing '
-                    'settings dialog, and check that the GRASS GIS 7\n'
-                    'folder is correctly configured')
+                    'The specified GRASS 7 folder "{}" does not contain '
+                    'a valid set of GRASS 7 modules.\nPlease, go to the '
+                    'Processing settings dialog, and check that the '
+                    'GRASS 7\nfolder is correctly configured'.format(os.path.join(path, 'bin')))
 
         if not ignorePreviousState:
             if Grass7Utils.isGrass7Installed:

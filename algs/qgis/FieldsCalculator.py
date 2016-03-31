@@ -38,7 +38,7 @@ from processing.core.parameters import ParameterSelection
 from processing.core.outputs import OutputVector
 from processing.tools import dataobjects, vector, system
 
-from ui.FieldsCalculatorDialog import FieldsCalculatorDialog
+from .ui.FieldsCalculatorDialog import FieldsCalculatorDialog
 
 
 class FieldsCalculator(GeoAlgorithm):
@@ -123,7 +123,6 @@ class FieldsCalculator(GeoAlgorithm):
         error = ''
         calculationSuccess = True
 
-        current = 0
         features = vector.features(layer)
         total = 100.0 / len(features)
 
@@ -148,7 +147,7 @@ class FieldsCalculator(GeoAlgorithm):
 
         if not calculationSuccess:
             raise GeoAlgorithmExecutionException(
-                self.tr('An error occured while evaluating the calculation '
+                self.tr('An error occurred while evaluating the calculation '
                         'string:\n%s' % error))
 
     def checkParameterValuesBeforeExecuting(self):

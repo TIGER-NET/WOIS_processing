@@ -2,8 +2,8 @@
 
 """
 ***************************************************************************
-    OTBUtils.py
-    ---------------------
+    OTBSpecific_XMLLoading.py
+    -------------------------
     Date                 : 11-12-13
     Copyright            : (C) 2013 by CS Systemes d'information (CS SI)
     Email                : otb at c-s dot fr (CS SI)
@@ -44,7 +44,7 @@ except ImportError as e:
 
 from processing.core.ProcessingConfig import ProcessingConfig
 
-from OTBUtils import OTBUtils
+import OTBUtils
 
 
 def adaptBinaryMorphologicalOperation(commands_list):

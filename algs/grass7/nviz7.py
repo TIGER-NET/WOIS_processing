@@ -52,6 +52,10 @@ class nviz7(GeoAlgorithm):
     GRASS_REGION_EXTENT_PARAMETER = 'GRASS_REGION_PARAMETER'
     GRASS_REGION_CELLSIZE_PARAMETER = 'GRASS_REGION_CELLSIZE_PARAMETER'
 
+    def __init__(self):
+        GeoAlgorithm.__init__(self)
+        self.showInModeler = False
+
     def getIcon(self):
         return QtGui.QIcon(os.path.join(pluginPath, 'images', 'grass.png'))
 
@@ -161,7 +165,7 @@ class nviz7(GeoAlgorithm):
                     else:
                         layer = dataobjects.getObjectFromUri(param.value)
                     cellsize = max(cellsize, (layer.extent().xMaximum()
-                                   - layer.extent().xMinimum())
+                                              - layer.extent().xMinimum())
                                    / layer.width())
                 elif isinstance(param, ParameterMultipleInput):
 

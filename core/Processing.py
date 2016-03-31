@@ -106,8 +106,8 @@ class Processing:
         try:
             provider.unload()
             Processing.providers.remove(provider)
-            ProcessingConfig.readSettings()
-            Processing.updateAlgsList()
+            del Processing.algs[provider.getName()]
+            Processing.fireAlgsListHasChanged()
         except:
             # This try catch block is here to avoid problems if the
             # plugin with a provider is unloaded after the Processing
@@ -142,13 +142,10 @@ class Processing:
 
         # And initialize
         AlgorithmClassification.loadClassification()
-        AlgorithmClassification.loadDisplayNames()
-        ProcessingLog.startLogging()
         ProcessingConfig.initialize()
         ProcessingConfig.readSettings()
         RenderingStyles.loadStyles()
         Processing.loadFromProviders()
-
         # Inform registered listeners that all providers' algorithms have been loaded
         Processing.fireAlgsListHasChanged()
 
@@ -158,8 +155,10 @@ class Processing:
         requires the list of algorithms to be created again from
         algorithm providers.
         """
+        QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
         Processing.loadFromProviders()
         Processing.fireAlgsListHasChanged()
+        QApplication.restoreOverrideCursor()
 
     @staticmethod
     def loadFromProviders():
@@ -299,7 +298,7 @@ class Processing:
             # fill any missing parameters with default values if allowed
             for param in alg.parameters:
                 if param.name not in setParams:
-                    if not param.setValue(None):
+                    if not param.setDefaultValue():
                         print ('Error: Missing parameter value for parameter %s.' % (param.name))
                         QgsMessageLog.logMessage(Processing.tr('Error: Missing parameter value for parameter {0}.').format(param.name), Processing.tr("Processing"))
                         ProcessingLog.addToLog(
@@ -334,7 +333,7 @@ class Processing:
 
         msg = alg._checkParameterValuesBeforeExecuting()
         if msg:
-            print 'Unable to execute algorithm\n' + msg
+            print 'Unable to execute algorithm\n' + unicode(msg)
             QgsMessageLog.logMessage(Processing.tr('Unable to execute algorithm\n{0}').format(msg), Processing.tr("Processing"))
             return
 

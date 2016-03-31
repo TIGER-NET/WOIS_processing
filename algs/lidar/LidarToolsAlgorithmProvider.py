@@ -121,6 +121,7 @@ from fusion.ClipData import ClipData
 from fusion.CloudMetrics import CloudMetrics
 from fusion.Cover import Cover
 from fusion.DTM2TIF import DTM2TIF
+from fusion.DTM2ASCII import DTM2ASCII
 from fusion.FirstLastReturn import FirstLastReturn
 from fusion.GridMetrics import GridMetrics
 from fusion.GridSurfaceCreate import GridSurfaceCreate
@@ -138,7 +139,9 @@ class LidarToolsAlgorithmProvider(AlgorithmProvider):
     def __init__(self):
         AlgorithmProvider.__init__(self)
         self.activate = False
-        self.algsList = []
+
+    def _loadAlgorithms(self):
+        self.algs = []
 
         # LAStools for processing single files
 
@@ -159,9 +162,7 @@ class LidarToolsAlgorithmProvider(AlgorithmProvider):
                 laszip(), lasindex(), lasmerge(), las2las_filter(), las2las_project(),
                 las2las_transform(), lasquery()
             ]
-        for alg in lastools:
-            alg.group = 'LAStools'
-        self.algsList.extend(lastools)
+        self.algs.extend(lastools)
 
         # LAStools Production for processing folders of files
 
@@ -179,9 +180,7 @@ class LidarToolsAlgorithmProvider(AlgorithmProvider):
                 laszipPro(), lasindexPro(), lasinfoPro(), las2lasPro_filter(), las2lasPro_project(),
                 las2lasPro_transform(), txt2lasPro(), las2txtPro(), lasvalidatePro(), lasmergePro()
             ]
-        for alg in lastoolsPro:
-            alg.group = 'LAStools Production'
-        self.algsList.extend(lastoolsPro)
+        self.algs.extend(lastoolsPro)
 
         # some examples for LAStools Pipelines
 
@@ -192,9 +191,7 @@ class LidarToolsAlgorithmProvider(AlgorithmProvider):
             ]
         else:
             lastoolsPipe = []
-        for alg in lastoolsPipe:
-            alg.group = 'LAStools Pipelines'
-        self.algsList.extend(lastoolsPipe)
+        self.algs.extend(lastoolsPipe)
 
         # FUSION
 
@@ -204,11 +201,11 @@ class LidarToolsAlgorithmProvider(AlgorithmProvider):
                 Catalog(), CloudMetrics(), CanopyMaxima(), CanopyModel(), ClipData(),
                 Csv2Grid(), Cover(), FilterData(), GridMetrics(), GroundFilter(),
                 GridSurfaceCreate(), MergeData(), TinSurfaceCreate(), PolyClipData(),
-                                DTM2TIF(), FirstLastReturn(), ASCII2DTM()
+                DTM2TIF(), DTM2ASCII(), FirstLastReturn(), ASCII2DTM()
             ]
             for alg in fusiontools:
-                alg.group = 'Fusion'
-            self.algsList.extend(fusiontools)
+                alg.group, alg.i18n_group = alg.trAlgorithm('Fusion')
+            self.algs.extend(fusiontools)
 
     def initializeSettings(self):
         AlgorithmProvider.initializeSettings(self)
@@ -222,10 +219,11 @@ class LidarToolsAlgorithmProvider(AlgorithmProvider):
             FusionUtils.FUSION_FOLDER,
             self.tr('Fusion folder'), FusionUtils.FusionPath(),
             valuetype=Setting.FOLDER))
-        ProcessingConfig.addSetting(Setting(
-            self.getDescription(),
-            LAStoolsUtils.WINE_FOLDER,
-            self.tr('Wine folder'), '', valuetype=Setting.FOLDER))
+        if not isWindows():
+            ProcessingConfig.addSetting(Setting(
+                self.getDescription(),
+                LAStoolsUtils.WINE_FOLDER,
+                self.tr('Wine folder'), '', valuetype=Setting.FOLDER))
 
     def getName(self):
         return 'lidartools'
@@ -235,9 +233,6 @@ class LidarToolsAlgorithmProvider(AlgorithmProvider):
 
     def getIcon(self):
         return QIcon(os.path.dirname(__file__) + '/../../images/tool.png')
-
-    def _loadAlgorithms(self):
-        self.algs = self.algsList
 
     def getSupportedOutputTableExtensions(self):
         return ['csv']

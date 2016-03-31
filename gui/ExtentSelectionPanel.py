@@ -48,7 +48,7 @@ WIDGET, BASE = uic.loadUiType(
 
 class ExtentSelectionPanel(BASE, WIDGET):
 
-    def __init__(self, dialog, alg, default):
+    def __init__(self, dialog, alg, default=None):
         super(ExtentSelectionPanel, self).__init__(None)
         self.setupUi(self)
 
@@ -65,7 +65,7 @@ class ExtentSelectionPanel(BASE, WIDGET):
         self.prevMapTool = canvas.mapTool()
         self.tool = RectangleMapTool(canvas)
         self.tool.rectangleCreated.connect(self.updateExtent)
-        
+
         if default:
             tokens = unicode(default).split(',')
             if len(tokens) == 4:
@@ -120,7 +120,7 @@ class ExtentSelectionPanel(BASE, WIDGET):
             if param.value:
                 if isinstance(param, (ParameterRaster, ParameterVector)):
                     if isinstance(param.value, (QgsRasterLayer,
-                                  QgsVectorLayer)):
+                                                QgsVectorLayer)):
                         layer = param.value
                     else:
                         layer = dataobjects.getObject(param.value)
@@ -161,7 +161,7 @@ class ExtentSelectionPanel(BASE, WIDGET):
         CANVAS_KEY = 'Use canvas extent'
         extentsDict = {}
         extentsDict[CANVAS_KEY] = {"extent": iface.mapCanvas().extent(),
-                                   "authid": iface.mapCanvas().mapRenderer().destinationCrs().authid()}
+                                   "authid": iface.mapCanvas().mapSettings().destinationCrs().authid()}
         extents = [CANVAS_KEY]
         layers = dataobjects.getAllLayers()
         for layer in layers:
@@ -177,7 +177,7 @@ class ExtentSelectionPanel(BASE, WIDGET):
                                           self.tr('Use extent from'), extents, False)
         if ok:
             self.setValueFromRect(extentsDict[item]["extent"])
-            if extentsDict[item]["authid"] != iface.mapCanvas().mapRenderer().destinationCrs().authid():
+            if extentsDict[item]["authid"] != iface.mapCanvas().mapSettings().destinationCrs().authid():
                 iface.messageBar().pushMessage(self.tr("Warning"),
                                                self.tr("The projection of the chosen layer is not the same as canvas projection! The selected extent might not be what was intended."),
                                                QgsMessageBar.WARNING, 8)
