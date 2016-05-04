@@ -86,7 +86,9 @@ class GrassUtils:
         if not isWindows() and not isMac():
             return ''
 
-        folder = ProcessingConfig.getSetting(GrassUtils.GRASS_FOLDER)
+        folder = ProcessingConfig.getSetting(GrassUtils.GRASS_FOLDER) or ''
+        if not os.path.exists(folder):
+            folder = None
         if folder is None:
             if isWindows():
                 testfolder = os.path.dirname(QgsApplication.prefixPath())
@@ -105,7 +107,9 @@ class GrassUtils:
 
     @staticmethod
     def grassWinShell():
-        folder = ProcessingConfig.getSetting(GrassUtils.GRASS_WIN_SHELL)
+        folder = ProcessingConfig.getSetting(GrassUtils.GRASS_WIN_SHELL) or ''
+        if not os.path.exists(folder):
+            folder = None
         if folder is None:
             folder = os.path.dirname(unicode(QgsApplication.prefixPath()))
             folder = os.path.join(folder, 'msys')

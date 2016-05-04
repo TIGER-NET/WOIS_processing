@@ -113,7 +113,9 @@ class ProcessingToolbox(BASE, WIDGET):
                         if text in alg.name:
                             self.disabledWithMatchingAlgs.append(providerName)
                             break
-            self.txtDisabled.setVisible(bool(self.disabledWithMatchingAlgs))
+            showTip = ProcessingConfig.getSetting(ProcessingConfig.SHOW_PROVIDERS_TOOLTIP)
+            if showTip:
+                self.txtDisabled.setVisible(bool(self.disabledWithMatchingAlgs))
         else:
             self.algorithmTree.collapseAll()
             self.algorithmTree.invisibleRootItem().child(0).setExpanded(True)
@@ -132,8 +134,6 @@ class ProcessingToolbox(BASE, WIDGET):
             hide = bool(text) and (text not in item.text(0).lower())
             if isinstance(item, TreeAlgorithmItem):
                 hide = hide and (text not in item.alg.commandLineName())
-                if item.alg.shortHelp() is not None:
-                    hide = hide and (text not in item.alg.shortHelp())
             item.setHidden(hide)
             return not hide
         else:

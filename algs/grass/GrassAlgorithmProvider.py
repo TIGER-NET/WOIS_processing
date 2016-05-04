@@ -44,6 +44,7 @@ class GrassAlgorithmProvider(AlgorithmProvider):
 
     def __init__(self):
         AlgorithmProvider.__init__(self)
+        self.activate = False
         self.createAlgsList()  # Preloading algorithms to speed up
 
     def initializeSettings(self):
@@ -97,7 +98,7 @@ class GrassAlgorithmProvider(AlgorithmProvider):
         return 'grass'
 
     def getIcon(self):
-        return QIcon(os.path.join(pluginPath, 'images', 'grass.png'))
+        return QIcon(os.path.join(pluginPath, 'images', 'grass.svg'))
 
     def getSupportedOutputVectorLayerExtensions(self):
         return ['shp']

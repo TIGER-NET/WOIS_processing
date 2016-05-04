@@ -16,6 +16,7 @@
 *                                                                         *
 ***************************************************************************
 """
+from processing.tools import dataobjects
 
 
 __author__ = 'Victor Olaya'
@@ -41,13 +42,21 @@ pluginPath = os.path.normpath(os.path.join(
 class GdalAlgorithm(GeoAlgorithm):
 
     def getIcon(self):
-        return QIcon(os.path.join(pluginPath, 'images', 'gdal.png'))
+        return QIcon(os.path.join(pluginPath, 'images', 'gdal.svg'))
 
     def getCustomParametersDialog(self):
         return GdalAlgorithmDialog(self)
 
     def processAlgorithm(self, progress):
-        GdalUtils.runGdal(self.getConsoleCommands(), progress)
+        commands = self.getConsoleCommands()
+        layers = dataobjects.getVectorLayers()
+        for i, c in enumerate(commands):
+            for layer in layers:
+                if layer.source() in c:
+                    c = c.replace(layer.source(), dataobjects.exportVectorLayer(layer))
+
+            commands[i] = c
+        GdalUtils.runGdal(commands, progress)
 
     def shortHelp(self):
         return self._formatHelp('''This algorithm is based on the GDAL %s module.
