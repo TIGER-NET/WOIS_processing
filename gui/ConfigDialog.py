@@ -215,7 +215,7 @@ class SettingDelegate(QStyledItemDelegate):
         setting = index.model().data(index, Qt.UserRole)
         if setting.valuetype == Setting.SELECTION:
             editor.setCurrentIndex(editor.findText(value))
-        elif setting.valuetype == Setting.INT or setting.valuetype == Setting.FLOAT:
+        elif setting.valuetype in [Setting.INT, Setting.FLOAT]:
             editor.setValue(value)
         else:
             editor.setText(value)
