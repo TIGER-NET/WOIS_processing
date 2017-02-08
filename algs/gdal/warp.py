@@ -25,8 +25,13 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
+import os
+
+from qgis.PyQt.QtGui import QIcon
+
 from processing.algs.gdal.GdalAlgorithm import GdalAlgorithm
 from processing.core.parameters import ParameterRaster
+from processing.core.parameters import ParameterExtent
 from processing.core.parameters import ParameterSelection
 from processing.core.parameters import ParameterCrs
 from processing.core.parameters import ParameterNumber
@@ -34,6 +39,8 @@ from processing.core.parameters import ParameterString
 from processing.core.parameters import ParameterBoolean
 from processing.core.outputs import OutputRaster
 from processing.algs.gdal.GdalUtils import GdalUtils
+
+pluginPath = os.path.split(os.path.split(os.path.dirname(__file__))[0])[0]
 
 
 class warp(GdalAlgorithm):
@@ -58,6 +65,11 @@ class warp(GdalAlgorithm):
     BIGTIFFTYPE = ['', 'YES', 'NO', 'IF_NEEDED', 'IF_SAFER']
     COMPRESSTYPE = ['NONE', 'JPEG', 'LZW', 'PACKBITS', 'DEFLATE']
     TFW = 'TFW'
+    RAST_EXT = 'RAST_EXT'
+    EXT_CRS = 'EXT_CRS'
+
+    def getIcon(self):
+        return QIcon(os.path.join(pluginPath, 'images', 'gdaltools', 'warp.png'))
 
     def defineCharacteristics(self):
         self.name, self.i18n_name = self.trAlgorithm('Warp (reproject)')
@@ -75,6 +87,11 @@ class warp(GdalAlgorithm):
                                           0.0, None, 0.0))
         self.addParameter(ParameterSelection(self.METHOD,
                                              self.tr('Resampling method'), self.METHOD_OPTIONS))
+        self.addParameter(ParameterExtent(self.RAST_EXT, self.tr('Raster extent'), optional=True))
+
+        if GdalUtils.version() >= 2000000:
+            self.addParameter(ParameterCrs(self.EXT_CRS,
+                                           self.tr('CRS of the raster extent'), '', optional=True))
 
         params = []
         params.append(ParameterSelection(self.RTYPE,
@@ -118,6 +135,8 @@ class warp(GdalAlgorithm):
         compress = self.COMPRESSTYPE[self.getParameterValue(self.COMPRESS)]
         bigtiff = self.BIGTIFFTYPE[self.getParameterValue(self.BIGTIFF)]
         tfw = unicode(self.getParameterValue(self.TFW))
+        rastext = unicode(self.getParameterValue(self.RAST_EXT))
+        rastext_crs = self.getParameterValue(self.EXT_CRS)
 
         arguments = []
         arguments.append('-ot')
@@ -144,6 +163,24 @@ class warp(GdalAlgorithm):
         extra = self.getParameterValue(self.EXTRA)
         if extra is not None:
             extra = unicode(extra)
+        regionCoords = rastext.split(',')
+        try:
+            rastext = []
+            rastext.append('-te')
+            rastext.append(regionCoords[0])
+            rastext.append(regionCoords[2])
+            rastext.append(regionCoords[1])
+            rastext.append(regionCoords[3])
+        except IndexError:
+            rastext = []
+        if rastext:
+            arguments.extend(rastext)
+
+        if GdalUtils.version() >= 2000000:
+            if rastext and rastext_crs is not None:
+                arguments.append('-te_srs')
+                arguments.append(rastext_crs)
+
         if extra and len(extra) > 0:
             arguments.append(extra)
         if GdalUtils.getFormatShortNameFromFilename(out) == "GTiff":
@@ -160,6 +197,8 @@ class warp(GdalAlgorithm):
                 arguments.append("-co TFW=YES")
             if len(bigtiff) > 0:
                 arguments.append("-co BIGTIFF=" + bigtiff)
+
+            arguments.append("-wo OPTIMIZE_SIZE=TRUE")
 
         arguments.append(self.getParameterValue(self.INPUT))
         arguments.append(out)

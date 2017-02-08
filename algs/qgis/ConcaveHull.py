@@ -66,7 +66,7 @@ class ConcaveHull(GeoAlgorithm):
 
         # Delaunay triangulation from input point layer
         progress.setText(self.tr('Creating Delaunay triangles...'))
-        delone_triangles = processing.runalg("qgis:delaunaytriangulation", layer, None, progress=None)['OUTPUT']
+        delone_triangles = processing.runalg("qgis:delaunaytriangulation", layer, None)['OUTPUT']
         delaunay_layer = processing.getObject(delone_triangles)
 
         # Get max edge length from Delaunay triangles
@@ -103,7 +103,7 @@ class ConcaveHull(GeoAlgorithm):
         # Dissolve all Delaunay triangles
         progress.setText(self.tr('Dissolving Delaunay triangles...'))
         dissolved = processing.runalg("qgis:dissolve", delaunay_layer,
-                                      True, None, None, progress=None)['OUTPUT']
+                                      True, None, None)['OUTPUT']
         dissolved_layer = processing.getObject(dissolved)
 
         # Save result
@@ -111,7 +111,7 @@ class ConcaveHull(GeoAlgorithm):
         feat = QgsFeature()
         dissolved_layer.getFeatures(QgsFeatureRequest().setFilterFid(0)).nextFeature(feat)
         writer = self.getOutputFromName(self.OUTPUT).getVectorWriter(
-            layer.pendingFields().toList(), QGis.WKBPolygon, layer.crs())
+            layer.fields().toList(), QGis.WKBPolygon, layer.crs())
         geom = feat.geometry()
         if no_multigeom and geom.isMultipart():
             # Only singlepart geometries are allowed

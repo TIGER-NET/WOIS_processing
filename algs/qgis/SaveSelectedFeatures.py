@@ -28,7 +28,7 @@ __revision__ = '$Format:%H$'
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.parameters import ParameterVector
 from processing.core.outputs import OutputVector
-from processing.tools import dataobjects, vector
+from processing.tools import dataobjects
 
 
 class SaveSelectedFeatures(GeoAlgorithm):
@@ -52,12 +52,11 @@ class SaveSelectedFeatures(GeoAlgorithm):
 
         vectorLayer = dataobjects.getObjectFromUri(inputFilename)
 
-        provider = vectorLayer.dataProvider()
-        writer = output.getVectorWriter(provider.fields(),
-                                        provider.geometryType(), vectorLayer.crs())
+        writer = output.getVectorWriter(vectorLayer.fields(),
+                                        vectorLayer.wkbType(), vectorLayer.crs())
 
-        features = vector.features(vectorLayer)
-        total = 100.0 / len(features)
+        features = vectorLayer.selectedFeaturesIterator()
+        total = 100.0 / int(vectorLayer.selectedFeatureCount())
         for current, feat in enumerate(features):
             writer.addFeature(feat)
             progress.setPercentage(int(current * total))

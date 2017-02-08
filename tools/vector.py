@@ -16,8 +16,6 @@
 *                                                                         *
 ***************************************************************************
 """
-from processing.algs.qgis import postgis_utils
-from processing.algs.qgis import spatialite_utils
 
 __author__ = 'Victor Olaya'
 __date__ = 'February 2013'
@@ -36,18 +34,21 @@ import cStringIO
 
 import psycopg2
 
-from PyQt4 import QtSql
-from PyQt4.QtCore import QVariant, QSettings
+from osgeo import ogr
+
+from qgis.PyQt.QtCore import QVariant, QSettings
 from qgis.core import (QGis, QgsFields, QgsField, QgsGeometry, QgsRectangle,
                        QgsSpatialIndex, QgsMapLayerRegistry, QgsMapLayer, QgsVectorLayer,
-                       QgsVectorFileWriter, QgsDistanceArea, QgsDataSourceURI, QgsCredentials)
+                       QgsVectorFileWriter, QgsDistanceArea, QgsDataSourceURI, QgsCredentials,
+                       QgsFeatureRequest)
 
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
-from processing.tools import dataobjects
+from processing.tools import dataobjects, spatialite, postgis
 
 
 GEOM_TYPE_MAP = {
+    QGis.WKBNoGeometry: 'none',
     QGis.WKBPoint: 'Point',
     QGis.WKBLineString: 'LineString',
     QGis.WKBPolygon: 'Polygon',
@@ -88,7 +89,7 @@ TYPE_MAP_SPATIALITE_LAYER = {
 }
 
 
-def features(layer):
+def features(layer, request=QgsFeatureRequest()):
     """This returns an iterator over features in a vector layer,
     considering the selection that might exist in the layer, and the
     configuration that indicates whether to use only selected feature
@@ -99,15 +100,15 @@ def features(layer):
     """
     class Features:
 
-        def __init__(self, layer):
+        def __init__(self, layer, request):
             self.layer = layer
             self.selection = False
-            self.iter = layer.getFeatures()
-            if ProcessingConfig.getSetting(ProcessingConfig.USE_SELECTED):
-                selected = layer.selectedFeatures()
-                if len(selected) > 0:
-                    self.selection = True
-                    self.iter = iter(selected)
+            if ProcessingConfig.getSetting(ProcessingConfig.USE_SELECTED)\
+                    and layer.selectedFeatureCount() > 0:
+                self.iter = layer.selectedFeaturesIterator(request)
+                self.selection = True
+            else:
+                self.iter = layer.getFeatures(request)
 
         def __iter__(self):
             return self.iter
@@ -118,7 +119,7 @@ def features(layer):
             else:
                 return int(self.layer.featureCount())
 
-    return Features(layer)
+    return Features(layer, request)
 
 
 def uniqueValues(layer, attribute):
@@ -201,10 +202,13 @@ def testForUniqueness(fieldList1, fieldList2):
 def spatialindex(layer):
     """Creates a spatial index for the passed vector layer.
     """
-    idx = QgsSpatialIndex()
-    feats = features(layer)
-    for ft in feats:
-        idx.insertFeature(ft)
+    request = QgsFeatureRequest()
+    request.setSubsetOfAttributes([])
+    if ProcessingConfig.getSetting(ProcessingConfig.USE_SELECTED) \
+            and layer.selectedFeatureCount() > 0:
+        idx = QgsSpatialIndex(layer.selectedFeaturesIterator(request))
+    else:
+        idx = QgsSpatialIndex(layer.getFeatures(request))
     return idx
 
 
@@ -463,7 +467,7 @@ def ogrConnectionString(uri):
         while not conn:
             try:
                 conn = psycopg2.connect(dsUri.connectionInfo())
-            except psycopg2.OperationalError as e:
+            except psycopg2.OperationalError:
                 (ok, user, passwd) = QgsCredentials.instance().get(conninfo, dsUri.username(), dsUri.password())
                 if not ok:
                     break
@@ -513,21 +517,67 @@ def ogrConnectionString(uri):
     return '"' + ogrstr + '"'
 
 
+#
+# The uri parameter is an URI from any QGIS provider,
+# so could have different formats.
+# Example formats:
+#
+# -- PostgreSQL provider
+# port=5493 sslmode=disable key='edge_id' srid=0 type=LineString table="city_data"."edge" (geom) sql=
+#
+# -- Spatialite provider
+# dbname='/tmp/x.sqlite' table="t" (geometry) sql='
+#
+# -- OGR provider (single-layer directory)
+# /tmp/x.gdb
+#
+# -- OGR provider (multi-layer directory)
+# /tmp/x.gdb|layerid=1
+#
+# -- OGR provider (multi-layer directory)
+# /tmp/x.gdb|layername=thelayer
+#
 def ogrLayerName(uri):
-    if 'host' in uri:
-        regex = re.compile('(table=")(.+?)(\.)(.+?)"')
-        r = regex.search(uri)
-        return '"' + r.groups()[1] + '.' + r.groups()[3] + '"'
-    elif 'dbname' in uri:
-        regex = re.compile('(table=")(.+?)"')
+
+    # handle URIs of database providers
+    if ' table=' in uri:
+        # Matches table="schema"."table"
+        re_table_schema = re.compile(' table="([^"]*)"\."([^"]*)"')
+        r = re_table_schema.search(uri)
+        if r:
+            return r.groups()[0] + '.' + r.groups()[1]
+        # Matches table="table"
+        re_table = re.compile(' table="([^"]*)"')
+        r = re_table.search(uri)
+        if r:
+            return r.groups()[0]
+
+    # handle URIs of OGR provider with explicit layername
+    if 'layername' in uri:
+        regex = re.compile('(layername=)([^|]*)')
         r = regex.search(uri)
         return r.groups()[1]
-    elif 'layername' in uri:
-        regex = re.compile('(layername=)(.*)')
-        r = regex.search(uri)
-        return r.groups()[1]
-    else:
-        return os.path.basename(os.path.splitext(uri)[0])
+
+    fields = uri.split('|')
+    ogruri = fields[0]
+    fields = fields[1:]
+    layerid = 0
+    for f in fields:
+        if f.startswith('layername='):
+            # Name encoded in uri, nothing more needed
+            return f.split('=')[1]
+        if f.startswith('layerid='):
+            layerid = int(f.split('=')[1])
+            # Last layerid= takes precedence, to allow of layername to
+            # take precedence
+    ds = ogr.Open(ogruri)
+    if not ds:
+        return "invalid-uri"
+    ly = ds.GetLayer(layerid)
+    if not ly:
+        return "invalid-layerid"
+    name = ly.GetName()
+    return name
 
 
 class VectorWriter:
@@ -535,6 +585,13 @@ class VectorWriter:
     MEMORY_LAYER_PREFIX = 'memory:'
     POSTGIS_LAYER_PREFIX = 'postgis:'
     SPATIALITE_LAYER_PREFIX = 'spatialite:'
+
+    nogeometry_extensions = [
+        u'csv',
+        u'dbf',
+        u'ods',
+        u'xlsx',
+    ]
 
     def __init__(self, destination, encoding, fields, geometryType,
                  crs, options=None):
@@ -574,16 +631,16 @@ class VectorWriter:
                 raise GeoAlgorithmExecutionException("Couldn't connect to database")
             print uri.uri()
             try:
-                db = postgis_utils.GeoDB(host=uri.host(), port=int(uri.port()),
-                                         dbname=uri.database(), user=user, passwd=passwd)
-            except postgis_utils.DbError as e:
+                db = postgis.GeoDB(host=uri.host(), port=int(uri.port()),
+                                   dbname=uri.database(), user=user, passwd=passwd)
+            except postgis.DbError as e:
                 raise GeoAlgorithmExecutionException(
                     "Couldn't connect to database:\n%s" % e.message)
 
             def _runSQL(sql):
                 try:
                     db._exec_sql_and_commit(unicode(sql))
-                except postgis_utils.DbError as e:
+                except postgis.DbError as e:
                     raise GeoAlgorithmExecutionException(
                         'Error creating output PostGIS table:\n%s' % e.message)
 
@@ -593,9 +650,10 @@ class VectorWriter:
                                   for f in fields)
 
             _runSQL("CREATE TABLE %s.%s (%s)" % (uri.schema(), uri.table().lower(), fieldsdesc))
-            _runSQL("SELECT AddGeometryColumn('{schema}', '{table}', 'the_geom', {srid}, '{typmod}', 2)".format(
-                table=uri.table().lower(), schema=uri.schema(), srid=crs.authid().split(":")[-1],
-                typmod=GEOM_TYPE_MAP[geometryType].upper()))
+            if geometryType != QGis.WKBNoGeometry:
+                _runSQL("SELECT AddGeometryColumn('{schema}', '{table}', 'the_geom', {srid}, '{typmod}', 2)".format(
+                    table=uri.table().lower(), schema=uri.schema(), srid=crs.authid().split(":")[-1],
+                    typmod=GEOM_TYPE_MAP[geometryType].upper()))
 
             self.layer = QgsVectorLayer(uri.uri(), uri.table(), "postgres")
             self.writer = self.layer.dataProvider()
@@ -604,17 +662,17 @@ class VectorWriter:
             uri = QgsDataSourceURI(self.destination[len(self.SPATIALITE_LAYER_PREFIX):])
             print uri.uri()
             try:
-                db = spatialite_utils.GeoDB(uri=uri)
-            except spatialite_utils.DbError as e:
+                db = spatialite.GeoDB(uri=uri)
+            except spatialite.DbError as e:
                 raise GeoAlgorithmExecutionException(
                     "Couldn't connect to database:\n%s" % e.message)
 
             def _runSQL(sql):
                 try:
                     db._exec_sql_and_commit(unicode(sql))
-                except spatialite_utils.DbError as e:
+                except spatialite.DbError as e:
                     raise GeoAlgorithmExecutionException(
-                        'Error creating output Spatialite table:\n%s' % e.message)
+                        'Error creating output Spatialite table:\n%s' % unicode(e))
 
             fields = [_toQgsField(f) for f in fields]
             fieldsdesc = ",".join('%s %s' % (f.name(),
@@ -623,9 +681,10 @@ class VectorWriter:
 
             _runSQL("DROP TABLE IF EXISTS %s" % uri.table().lower())
             _runSQL("CREATE TABLE %s (%s)" % (uri.table().lower(), fieldsdesc))
-            _runSQL("SELECT AddGeometryColumn('{table}', 'the_geom', {srid}, '{typmod}', 2)".format(
-                table=uri.table().lower(), srid=crs.authid().split(":")[-1],
-                typmod=GEOM_TYPE_MAP[geometryType].upper()))
+            if geometryType != QGis.WKBNoGeometry:
+                _runSQL("SELECT AddGeometryColumn('{table}', 'the_geom', {srid}, '{typmod}', 2)".format(
+                    table=uri.table().lower(), srid=crs.authid().split(":")[-1],
+                    typmod=GEOM_TYPE_MAP[geometryType].upper()))
 
             self.layer = QgsVectorLayer(uri.uri(), uri.table(), "spatialite")
             self.writer = self.layer.dataProvider()
@@ -637,11 +696,21 @@ class VectorWriter:
                 extension = extension[extension.find('*.') + 2:]
                 extension = extension[:extension.find(' ')]
                 OGRCodes[extension] = value
+            OGRCodes['dbf'] = "DBF file"
 
             extension = self.destination[self.destination.rfind('.') + 1:]
+
             if extension not in OGRCodes:
                 extension = 'shp'
                 self.destination = self.destination + '.shp'
+
+            if geometryType == QGis.WKBNoGeometry:
+                if extension == 'shp':
+                    extension = 'dbf'
+                    self.destination = self.destination[:self.destination.rfind('.')] + '.dbf'
+                if extension not in self.nogeometry_extensions:
+                    raise GeoAlgorithmExecutionException(
+                        "Unsupported format for tables with no geometry")
 
             qgsfields = QgsFields()
             for field in fields:

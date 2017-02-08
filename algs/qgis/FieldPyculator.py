@@ -27,7 +27,7 @@ __revision__ = '$Format:%H$'
 
 import sys
 
-from PyQt4.QtCore import QVariant
+from qgis.PyQt.QtCore import QVariant
 from qgis.core import QgsFeature, QgsField
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
@@ -88,11 +88,10 @@ class FieldsPyculator(GeoAlgorithm):
 
         layer = dataobjects.getObjectFromUri(
             self.getParameterValue(self.INPUT_LAYER))
-        provider = layer.dataProvider()
-        fields = provider.fields()
+        fields = layer.fields()
         fields.append(QgsField(fieldName, self.TYPES[fieldType], '',
                                fieldLength, fieldPrecision))
-        writer = output.getVectorWriter(fields, provider.geometryType(),
+        writer = output.getVectorWriter(fields, layer.wkbType(),
                                         layer.crs())
         outFeat = QgsFeature()
         new_ns = {}
@@ -104,10 +103,10 @@ class FieldsPyculator(GeoAlgorithm):
                 exec(bytecode, new_ns)
             except:
                 raise GeoAlgorithmExecutionException(
-                    self.tr("FieldPyculator code execute error.Global code block can't be executed!\n%s\n%s" % (unicode(sys.exc_info()[0].__name__), unicode(sys.exc_info()[1]))))
+                    self.tr("FieldPyculator code execute error.Global code block can't be executed!\n%s\n%s") % (unicode(sys.exc_info()[0].__name__), unicode(sys.exc_info()[1])))
 
         # Replace all fields tags
-        fields = provider.fields()
+        fields = layer.fields()
         num = 0
         for field in fields:
             field_name = unicode(field.name())
@@ -127,7 +126,7 @@ class FieldsPyculator(GeoAlgorithm):
             bytecode = compile(code, '<string>', 'exec')
         except:
             raise GeoAlgorithmExecutionException(
-                self.tr("FieldPyculator code execute error.Field code block can't be executed!\n%s\n%s" % (unicode(sys.exc_info()[0].__name__), unicode(sys.exc_info()[1]))))
+                self.tr("FieldPyculator code execute error.Field code block can't be executed!\n%s\n%s") % (unicode(sys.exc_info()[0].__name__), unicode(sys.exc_info()[1])))
 
         # Run
         features = vector.features(layer)
@@ -161,7 +160,7 @@ class FieldsPyculator(GeoAlgorithm):
                 raise GeoAlgorithmExecutionException(
                     self.tr("FieldPyculator code execute error\n"
                             "Field code block does not return '%s1' variable! "
-                            "Please declare this variable in your code!" % self.RESULT_VAR_NAME))
+                            "Please declare this variable in your code!") % self.RESULT_VAR_NAME)
 
             # Write feature
             outFeat.setGeometry(feat.geometry())

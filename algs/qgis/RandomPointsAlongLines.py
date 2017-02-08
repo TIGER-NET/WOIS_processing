@@ -27,7 +27,7 @@ __revision__ = '$Format:%H$'
 
 import random
 
-from PyQt4.QtCore import QVariant
+from qgis.PyQt.QtCore import QVariant
 from qgis.core import (QGis, QgsFields, QgsField, QgsGeometry, QgsSpatialIndex,
                        QgsDistanceArea, QgsFeatureRequest, QgsFeature,
                        QgsPoint)
@@ -68,7 +68,7 @@ class RandomPointsAlongLines(GeoAlgorithm):
         fields = QgsFields()
         fields.append(QgsField('id', QVariant.Int, '', 10, 0))
         writer = self.getOutputFromName(self.OUTPUT).getVectorWriter(
-            fields, QGis.WKBPoint, layer.dataProvider().crs())
+            fields, QGis.WKBPoint, layer.crs())
 
         nPoints = 0
         nIterations = 0

@@ -28,19 +28,29 @@ __revision__ = '$Format:%H$'
 
 import os
 import importlib
-import subprocess
-from PyQt4.QtCore import QCoreApplication
-from PyQt4.QtGui import QIcon
+from qgis.PyQt.QtCore import QCoreApplication
+from qgis.PyQt.QtGui import QIcon
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.ProcessingLog import ProcessingLog
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
-from processing.core.parameters import getParameterFromString, ParameterExtent, ParameterRaster, ParameterVector, ParameterTable, ParameterMultipleInput, ParameterBoolean, ParameterFixedTable, ParameterNumber, ParameterSelection
-from processing.core.outputs import getOutputFromString, OutputTable, OutputVector, OutputRaster
-import SagaUtils
+from processing.core.parameters import (getParameterFromString,
+                                        ParameterExtent,
+                                        ParameterRaster,
+                                        ParameterVector,
+                                        ParameterTable,
+                                        ParameterMultipleInput,
+                                        ParameterBoolean,
+                                        ParameterFixedTable,
+                                        ParameterNumber,
+                                        ParameterSelection)
+from processing.core.outputs import (getOutputFromString,
+                                     OutputVector,
+                                     OutputRaster)
 from processing.tools import dataobjects
 from processing.tools.system import getTempFilename, getTempFilenameInTempFolder
-from processing.algs.saga.SagaNameDecorator import *
+from processing.algs.saga.SagaNameDecorator import decoratedAlgorithmName, decoratedGroupName
+from . import SagaUtils
 
 pluginPath = os.path.normpath(os.path.join(
     os.path.split(os.path.dirname(__file__))[0], os.pardir))

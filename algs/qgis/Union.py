@@ -25,13 +25,20 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
+import os
+
+from qgis.PyQt.QtGui import QIcon
+
 from qgis.core import QGis, QgsFeatureRequest, QgsFeature, QgsGeometry, QgsWKBTypes
+
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.ProcessingLog import ProcessingLog
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
 from processing.core.parameters import ParameterVector
 from processing.core.outputs import OutputVector
 from processing.tools import dataobjects, vector
+
+pluginPath = os.path.split(os.path.split(os.path.dirname(__file__))[0])[0]
 
 wkbTypeGroups = {
     'Point': (QGis.WKBPoint, QGis.WKBMultiPoint, QGis.WKBPoint25D, QGis.WKBMultiPoint25D,),
@@ -42,16 +49,15 @@ for key, value in wkbTypeGroups.items():
     for const in value:
         wkbTypeGroups[const] = key
 
-GEOM_25D = [QGis.WKBPoint25D, QGis.WKBLineString25D, QGis.WKBPolygon25D,
-            QGis.WKBMultiPoint25D, QGis.WKBMultiLineString25D,
-            QGis.WKBMultiPolygon25D]
-
 
 class Union(GeoAlgorithm):
 
     INPUT = 'INPUT'
     INPUT2 = 'INPUT2'
     OUTPUT = 'OUTPUT'
+
+    def getIcon(self):
+        return QIcon(os.path.join(pluginPath, 'images', 'ftools', 'union.png'))
 
     def defineCharacteristics(self):
         self.name, self.i18n_name = self.trAlgorithm('Union')
@@ -66,16 +72,10 @@ class Union(GeoAlgorithm):
         vlayerA = dataobjects.getObjectFromUri(self.getParameterValue(Union.INPUT))
         vlayerB = dataobjects.getObjectFromUri(self.getParameterValue(Union.INPUT2))
 
-        vproviderA = vlayerA.dataProvider()
-
-        geomType = vproviderA.geometryType()
-        if geomType in GEOM_25D:
-            raise GeoAlgorithmExecutionException(
-                self.tr('Input layer has unsupported geometry type {}').format(geomType))
-
+        geomType = vlayerA.wkbType()
         fields = vector.combineVectorFields(vlayerA, vlayerB)
         writer = self.getOutputFromName(Union.OUTPUT).getVectorWriter(fields,
-                                                                      geomType, vproviderA.crs())
+                                                                      geomType, vlayerA.crs())
         inFeatA = QgsFeature()
         inFeatB = QgsFeature()
         outFeat = QgsFeature()
@@ -116,7 +116,7 @@ class Union(GeoAlgorithm):
                         lstIntersectingB.append(tmpGeom)
 
                         if int_geom is None:
-                           # There was a problem creating the intersection
+                            # There was a problem creating the intersection
                             ProcessingLog.addToLog(ProcessingLog.LOG_INFO,
                                                    self.tr('GEOS geoprocessing error: One or more input features have invalid geometry.'))
                             int_geom = QgsGeometry()
@@ -173,7 +173,7 @@ class Union(GeoAlgorithm):
                     ProcessingLog.addToLog(ProcessingLog.LOG_INFO,
                                            self.tr('Feature geometry error: One or more output features ignored due to invalid geometry.'))
 
-        length = len(vproviderA.fields())
+        length = len(vlayerA.fields())
         atMapA = [None] * length
 
         featuresA = vector.features(vlayerB)

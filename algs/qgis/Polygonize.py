@@ -27,9 +27,9 @@ __revision__ = '$Format:%H$'
 
 from shapely.ops import polygonize
 from shapely.ops import unary_union
-from shapely.geometry import Point, MultiLineString
+from shapely.geometry import MultiLineString
 
-from PyQt4.QtCore import QVariant
+from qgis.PyQt.QtCore import QVariant
 from qgis.core import QGis, QgsFields, QgsField, QgsFeature, QgsGeometry
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
@@ -60,9 +60,8 @@ class Polygonize(GeoAlgorithm):
     def processAlgorithm(self, progress):
         vlayer = dataobjects.getObjectFromUri(self.getParameterValue(self.INPUT))
         output = self.getOutputFromName(self.OUTPUT)
-        vprovider = vlayer.dataProvider()
         if self.getParameterValue(self.FIELDS):
-            fields = vprovider.fields()
+            fields = vlayer.fields()
         else:
             fields = QgsFields()
         if self.getParameterValue(self.GEOMETRY):

@@ -25,6 +25,8 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
+import os
+
 from qgis.core import QGis, QgsFeature, QgsGeometry, QgsPoint
 
 from processing.core.GeoAlgorithm import GeoAlgorithm
@@ -32,6 +34,8 @@ from processing.core.parameters import ParameterVector
 from processing.core.parameters import ParameterNumber
 from processing.core.outputs import OutputVector
 from processing.tools import dataobjects, vector
+
+pluginPath = os.path.split(os.path.split(os.path.dirname(__file__))[0])[0]
 
 
 class DensifyGeometries(GeoAlgorithm):
@@ -108,10 +112,7 @@ class DensifyGeometries(GeoAlgorithm):
 
     def densify(self, polyline, pointsNumber):
         output = []
-        if pointsNumber != 1:
-            multiplier = 1.0 / float(pointsNumber + 1)
-        else:
-            multiplier = 1
+        multiplier = 1.0 / float(pointsNumber + 1)
         for i in xrange(len(polyline) - 1):
             p1 = polyline[i]
             p2 = polyline[i + 1]

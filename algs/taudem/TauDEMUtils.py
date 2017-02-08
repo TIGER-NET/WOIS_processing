@@ -28,7 +28,7 @@ __revision__ = '$Format:%H$'
 import os
 import subprocess
 
-from PyQt4.QtCore import QCoreApplication
+from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import QgsApplication
 
 from processing.core.ProcessingConfig import ProcessingConfig
@@ -102,6 +102,7 @@ class TauDEMUtils:
     def executeTauDEM(command, progress):
         loglines = []
         loglines.append(TauDEMUtils.tr('TauDEM execution console output'))
+        command = escapeAndJoin(command)
         fused_command = ''.join(['"%s" ' % c for c in command])
         progress.setInfo(TauDEMUtils.tr('TauDEM command:'))
         progress.setCommand(fused_command.replace('" "', ' ').strip('"'))

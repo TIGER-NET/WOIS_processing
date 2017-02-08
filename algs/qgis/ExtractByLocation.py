@@ -25,7 +25,7 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
-from qgis.core import QGis, QgsFeatureRequest, QgsGeometry
+from qgis.core import QgsFeatureRequest
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.parameters import ParameterVector
 from processing.core.parameters import ParameterGeometryPredicate
@@ -71,7 +71,7 @@ class ExtractByLocation(GeoAlgorithm):
 
         output = self.getOutputFromName(self.OUTPUT)
         writer = output.getVectorWriter(layer.pendingFields(),
-                                        layer.dataProvider().geometryType(), layer.crs())
+                                        layer.wkbType(), layer.crs())
 
         if 'disjoint' in predicates:
             disjoinSet = []

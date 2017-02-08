@@ -25,6 +25,10 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
+import os
+
+from qgis.PyQt.QtGui import QIcon
+
 from qgis.core import QGis, QgsFeature, QgsGeometry
 
 from processing.core.GeoAlgorithm import GeoAlgorithm
@@ -34,12 +38,17 @@ from processing.core.parameters import ParameterNumber
 from processing.core.outputs import OutputVector
 from processing.tools import dataobjects, vector
 
+pluginPath = os.path.split(os.path.split(os.path.dirname(__file__))[0])[0]
+
 
 class SimplifyGeometries(GeoAlgorithm):
 
     INPUT = 'INPUT'
     TOLERANCE = 'TOLERANCE'
     OUTPUT = 'OUTPUT'
+
+    def getIcon(self):
+        return QIcon(os.path.join(pluginPath, 'images', 'ftools', 'simplify.png'))
 
     def defineCharacteristics(self):
         self.name, self.i18n_name = self.trAlgorithm('Simplify geometries')
@@ -66,15 +75,16 @@ class SimplifyGeometries(GeoAlgorithm):
         features = vector.features(layer)
         total = 100.0 / len(features)
         for current, f in enumerate(features):
-            featGeometry = QgsGeometry(f.geometry())
-            attrs = f.attributes()
-            pointsBefore += self.geomVertexCount(featGeometry)
-            newGeometry = featGeometry.simplify(tolerance)
-            pointsAfter += self.geomVertexCount(newGeometry)
-            feature = QgsFeature()
-            feature.setGeometry(newGeometry)
-            feature.setAttributes(attrs)
-            writer.addFeature(feature)
+            featGeometry = f.geometry()
+            if featGeometry is not None:
+                attrs = f.attributes()
+                pointsBefore += self.geomVertexCount(featGeometry)
+                newGeometry = featGeometry.simplify(tolerance)
+                pointsAfter += self.geomVertexCount(newGeometry)
+                feature = QgsFeature()
+                feature.setGeometry(newGeometry)
+                feature.setAttributes(attrs)
+                writer.addFeature(feature)
             progress.setPercentage(int(current * total))
 
         del writer
@@ -105,4 +115,4 @@ class SimplifyGeometries(GeoAlgorithm):
 
             return len(points)
         else:
-            return None
+            return 0

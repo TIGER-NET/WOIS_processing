@@ -25,7 +25,7 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
-from PyQt4.QtCore import QVariant
+from qgis.PyQt.QtCore import QVariant
 from qgis.core import QgsExpression, QgsExpressionContext, QgsExpressionContextUtils, QgsFeature, QgsField, QgsDistanceArea, QgsProject, GEO_NONE
 from qgis.utils import iface
 from processing.core.GeoAlgorithm import GeoAlgorithm
@@ -94,12 +94,11 @@ class FieldsCalculator(GeoAlgorithm):
             output.value = system.getTempFilenameInTempFolder(
                 output.name + '.' + ext)
 
-        provider = layer.dataProvider()
-        fields = layer.pendingFields()
+        fields = layer.fields()
         if newField:
             fields.append(QgsField(fieldName, fieldType, '', width, precision))
 
-        writer = output.getVectorWriter(fields, provider.geometryType(),
+        writer = output.getVectorWriter(fields, layer.wkbType(),
                                         layer.crs())
 
         exp = QgsExpression(formula)

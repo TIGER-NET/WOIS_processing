@@ -25,6 +25,8 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
+import os
+
 from qgis.core import QgsFeature
 
 from processing.core.GeoAlgorithm import GeoAlgorithm
@@ -33,6 +35,8 @@ from processing.core.parameters import ParameterTable
 from processing.core.parameters import ParameterTableField
 from processing.core.outputs import OutputVector
 from processing.tools import dataobjects, vector
+
+pluginPath = os.path.split(os.path.split(os.path.dirname(__file__))[0])[0]
 
 
 class JoinAttributes(GeoAlgorithm):
@@ -65,14 +69,13 @@ class JoinAttributes(GeoAlgorithm):
         field2 = self.getParameterValue(self.TABLE_FIELD_2)
 
         layer = dataobjects.getObjectFromUri(input)
-        provider = layer.dataProvider()
         joinField1Index = layer.fieldNameIndex(field)
 
         layer2 = dataobjects.getObjectFromUri(input2)
         joinField2Index = layer2.fieldNameIndex(field2)
 
         outFields = vector.combineVectorFields(layer, layer2)
-        writer = output.getVectorWriter(outFields, provider.geometryType(),
+        writer = output.getVectorWriter(outFields, layer.wkbType(),
                                         layer.crs())
 
         # Cache attributes of Layer 2

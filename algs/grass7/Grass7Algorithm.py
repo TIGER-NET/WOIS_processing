@@ -30,8 +30,8 @@ import time
 import uuid
 import importlib
 
-from PyQt4.QtCore import QCoreApplication, QUrl
-from PyQt4.QtGui import QIcon
+from qgis.PyQt.QtCore import QCoreApplication, QUrl
+from qgis.PyQt.QtGui import QIcon
 
 from qgis.core import QgsRasterLayer
 from qgis.utils import iface
@@ -41,10 +41,24 @@ from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.ProcessingLog import ProcessingLog
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
 
-from processing.core.parameters import getParameterFromString, ParameterVector, ParameterMultipleInput, ParameterExtent, ParameterNumber, ParameterSelection, ParameterRaster, ParameterTable, ParameterBoolean, ParameterString
-from processing.core.outputs import getOutputFromString, OutputRaster, OutputVector, OutputFile, OutputHTML
+from processing.core.parameters import (getParameterFromString,
+                                        ParameterVector,
+                                        ParameterMultipleInput,
+                                        ParameterExtent,
+                                        ParameterNumber,
+                                        ParameterSelection,
+                                        ParameterRaster,
+                                        ParameterTable,
+                                        ParameterBoolean,
+                                        ParameterString,
+                                        ParameterPoint)
+from processing.core.outputs import (getOutputFromString,
+                                     OutputRaster,
+                                     OutputVector,
+                                     OutputFile,
+                                     OutputHTML)
 
-from Grass7Utils import Grass7Utils
+from .Grass7Utils import Grass7Utils
 
 from processing.tools import dataobjects, system
 
@@ -69,6 +83,7 @@ class Grass7Algorithm(GeoAlgorithm):
         self.descriptionFile = descriptionfile
         self.defineCharacteristicsFromFile()
         self.numExportedLayers = 0
+        self._icon = None
         self.uniqueSufix = unicode(uuid.uuid4()).replace('-', '')
 
         # Use the ext mechanism
@@ -84,37 +99,19 @@ class Grass7Algorithm(GeoAlgorithm):
         return newone
 
     def getIcon(self):
-        return QIcon(os.path.join(pluginPath, 'images', 'grass.svg'))
+        if self._icon is None:
+            self._icon = QIcon(os.path.join(pluginPath, 'images', 'grass.svg'))
+        return self._icon
 
     def help(self):
-        localDoc = None
-        html = self.grass7Name + '.html'
-        if system.isWindows():
-            # For MS-Windows, use the configured GRASS7 path
-            localPath = os.path.join(Grass7Utils.grassPath(), 'docs/html', html)
-            if os.path.exists(localPath):
-                localDoc = os.path.abspath(localPath)
-        elif system.isMac():
-            # For MacOSX official package
-            localPath = os.path.join('/Applications/GRASS-7.0.app/Contents/MacOS/docs/html', html)
-            if os.path.exists(localPath):
-                localDoc = os.path.abspath(localPath)
+        helpPath = Grass7Utils.grassHelpPath()
+        if helpPath == '':
+            return False, None
+
+        if os.path.exists(helpPath):
+            return False, QUrl.fromLocalFile(os.path.join(helpPath, '{}.html'.format(self.grass7Name))).toString()
         else:
-            # For GNU/Linux distributions
-            searchPaths = ['/usr/share/doc/grass-doc/html', '/opt/grass/docs/html',
-                           '/usr/share/doc/grass/docs/html']
-            for path in searchPaths:
-                localPath = os.path.join(path, html)
-                if os.path.exists(localPath):
-                    localDoc = os.path.abspath(localPath)
-
-        # Found the local documentation
-        if localDoc:
-            localDoc = QUrl.fromLocalFile(localDoc).toString()
-            return False, localDoc
-
-        # Return the URL if local doc is not found
-        return False, 'http://grass.osgeo.org/grass70/manuals/' + self.grass7Name + '.html'
+            return False, helpPath + '{}.html'.format(self.grass7Name)
 
     def getParameterDescriptions(self):
         descs = {}
@@ -200,7 +197,7 @@ class Grass7Algorithm(GeoAlgorithm):
         if hasVectorInput:
             param = ParameterNumber(self.GRASS_SNAP_TOLERANCE_PARAMETER,
                                     'v.in.ogr snap tolerance (-1 = no snap)',
-                                    -1, None, -1.0)
+                                    - 1, None, -1.0)
             param.isAdvanced = True
             self.addParameter(param)
             param = ParameterNumber(self.GRASS_MIN_AREA_PARAMETER,
@@ -369,7 +366,6 @@ class Grass7Algorithm(GeoAlgorithm):
             unicode(self.getParameterValue(self.GRASS_REGION_EXTENT_PARAMETER))
         regionCoords = region.split(',')
         command = 'g.region'
-        command += ' -a'
         command += ' n=' + unicode(regionCoords[3])
         command += ' s=' + unicode(regionCoords[2])
         command += ' e=' + unicode(regionCoords[1])
@@ -399,16 +395,16 @@ class Grass7Algorithm(GeoAlgorithm):
             if isinstance(param, (ParameterRaster, ParameterVector)):
                 value = param.value
                 if value in self.exportedLayers.keys():
-                    command += ' ' + param.name + '=' \
-                        + self.exportedLayers[value]
+                    command += ' ' + param.name + '="' \
+                        + self.exportedLayers[value] + '"'
                 else:
-                    command += ' ' + param.name + '=' + value
+                    command += ' ' + param.name + '="' + value + '"'
             elif isinstance(param, ParameterMultipleInput):
                 s = param.value
                 for layer in self.exportedLayers.keys():
                     s = s.replace(layer, self.exportedLayers[layer])
                 s = s.replace(';', ',')
-                command += ' ' + param.name + '=' + s
+                command += ' ' + param.name + '="' + s + '"'
             elif isinstance(param, ParameterBoolean):
                 if param.value:
                     command += ' ' + param.name
@@ -417,6 +413,8 @@ class Grass7Algorithm(GeoAlgorithm):
                 command += ' ' + param.name + '=' + unicode(param.options[idx])
             elif isinstance(param, ParameterString):
                 command += ' ' + param.name + '="' + unicode(param.value) + '"'
+            elif isinstance(param, ParameterPoint):
+                command += ' ' + param.name + '=' + unicode(param.value)
             else:
                 command += ' ' + param.name + '="' + unicode(param.value) + '"'
 
@@ -461,20 +459,12 @@ class Grass7Algorithm(GeoAlgorithm):
                     command += ' input='
                     command += 'correctedoutput' + self.uniqueSufix
                     command += ' output="' + filename + '"'
-                elif self.grass7Name == 'r.composite':
-                    command = 'r.out.gdal --overwrite -c createopt="TFW=YES,COMPRESS=LZW"'
-                    command += ' input='
-                    command += 'correctedoutput' + self.uniqueSufix
-                    command += ' output="' + filename + '"'
                 else:
                     command = 'r.out.gdal --overwrite -c createopt="TFW=YES,COMPRESS=LZW"'
                     command += ' input='
 
                 if self.grass7Name == 'r.horizon':
                     command += out.name + self.uniqueSufix + '_0'
-                elif self.grass7Name == 'r.composite':
-                    self.commands.append(command)
-                    self.outputCommands.append(command)
                 elif self.grass7Name == 'r.statistics':
                     self.commands.append(command)
                     self.outputCommands.append(command)
@@ -543,7 +533,7 @@ class Grass7Algorithm(GeoAlgorithm):
         return command
 
     def setSessionProjectionFromProject(self, commands):
-        if not Grass7Utils.projectionSet:
+        if not Grass7Utils.projectionSet and iface:
             proj4 = iface.mapCanvas().mapSettings().destinationCrs().toProj4()
             command = 'g.proj'
             command += ' -c'

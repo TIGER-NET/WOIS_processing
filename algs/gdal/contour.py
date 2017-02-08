@@ -25,6 +25,10 @@ __copyright__ = '(C) 2013, Alexander Bruy'
 
 __revision__ = '$Format:%H$'
 
+import os
+
+from qgis.PyQt.QtGui import QIcon
+
 from processing.algs.gdal.GdalAlgorithm import GdalAlgorithm
 
 from processing.core.parameters import ParameterRaster
@@ -35,6 +39,8 @@ from processing.core.outputs import OutputVector
 
 from processing.algs.gdal.GdalUtils import GdalUtils
 
+pluginPath = os.path.split(os.path.split(os.path.dirname(__file__))[0])[0]
+
 
 class contour(GdalAlgorithm):
 
@@ -43,6 +49,9 @@ class contour(GdalAlgorithm):
     INTERVAL = 'INTERVAL'
     FIELD_NAME = 'FIELD_NAME'
     EXTRA = 'EXTRA'
+
+    def getIcon(self):
+        return QIcon(os.path.join(pluginPath, 'images', 'gdaltools', 'contour.png'))
 
     def defineCharacteristics(self):
         self.name, self.i18n_name = self.trAlgorithm('Contour')
@@ -62,6 +71,7 @@ class contour(GdalAlgorithm):
                                     self.tr('Contours')))
 
     def getConsoleCommands(self):
+        output = self.getOutputValue(self.OUTPUT_VECTOR)
         interval = unicode(self.getParameterValue(self.INTERVAL))
         fieldName = unicode(self.getParameterValue(self.FIELD_NAME))
         extra = self.getParameterValue(self.EXTRA)
@@ -75,10 +85,14 @@ class contour(GdalAlgorithm):
         arguments.append('-i')
         arguments.append(interval)
 
+        driver = GdalUtils.getVectorDriverFromFileName(output)
+        arguments.append('-f')
+        arguments.append(driver)
+
         if extra and len(extra) > 0:
             arguments.append(extra)
 
         arguments.append(self.getParameterValue(self.INPUT_RASTER))
-        arguments.append(self.getOutputValue(self.OUTPUT_VECTOR))
+        arguments.append(output)
 
         return ['gdal_contour', GdalUtils.escapeAndJoin(arguments)]

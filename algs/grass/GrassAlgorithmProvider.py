@@ -27,13 +27,13 @@ __revision__ = '$Format:%H$'
 
 import os
 
-from PyQt4.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.core.ProcessingLog import ProcessingLog
-from GrassUtils import GrassUtils
-from GrassAlgorithm import GrassAlgorithm
-from nviz import nviz
+from .GrassUtils import GrassUtils
+from .GrassAlgorithm import GrassAlgorithm
+from .nviz import nviz
 from processing.tools.system import isMac, isWindows
 
 pluginPath = os.path.normpath(os.path.join(
@@ -53,15 +53,21 @@ class GrassAlgorithmProvider(AlgorithmProvider):
             ProcessingConfig.addSetting(Setting(self.getDescription(),
                                                 GrassUtils.GRASS_FOLDER, self.tr('GRASS folder'),
                                                 GrassUtils.grassPath(), valuetype=Setting.FOLDER))
-            ProcessingConfig.addSetting(Setting(self.getDescription(),
-                                                GrassUtils.GRASS_WIN_SHELL, self.tr('Msys folder'),
-                                                GrassUtils.grassWinShell(), valuetype=Setting.FOLDER))
+            if isWindows():
+                ProcessingConfig.addSetting(Setting(self.getDescription(),
+                                                    GrassUtils.GRASS_WIN_SHELL, self.tr('Msys folder'),
+                                                    GrassUtils.grassWinShell(), valuetype=Setting.FOLDER))
         ProcessingConfig.addSetting(Setting(self.getDescription(),
                                             GrassUtils.GRASS_LOG_COMMANDS,
                                             self.tr('Log execution commands'), False))
         ProcessingConfig.addSetting(Setting(self.getDescription(),
                                             GrassUtils.GRASS_LOG_CONSOLE,
                                             self.tr('Log console output'), False))
+        ProcessingConfig.addSetting(Setting(
+            self.getDescription(),
+            GrassUtils.GRASS_HELP_PATH,
+            self.tr('Location of GRASS docs'),
+            GrassUtils.grassHelpPath()))
 
     def unload(self):
         AlgorithmProvider.unload(self)
@@ -70,6 +76,7 @@ class GrassAlgorithmProvider(AlgorithmProvider):
             ProcessingConfig.removeSetting(GrassUtils.GRASS_WIN_SHELL)
         ProcessingConfig.removeSetting(GrassUtils.GRASS_LOG_COMMANDS)
         ProcessingConfig.removeSetting(GrassUtils.GRASS_LOG_CONSOLE)
+        ProcessingConfig.removeSetting(GrassUtils.GRASS_HELP_PATH)
 
     def createAlgsList(self):
         self.preloadedAlgs = []
@@ -83,7 +90,7 @@ class GrassAlgorithmProvider(AlgorithmProvider):
                     else:
                         ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
                                                self.tr('Could not open GRASS algorithm: %s' % descriptionFile))
-                except Exception as e:
+                except Exception:
                     ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
                                            self.tr('Could not open GRASS algorithm: %s' % descriptionFile))
         self.preloadedAlgs.append(nviz())

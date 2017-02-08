@@ -28,8 +28,9 @@ __revision__ = '$Format:%H$'
 import os
 import stat
 import subprocess
+import time
 
-from PyQt4.QtCore import QCoreApplication
+from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import QgsApplication
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.ProcessingLog import ProcessingLog
@@ -71,10 +72,13 @@ def findSagaFolder():
 
 def sagaPath():
     folder = ProcessingConfig.getSetting(SAGA_FOLDER)
+    if folder and not os.path.isdir(folder):
+        folder = None
+        ProcessingLog.addToLog(ProcessingLog.LOG_WARNING,
+                               'Specified SAGA folder does not exist. Will try to find built-in binaries.')
     if folder is None or folder == '':
         folder = findSagaFolder()
-        if folder is not None:
-            ProcessingConfig.setSettingValue(SAGA_FOLDER, folder)
+
     return folder or ''
 
 
@@ -97,7 +101,12 @@ def createSagaBatchJobFileFromSagaCommands(commands):
     else:
         pass
     for command in commands:
-        fout.write('saga_cmd ' + command.encode('utf8') + '\n')
+        try:
+            # Python 2
+            fout.write('saga_cmd ' + command.encode('utf8') + '\n')
+        except TypeError:
+            # Python 3
+            fout.write('saga_cmd ' + command + '\n')
 
     fout.write('exit')
     fout.close()
@@ -133,6 +142,8 @@ def getSagaInstalledVersion(runSaga=False):
             stderr=subprocess.STDOUT,
             universal_newlines=True,
         ).stdout
+        if isMac():  # This trick avoids having an uninterrupted system call exception if SAGA is not installed
+            time.sleep(1)
         try:
             lines = proc.readlines()
             for line in lines:

@@ -25,8 +25,8 @@ __copyright__ = '(C) 2012, Victor Olaya'
 
 __revision__ = '$Format:%H$'
 
-from PyQt4.QtCore import QVariant
-from qgis.core import QgsField, QgsFeature, QgsGeometry
+from qgis.PyQt.QtCore import QVariant
+from qgis.core import QgsField, QgsFeature
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.parameters import ParameterVector
 from processing.core.outputs import OutputVector
@@ -49,10 +49,9 @@ class AutoincrementalField(GeoAlgorithm):
         output = self.getOutputFromName(self.OUTPUT)
         vlayer = \
             dataobjects.getObjectFromUri(self.getParameterValue(self.INPUT))
-        vprovider = vlayer.dataProvider()
-        fields = vprovider.fields()
+        fields = vlayer.fields()
         fields.append(QgsField('AUTO', QVariant.Int))
-        writer = output.getVectorWriter(fields, vprovider.geometryType(),
+        writer = output.getVectorWriter(fields, vlayer.wkbType(),
                                         vlayer.crs())
         outFeat = QgsFeature()
         features = vector.features(vlayer)

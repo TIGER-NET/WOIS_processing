@@ -26,15 +26,15 @@ __copyright__ = '(C) 2012, Victor Olaya'
 __revision__ = '$Format:%H$'
 
 import os
-from PyQt4.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
 from processing.core.ProcessingLog import ProcessingLog
-from SagaAlgorithm212 import SagaAlgorithm212
-from SagaAlgorithm213 import SagaAlgorithm213
-from SagaAlgorithm214 import SagaAlgorithm214
-from SplitRGBBands import SplitRGBBands
-import SagaUtils
+from .SagaAlgorithm212 import SagaAlgorithm212
+from .SagaAlgorithm213 import SagaAlgorithm213
+from .SagaAlgorithm214 import SagaAlgorithm214
+from .SplitRGBBands import SplitRGBBands
+from . import SagaUtils
 from processing.tools.system import isWindows, isMac
 
 
@@ -57,7 +57,7 @@ class SagaAlgorithmProvider(AlgorithmProvider):
         self.activate = True
 
     def initializeSettings(self):
-        if (isWindows() or isMac()) and SagaUtils.findSagaFolder() is None:
+        if (isWindows() or isMac()):
             ProcessingConfig.addSetting(Setting("SAGA",
                                                 SagaUtils.SAGA_FOLDER, self.tr('SAGA folder'),
                                                 '',
@@ -77,7 +77,7 @@ class SagaAlgorithmProvider(AlgorithmProvider):
 
     def unload(self):
         AlgorithmProvider.unload(self)
-        if (isWindows() or isMac()) and SagaUtils.findSagaFolder() is None:
+        if (isWindows() or isMac()):
             ProcessingConfig.removeSetting(SagaUtils.SAGA_FOLDER)
 
         ProcessingConfig.removeSetting(SagaUtils.SAGA_LOG_CONSOLE)

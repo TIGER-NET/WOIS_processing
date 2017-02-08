@@ -25,7 +25,7 @@ __copyright__ = '(C) 2010, Michael Minn'
 
 __revision__ = '$Format:%H$'
 
-from PyQt4.QtCore import QVariant
+from qgis.PyQt.QtCore import QVariant
 from qgis.core import QgsExpression, QgsFeatureRequest
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
@@ -34,7 +34,7 @@ from processing.core.parameters import ParameterTableField
 from processing.core.parameters import ParameterSelection
 from processing.core.parameters import ParameterString
 from processing.core.outputs import OutputVector
-from processing.tools import dataobjects, vector
+from processing.tools import dataobjects
 
 
 class ExtractByAttribute(GeoAlgorithm):
@@ -95,7 +95,7 @@ class ExtractByAttribute(GeoAlgorithm):
             raise GeoAlgorithmExecutionException(
                 self.tr('Operators %s can be used only with string fields.' % op))
 
-        if fieldType in [QVariant.Int, QVariant.Double]:
+        if fieldType in [QVariant.Int, QVariant.Double, QVariant.UInt, QVariant.LongLong, QVariant.ULongLong]:
             expr = '"%s" %s %s' % (fieldName, operator, value)
         elif fieldType == QVariant.String:
             if operator not in self.OPERATORS[-2:]:

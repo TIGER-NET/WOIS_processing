@@ -30,10 +30,10 @@ import os
 import stat
 import subprocess
 
-from PyQt4.QtCore import QSettings, QCoreApplication
+from qgis.PyQt.QtCore import QSettings, QCoreApplication
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.ProcessingLog import ProcessingLog
-from processing.tools.system import userFolder, isWindows, mkdir
+from processing.tools.system import userFolder, isWindows, mkdir, getTempFilenameInTempFolder
 
 
 class RUtils:
@@ -43,11 +43,33 @@ class RUtils:
     R_USE64 = 'R_USE64'
     R_LIBS_USER = 'R_LIBS_USER'
 
+    rscriptfilename = userFolder() + os.sep + 'processing_script.r'
+
     @staticmethod
     def RFolder():
         folder = ProcessingConfig.getSetting(RUtils.R_FOLDER)
         if folder is None:
-            folder = ''
+            if isWindows():
+                if 'ProgramW6432' in os.environ.keys() and os.path.isdir(os.path.join(os.environ['ProgramW6432'], 'R')):
+                    testfolder = os.path.join(os.environ['ProgramW6432'], 'R')
+                elif 'PROGRAMFILES(x86)' in os.environ.keys() and os.path.isdir(os.path.join(os.environ['PROGRAMFILES(x86)'], 'R')):
+                    testfolder = os.path.join(os.environ['PROGRAMFILES(x86)'], 'R')
+                elif 'PROGRAMFILES' in os.environ.keys() and os.path.isdir(os.path.join(os.environ['PROGRAMFILES'], 'R')):
+                    testfolder = os.path.join(os.environ['PROGRAMFILES'], 'R')
+                else:
+                    testfolder = 'C:\\R'
+
+                if os.path.isdir(testfolder):
+                    subfolders = os.listdir(testfolder)
+                    subfolders.sort(reverse=True)
+                    for subfolder in subfolders:
+                        if subfolder.startswith('R-'):
+                            folder = os.path.join(testfolder, subfolder)
+                            break
+                else:
+                    folder = ''
+            else:
+                folder = ''
 
         return os.path.abspath(unicode(folder))
 
@@ -64,17 +86,18 @@ class RUtils:
         return os.path.abspath(unicode(folder))
 
     @staticmethod
-    def RScriptsFolder():
-        folder = ProcessingConfig.getSetting(RUtils.RSCRIPTS_FOLDER)
-        if folder is None:
-            folder = unicode(os.path.join(userFolder(), 'rscripts'))
-        try:
-            mkdir(folder)
-        except:
-            folder = unicode(os.path.join(userFolder(), 'rscripts'))
-            mkdir(folder)
-
+    def defaultRScriptsFolder():
+        folder = unicode(os.path.join(userFolder(), 'rscripts'))
+        mkdir(folder)
         return os.path.abspath(folder)
+
+    @staticmethod
+    def RScriptsFolders():
+        folder = ProcessingConfig.getSetting(RUtils.RSCRIPTS_FOLDER)
+        if folder is not None:
+            return folder.split(';')
+        else:
+            return [RUtils.defaultRScriptsFolder()]
 
     @staticmethod
     def createRScriptFromRCommands(commands):
@@ -85,7 +108,7 @@ class RUtils:
 
     @staticmethod
     def getRScriptFilename():
-        return userFolder() + os.sep + 'processing_script.r'
+        return RUtils.rscriptfilename
 
     @staticmethod
     def getConsoleOutputFilename():
@@ -93,6 +116,9 @@ class RUtils:
 
     @staticmethod
     def executeRAlgorithm(alg, progress):
+        # generate new R script file name in a temp folder
+        RUtils.rscriptfilename = getTempFilenameInTempFolder('processing_script.r')
+        # run commands
         RUtils.verboseCommands = alg.getVerboseCommands()
         RUtils.createRScriptFromRCommands(alg.getFullSetOfRCommands())
         if isWindows():
