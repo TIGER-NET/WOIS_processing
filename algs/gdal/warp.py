@@ -177,7 +177,7 @@ class warp(GdalAlgorithm):
             arguments.extend(rastext)
 
         if GdalUtils.version() >= 2000000:
-            if rastext and rastext_crs is not None:
+            if rastext and len(rastext_crs) > 0:
                 arguments.append('-te_srs')
                 arguments.append(rastext_crs)
 
