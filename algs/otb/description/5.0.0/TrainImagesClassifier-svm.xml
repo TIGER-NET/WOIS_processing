@@ -161,7 +161,7 @@
     <default>0</default>
   </parameter>
   <parameter>
-    <parameter_type source_parameter_type="ParameterType_Float">ParameterNumber</parameter_type>
+    <parameter_type source_parameter_type="ParameterType_Float">*ParameterNumber</parameter_type>
     <key>classifier.svm.coef0</key>
     <name>Parameter coef0 of a kernel function (POLY / SIGMOID)</name>
     <description>Parameter coef0 of a kernel function (POLY / SIGMOID).</description>
