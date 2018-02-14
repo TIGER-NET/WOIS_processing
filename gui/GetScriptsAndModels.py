@@ -97,7 +97,7 @@ class GetRScriptsAction(ToolboxAction):
         dlg = GetScriptsAndModelsDialog(GetScriptsAndModelsDialog.RSCRIPTS)
         dlg.exec_()
         if dlg.updateProvider:
-            self.toolbox.updateProvider('r')
+            algList.reloadProvider('r')
 
 
 class GetModelsAction(ToolboxAction):
@@ -193,9 +193,6 @@ class GetScriptsAndModelsDialog(BASE, WIDGET):
             reply.finished.connect(partial(loadFunction, reply, arguments))
         else:
             reply.finished.connect(partial(loadFunction, reply))
-
-        while not reply.isFinished():
-            QCoreApplication.processEvents()
 
     def populateTree(self):
         self.uptodateItem = QTreeWidgetItem()

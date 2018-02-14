@@ -172,7 +172,7 @@ class ZonalStatistics(GeoAlgorithm):
         outFeat.setFields(fields)
 
         features = vector.features(layer)
-        total = 100.0 / len(features)
+        total = 100.0 / len(features) if len(features) > 0 else 1
         for current, f in enumerate(features):
             geom = f.geometry()
 
@@ -226,10 +226,9 @@ class ZonalStatistics(GeoAlgorithm):
             rasterizedArray = rasterizedDS.ReadAsArray()
 
             masked = numpy.ma.MaskedArray(srcArray,
-                                          mask=numpy.logical_or.reduce((
-                                                                srcArray == noData,
-                                                                numpy.logical_not(rasterizedArray),
-                                                                numpy.isnan(srcArray))))
+                                          mask=numpy.logical_or(
+                                              srcArray == noData,
+                                              numpy.logical_not(rasterizedArray)))
 
             outFeat.setGeometry(geom)
 

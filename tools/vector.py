@@ -71,7 +71,8 @@ TYPE_MAP_MEMORY_LAYER = {
     QVariant.Int: "integer",
     QVariant.Date: "date",
     QVariant.DateTime: "datetime",
-    QVariant.Time: "time"
+    QVariant.Time: "time",
+    QVariant.LongLong: "integer"
 }
 
 TYPE_MAP_POSTGIS_LAYER = {
@@ -419,6 +420,7 @@ def checkMinDistance(point, index, distance, points):
 def _toQgsField(f):
     if isinstance(f, QgsField):
         return f
+    print f[0], f[1]
     return QgsField(f[0], TYPE_MAP.get(f[1], QVariant.String))
 
 
@@ -525,26 +527,6 @@ def ogrConnectionString(uri):
     return '"' + ogrstr + '"'
 
 
-#
-# The uri parameter is an URI from any QGIS provider,
-# so could have different formats.
-# Example formats:
-#
-# -- PostgreSQL provider
-# port=5493 sslmode=disable key='edge_id' srid=0 type=LineString table="city_data"."edge" (geom) sql=
-#
-# -- Spatialite provider
-# dbname='/tmp/x.sqlite' table="t" (geometry) sql='
-#
-# -- OGR provider (single-layer directory)
-# /tmp/x.gdb
-#
-# -- OGR provider (multi-layer directory)
-# /tmp/x.gdb|layerid=1
-#
-# -- OGR provider (multi-layer directory)
-# /tmp/x.gdb|layername=thelayer
-#
 def ogrLayerName(uri):
 
     # handle URIs of database providers
@@ -580,10 +562,10 @@ def ogrLayerName(uri):
             # take precedence
     ds = ogr.Open(ogruri)
     if not ds:
-        return "invalid-uri"
+        return None
     ly = ds.GetLayer(layerid)
     if not ly:
-        return "invalid-layerid"
+        return None
     name = ly.GetName()
     return name
 
