@@ -158,11 +158,12 @@ class RAlgorithm(GeoAlgorithm):
             self.passFileNames = True
             return
         tokens = line.split('=')
+        desc = self.createDescriptiveName(tokens[0])
         if tokens[1].lower().strip() == 'group':
-            self.group = self.i18n_group = tokens[0]
+            self.group = self.i18n_group = desc
             return
         if tokens[1].lower().strip() == 'name':
-            self.name = self.i18n_name = tokens[0]
+            self.name = self.i18n_name = desc
             return
         if tokens[1].lower().strip().startswith('output'):
             outToken = tokens[1].strip()[len('output') + 1:]
@@ -174,7 +175,7 @@ class RAlgorithm(GeoAlgorithm):
             self.addParameter(param)
         elif out is not None:
             out.name = tokens[0]
-            out.description = tokens[0]
+            out.description = desc
             self.addOutput(out)
         else:
             raise WrongScriptException(
