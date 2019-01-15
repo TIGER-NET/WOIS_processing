@@ -43,6 +43,7 @@ from processing.gui.RenderingStyles import RenderingStyles
 from processing.core.outputs import OutputRaster
 from processing.core.outputs import OutputVector
 from processing.core.outputs import OutputTable
+from processing.core.outputs import OutputFile
 from processing.core.outputs import OutputHTML
 
 from processing.tools import dataobjects
@@ -59,7 +60,8 @@ def handleAlgorithmResults(alg, progress=None, showResults=True):
         progress.setPercentage(100 * i / float(len(alg.outputs)))
         if out.hidden or not out.open:
             continue
-        if isinstance(out, (OutputRaster, OutputVector, OutputTable)):
+        if isinstance(out, (OutputRaster, OutputVector, OutputTable)) or \
+           (isinstance(out, OutputFile) and out.ext == 'csv'):
             try:
                 if hasattr(out, "layer") and out.layer is not None:
                     out.layer.setLayerName(out.description)
